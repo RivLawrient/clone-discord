@@ -1,7 +1,6 @@
-import { cookies } from "next/headers";
-import Header from "./_components/header";
 import InnerSidebar from "./_components/inner-sidebar";
 import Sidebar from "./_components/sidebar";
+import Header from "./_components/header";
 
 export default async function Layout(props: { children: React.ReactNode }) {
   console.log("aku layout auth");
