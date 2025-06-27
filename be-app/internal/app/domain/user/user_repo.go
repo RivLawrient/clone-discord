@@ -1,1 +1,40 @@
 package user
+
+import (
+	"be-app/internal/errs"
+
+	"gorm.io/gorm"
+)
+
+type Repo struct {
+}
+
+func NewRepo() Repo {
+	return Repo{}
+}
+
+func (r Repo) NewUser(db *gorm.DB, user *User) error {
+	return db.Create(user).Error
+}
+
+func (r Repo) CheckEmailDuplicate(db *gorm.DB, email string) error {
+	var count int64
+	err := db.Model(&User{}).Where("email = ?", email).Count(&count).Error
+	if err != nil {
+		return err // error dari DB
+	}
+
+	if count > 0 {
+		return errs.ErrEmailUsed // <- trigger error kalau sudah ada
+	}
+
+	return nil // tidak error = belum digunakan
+}
+
+func (r Repo) FindByEmail(db *gorm.DB, email string, user *User) error {
+	return db.Where("email = ?", email).First(user).Error
+}
+
+func (r Repo) FindById(db *gorm.DB, id string, user *User) error {
+	return db.Preload("Profile").Where("id = ?", id).First(user).Error
+}
