@@ -1,10 +1,15 @@
 @import "tailwindcss";
-@theme{
-  --color-bg-modal-auth: oklab(0.32 0 -0.01);
-  --color-bg-input-auth: oklab(0 0 0 / 0.2);
-  --color-bg-border-input-auth: oklab(0.68 0 -0.01 / 0.2);
-}
 
+@theme {
+  --color-canvas-auth: oklab(0.32 0 -0.01);
+  --color-input-auth: oklab(0 0 0 / 0.2);
+
+  --color-border-input-normal-auth: oklab(0.68 0 -0.01 / 0.2);
+  --color-border-input-select-auth: oklab(0.74 -0.02 -0.09);
+
+  --color-blue-discord: #8DA1FC;
+  --color-blue-discord-fill: #5865F2;
+}
 body{
   height: 100vh;
   width: 100vw;
