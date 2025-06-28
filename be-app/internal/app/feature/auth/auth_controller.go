@@ -93,7 +93,7 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 func (a Controller) LoginUser(request *dto.LoginRequest) (*user.User, error) {
 	var user user.User
 	if err := a.UserRepo.FindByEmail(a.DB, request.Email, &user); err != nil {
-		return nil, errs.ErrUserNotFound
+		return nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(request.Password)); err != nil {
@@ -147,8 +147,8 @@ func (a Controller) ValidateRefreshToken(token string) (*refreshtoken.RefreshTok
 	}
 
 	if rt.ExpiresAt.Before(time.Now()) {
-    return nil, errs.ErrTokenExpired
-}
+		return nil, errs.ErrTokenExpired
+	}
 
 	return &rt, nil
 }

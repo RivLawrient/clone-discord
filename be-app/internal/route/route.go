@@ -6,6 +6,7 @@ import (
 	"be-app/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 )
 
 type Routes struct {
@@ -14,11 +15,16 @@ type Routes struct {
 }
 
 func (r Routes) SetupRoutes() {
+	r.App.Use(cors.New(cors.Config{
+		AllowOrigins:     "http://127.0.0.1:3000",
+		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
+		AllowHeaders:     "Content-Type, Authorization, Origin, Accept",
+		AllowCredentials: true,
+	}))
 	r.App.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(dto.ResponseWeb[interface{}]{
 			Message: "This yout root api",
 		})
-
 	})
 
 	r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)

@@ -2,6 +2,7 @@ package user
 
 import (
 	"be-app/internal/errs"
+	"errors"
 
 	"gorm.io/gorm"
 )
@@ -31,8 +32,23 @@ func (r Repo) CheckEmailDuplicate(db *gorm.DB, email string) error {
 	return nil // tidak error = belum digunakan
 }
 
+//	func (r Repo) FindByEmail(db *gorm.DB, email string, user *User) error {
+//		return db.Where("email = ?", email).First(user).Error
+//	}
 func (r Repo) FindByEmail(db *gorm.DB, email string, user *User) error {
-	return db.Where("email = ?", email).First(user).Error
+	err := db.Where("email = ?", email).First(user).Error
+
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		// data tidak ditemukan
+		return errs.ErrUserNotFound
+	}
+
+	if err != nil {
+		// error lain dari database
+		return err
+	}
+
+	return nil
 }
 
 func (r Repo) FindById(db *gorm.DB, id string, user *User) error {
