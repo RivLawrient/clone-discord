@@ -20,11 +20,11 @@ export default function Page() {
     email: "",
     password: "",
   });
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const login_handle = () => {
-    setLoading(true)
+    setLoading(true);
 
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/login`, {
       method: "POST",
@@ -53,14 +53,14 @@ export default function Page() {
             password: data,
           }));
         }
-        setLoading(false)
+        setLoading(false);
       })
       .catch(() => {
         setError({
           email: "error server offline",
           password: "error server offline",
         }),
-          setLoading(false)
+          setLoading(false);
       });
   };
   return (
@@ -107,20 +107,19 @@ export default function Page() {
           type="submit"
           className="bg-blue-discord-fill hover:bg-blue-discord-fill/80 mt-5 mb-2 cursor-pointer rounded-lg py-2 font-semibold text-white transition-all"
         >
-          {
-            loading ? (
-              <LoaderCircleIcon className="animate-spin place-self-center" />
-            ) : (
-              <>
-                Log In
-              </>
-            )
-          }
+          {loading ? (
+            <LoaderCircleIcon className="animate-spin place-self-center" />
+          ) : (
+            <>Log In</>
+          )}
         </button>
       </form>
       <label className="text-sm text-white/60">
         Need an account?{" "}
-        <span onClick={() => router.push("/register")} className="text-blue-discord cursor-pointer font-semibold opacity-100 hover:underline">
+        <span
+          onClick={() => router.push("/register")}
+          className="text-blue-discord cursor-pointer font-semibold opacity-100 hover:underline"
+        >
           Register
         </span>
       </label>
