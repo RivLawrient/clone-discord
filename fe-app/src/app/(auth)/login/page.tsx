@@ -1,6 +1,9 @@
 "use client";
+import { LoaderCircleIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
+import FieldInput from "../_components/field-input";
 
 type LoginField = {
   email: string;
@@ -17,12 +20,11 @@ export default function Page() {
     email: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const login_handle = () => {
-    setError({
-      email: "",
-      password: "",
-    });
+    setLoading(true)
 
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/login`, {
       method: "POST",
@@ -51,13 +53,15 @@ export default function Page() {
             password: data,
           }));
         }
+        setLoading(false)
       })
-      .catch(() =>
+      .catch(() => {
         setError({
           email: "error server offline",
           password: "error server offline",
         }),
-      );
+          setLoading(false)
+      });
   };
   return (
     <div className="bg-canvas-auth flex flex-col rounded-lg p-8">
@@ -74,77 +78,49 @@ export default function Page() {
         }}
         className="flex flex-col"
       >
-        <label
-          className={twMerge(
-            "text-xs font-bold text-white",
-            error.email && "text-red-400",
-          )}
-        >
-          EMAIL
-          {error.email ? (
-            <span className="font-normal text-red-400 italic">
-              {" "}
-              - {error.email}
-            </span>
-          ) : (
-            <span className="pl-1 text-red-500">*</span>
-          )}
-        </label>
-        <input
+        <FieldInput
+          error={error.email}
+          label="EMAIL"
           type="text"
           required
-          max={255}
-          value={input.email}
-          onChange={(e) => setInput((v) => ({ ...v, email: e.target.value }))}
-          spellCheck="false"
-          className={twMerge(
-            "bg-input-auth border-border-input-normal-auth focus:border-border-input-select-auth mt-2 mb-5 w-[400px] rounded-lg border p-2 text-white outline-none",
-            error.email && "border-2 border-red-400",
-          )}
+          fieldInput="email"
+          valueInput={input.email}
+          setInput={setInput}
         />
-        <label
-          className={twMerge(
-            "text-xs font-bold text-white",
-            error.password && "text-red-400",
-          )}
-        >
-          PASSWORD
-          {error.password ? (
-            <span className="font-normal text-red-400 italic">
-              {" "}
-              - {error.password}
-            </span>
-          ) : (
-            <span className="pl-1 text-red-500">*</span>
-          )}
-        </label>
-        <input
+        <div className="mt-5" />
+        <FieldInput
+          error={error.password}
+          label="PASSWORD"
           type="password"
           required
-          max={255}
-          value={input.password}
-          onChange={(e) =>
-            setInput((v) => ({ ...v, password: e.target.value }))
-          }
-          spellCheck="false"
-          className={twMerge(
-            "bg-input-auth border-border-input-normal-auth focus:border-border-input-select-auth mt-2 mb-1 w-[400px] rounded-lg border p-2 text-white outline-none",
-            error.password && "border-2 border-red-400",
-          )}
+          fieldInput="password"
+          valueInput={input.password}
+          setInput={setInput}
         />
+        <div className="mt-1" />
+
         <label className="text-blue-discord mr-auto cursor-pointer text-sm font-semibold hover:underline">
           Forgot your password?
         </label>
         <button
+          disabled={loading}
           type="submit"
           className="bg-blue-discord-fill hover:bg-blue-discord-fill/80 mt-5 mb-2 cursor-pointer rounded-lg py-2 font-semibold text-white transition-all"
         >
-          Log In
+          {
+            loading ? (
+              <LoaderCircleIcon className="animate-spin place-self-center" />
+            ) : (
+              <>
+                Log In
+              </>
+            )
+          }
         </button>
       </form>
       <label className="text-sm text-white/60">
         Need an account?{" "}
-        <span className="text-blue-discord cursor-pointer font-semibold opacity-100 hover:underline">
+        <span onClick={() => router.push("/register")} className="text-blue-discord cursor-pointer font-semibold opacity-100 hover:underline">
           Register
         </span>
       </label>

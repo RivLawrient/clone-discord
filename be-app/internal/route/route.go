@@ -16,7 +16,7 @@ type Routes struct {
 
 func (r Routes) SetupRoutes() {
 	r.App.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://127.0.0.1:3000",
+		AllowOrigins:     "http://127.0.0.1:3000, http://145.79.11.111:3000",
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS",
 		AllowHeaders:     "Content-Type, Authorization, Origin, Accept",
 		AllowCredentials: true,
