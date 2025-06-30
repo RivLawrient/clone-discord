@@ -28,7 +28,11 @@ export default function Sidebar() {
   const [drag, setDrag] = useState<number>(0);
 
   return (
-    <div className="flex min-h-0 flex-col gap-y-2 overflow-y-scroll select-none">
+    <div
+      style={{
+        scrollbarWidth: "none"
+      }}
+      className="flex min-h-0 flex-col gap-y-2 overflow-y-scroll select-none">
       <div className="" />
       {list
         .sort((a, b) => a.position - b.position)
