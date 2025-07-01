@@ -4,6 +4,7 @@ import { twMerge } from "tailwind-merge";
 import FieldInput from "../_components/field-input";
 import { useState } from "react";
 import { LoaderCircleIcon } from "lucide-react";
+import { } from "radix-ui"
 
 type RegisterField = {
   email: string;
@@ -135,6 +136,18 @@ export default function Page() {
         />
         <div className="mt-5" />
 
+        <FieldInput
+          error={error.password}
+          label="DATE OF BIRTH"
+          type="text"
+          required
+          fieldInput="birth"
+          valueInput={input.birthdate}
+          setInput={setInput}
+          isBirthdate
+        />
+        <div className="mt-5" />
+
         <button
           disabled={loading}
           type="submit"
@@ -156,4 +169,8 @@ export default function Page() {
       </label>
     </div>
   )
+}
+
+function birthdate() {
+  return <div></div>
 }
