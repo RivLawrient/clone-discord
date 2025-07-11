@@ -4,10 +4,16 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
 import FieldInput from "../_components/field-input";
+import Cookies from "js-cookie";
 
 type LoginField = {
   email: string;
   password: string;
+};
+
+type responseSucces = {
+  email: string;
+  token: string;
 };
 
 export default function Page() {
@@ -32,9 +38,23 @@ export default function Page() {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(input),
+      credentials: "include",
     })
       .then(async (resp) => {
         const res = await resp.json();
+        if (resp.ok) {
+          setError(() => ({
+            email: "",
+            password: "",
+          }));
+          const data: responseSucces = res.data;
+          Cookies.set("token", data.token, {
+            expires: 7, // dalam hari, artinya token disimpan selama 7 hari
+            secure: true, // aktifkan ini kalau pakai HTTPS
+            sameSite: "strict", // tambahkan ini untuk menghindari CSRF
+          });
+          router.refresh();
+        }
         if (resp.status === 400) {
           const data: LoginField = res.data;
           setError(data);

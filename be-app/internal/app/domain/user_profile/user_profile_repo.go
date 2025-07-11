@@ -25,7 +25,7 @@ func (r Repo) CheckUsernameDuplicate(db *gorm.DB, username string) error {
 	}
 
 	if count > 0 {
-		return errs.ErrEmailUsed
+		return errs.ErrUsernameUsed
 	}
 
 	return nil

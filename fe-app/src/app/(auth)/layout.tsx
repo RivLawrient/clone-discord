@@ -1,6 +1,12 @@
+import { cookies } from "next/headers";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 
-export default function Layout(props: { children: React.ReactNode }) {
+export default async function Layout(props: { children: React.ReactNode }) {
+  const cookie = await cookies();
+
+  console.log(cookie.get("token"));
+  if (cookie.get("token")) redirect("/");
   return (
     <div
       style={{ backgroundImage: "url('/bg.svg')", backgroundSize: "cover" }}

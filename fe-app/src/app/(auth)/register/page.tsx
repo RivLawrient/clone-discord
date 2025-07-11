@@ -1,17 +1,22 @@
-'use client'
+"use client";
 import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import FieldInput from "../_components/field-input";
 import { useState } from "react";
 import { LoaderCircleIcon } from "lucide-react";
-import { } from "radix-ui"
+import Cookies from "js-cookie";
 
 type RegisterField = {
   email: string;
-  name: string
-  username: string
+  name: string;
+  username: string;
   password: string;
-  birthdate: string
+  birthdate: string;
+};
+
+type responseSucces = {
+  email: string;
+  token: string;
 };
 
 export default function Page() {
@@ -20,30 +25,48 @@ export default function Page() {
     name: "",
     username: "",
     password: "",
-    birthdate: ""
-  })
+    birthdate: "",
+  });
   const [error, setError] = useState<RegisterField>({
     email: "",
     name: "",
     username: "",
     password: "",
-    birthdate: ""
-  })
-  const [loading, setLoading] = useState(false)
-  const router = useRouter()
+    birthdate: "",
+  });
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   const register_handle = () => {
-    setLoading(true)
-
+    setLoading(true);
+    // console.log("b", input.birthdate);
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/register`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(input),
+      credentials: "include",
     })
       .then(async (resp) => {
         const res = await resp.json();
+        if (resp.ok) {
+          setError(() => ({
+            email: "",
+            name: "",
+            username: "",
+            password: "",
+            birthdate: "",
+          }));
+          const data: responseSucces = res.data;
+          Cookies.set("token", data.token, {
+            expires: 7, // dalam hari, artinya token disimpan selama 7 hari
+            secure: true, // aktifkan ini kalau pakai HTTPS
+            sameSite: "strict", // tambahkan ini untuk menghindari CSRF
+          });
+          router.refresh();
+        }
+
         if (resp.status === 400) {
           const data: RegisterField = res.data;
           setError(data);
@@ -55,9 +78,8 @@ export default function Page() {
             name: data,
             username: data,
             password: data,
-            birthdate: data
+            birthdate: data,
           }));
-
         }
         if (resp.status === 500) {
           const data: string = res.message;
@@ -66,33 +88,33 @@ export default function Page() {
             name: data,
             username: data,
             password: data,
-            birthdate: data
+            birthdate: data,
           }));
         }
-        setLoading(false)
+        setLoading(false);
       })
       .catch(() => {
-        const data = "error server offline"
+        const data = "error server offline";
         setError(() => ({
           email: data,
           name: data,
           username: data,
           password: data,
-          birthdate: data
+          birthdate: data,
         }));
 
-        setLoading(false)
+        setLoading(false);
       });
   };
   return (
-    <div className="bg-canvas-auth flex flex-col rounded-lg p-8 ">
+    <div className="bg-canvas-auth flex flex-col rounded-lg p-8">
       <h1 className="mb-5 text-center text-2xl font-semibold text-white">
         Create an account
       </h1>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          register_handle()
+          register_handle();
         }}
         className="flex flex-col"
       >
@@ -137,11 +159,11 @@ export default function Page() {
         <div className="mt-5" />
 
         <FieldInput
-          error={error.password}
+          error={error.birthdate}
           label="DATE OF BIRTH"
           type="text"
           required
-          fieldInput="birth"
+          fieldInput="birthdate"
           valueInput={input.birthdate}
           setInput={setInput}
           isBirthdate
@@ -153,24 +175,23 @@ export default function Page() {
           type="submit"
           className="bg-blue-discord-fill hover:bg-blue-discord-fill/80 mt-5 mb-2 cursor-pointer rounded-lg py-2 font-semibold text-white transition-all"
         >
-          {
-            loading ? (
-              <LoaderCircleIcon className="animate-spin place-self-center" />
-            ) : (
-              <>
-                Create Account
-              </>
-            )
-          }
+          {loading ? (
+            <LoaderCircleIcon className="animate-spin place-self-center" />
+          ) : (
+            <>Create Account</>
+          )}
         </button>
       </form>
-      <label onClick={() => router.push("/login")} className="text-sm font-semibold text-blue-discord hover:underline cursor-pointer">
+      <label
+        onClick={() => router.push("/login")}
+        className="text-blue-discord cursor-pointer text-sm font-semibold hover:underline"
+      >
         Already have an account? Log in
       </label>
     </div>
-  )
+  );
 }
 
 function birthdate() {
-  return <div></div>
+  return <div></div>;
 }

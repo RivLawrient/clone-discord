@@ -45,7 +45,7 @@ func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 			})
 		}
 
-		if errors.Is(err, errs.ErrUserNotFound) {
+		if errors.Is(err, errs.ErrUsernameUsed) {
 			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
 				Message: "validation failed",
 				Data: map[string]string{

@@ -21,6 +21,7 @@ func (r Repo) NewUser(db *gorm.DB, user *User) error {
 func (r Repo) CheckEmailDuplicate(db *gorm.DB, email string) error {
 	var count int64
 	err := db.Model(&User{}).Where("email = ?", email).Count(&count).Error
+
 	if err != nil {
 		return err // error dari DB
 	}
