@@ -81,6 +81,7 @@ func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 		SameSite: "Strict",
 		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
 		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		// Expires: time.Now().Add(1 * time.Minute),
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
