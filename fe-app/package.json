@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "jotai": "^2.12.5",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.525.0",
     "next": "15.3.3",

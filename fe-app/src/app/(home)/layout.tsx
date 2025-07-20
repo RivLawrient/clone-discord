@@ -10,25 +10,6 @@ export default async function Layout(props: { children: React.ReactNode }) {
   const cookie = await cookies();
 
   if (!cookie.has("token") && !cookie.has("refresh_token")) redirect("/login");
-  // fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
-  //   method: "GET",
-  //   headers: {
-  //     Authorization: "Bearer " + cookie.get("token")?.value,
-  //   },
-  // }).then(async (res) => {
-  //   const resp = await res.json();
-  //   console.log(resp);
-
-  //   if (res.status == 401) {
-  //     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
-  //       method: "GET",
-  //       credentials: "include",
-  //     }).then(async (ress) => {
-  //       const resp = await ress.json();
-  //       console.log("refresh, ", resp);
-  //     });
-  //   }
-  // });
 
   return (
     <AuthProvider>

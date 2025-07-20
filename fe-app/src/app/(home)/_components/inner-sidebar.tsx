@@ -11,9 +11,13 @@
 // }
 "use client";
 
+import { useAtom } from "jotai";
 import { useEffect, useRef, useState } from "react";
+import { userAtom } from "../_state/user-atom";
+import UserAvatar from "./user-avatar";
 
 export default function InnerSidebar() {
+  const [user, setUser] = useAtom(userAtom);
   const sidebarRef = useRef<HTMLDivElement>(null);
   const [width, setWidth] = useState(208); // 52 * 4 = 208px (default Tailwind min-w-52)
 
@@ -67,7 +71,9 @@ export default function InnerSidebar() {
 
       {/* Bawah sidebar */}
       <div className="absolute right-0 bottom-0 left-0 -ml-[72px] p-1.5">
-        <div className="h-14 bg-red-400"></div>
+        <div className="h-14 bg-red-400">
+          <UserAvatar avatar={user.avatar} name={user.name} />
+        </div>
       </div>
     </div>
   );

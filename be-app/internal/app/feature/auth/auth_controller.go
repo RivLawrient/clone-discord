@@ -61,10 +61,14 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 		return nil, err
 	}
 
+	name := request.Name
+	if name == "" {
+		name = request.Username
+	}
 	profile := userprofile.UserProfile{
 		ID:        uuid.NewString(),
 		UserId:    users.ID,
-		Name:      request.Name,
+		Name:      name,
 		Username:  request.Username,
 		Bio:       "",
 		Avatar:    "",
@@ -122,6 +126,7 @@ func (a Controller) GenerateRefreshToken(c *fiber.Ctx, user_id string) (*refresh
 	rt.Token = uuid.NewString()
 	rt.UserAgent = c.Get("User-Agent")
 	rt.IPAddress = c.IP()
+	// rt.ExpiresAt = time.Now().Add(1 * time.Minute)
 	rt.ExpiresAt = time.Now().Add(7 * 24 * time.Hour)
 
 	if err := a.RTokenRepo.Create(tx, &rt); err != nil {

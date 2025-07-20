@@ -1,15 +1,18 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { userAtom, UserCurrent } from "../_state/user-atom";
 
 export default function AuthProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const [user, setUser] = useAtom(userAtom);
 
   useEffect(() => {
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -19,9 +22,25 @@ export default function AuthProvider({
       },
     }).then(async (resp) => {
       const res = await resp.json();
-      console.log(res);
+      const data: UserCurrent = res.data;
+      console.log(data);
+      setUser(data);
+
       if (resp.status === 401) {
-        RefreshToken();
+        fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
+          method: "GET",
+          credentials: "include", // penting! agar refresh_token terkirim
+        }).then(async (resp) => {
+          const res = await resp.json();
+          console.log(res);
+          if (resp.ok) {
+            setCookie("token", res.data.token, 3600); // 1 jam, sesuaikan
+            router.refresh();
+          } else {
+            setCookie("token", "", 0);
+            router.refresh();
+          }
+        });
       }
       setLoading(false);
     });
@@ -32,23 +51,7 @@ export default function AuthProvider({
   return <>{children}</>;
 }
 
-export function RefreshToken() {
-  fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
-    method: "GET",
-    credentials: "include", // penting! agar refresh_token terkirim
-  }).then(async (resp) => {
-    const res = await resp.json();
-    console.log(res);
-    if (resp.ok) {
-      setCookie("token", res.data.token, 3600); // 1 jam, sesuaikan
-    }
-
-    if (resp.status == 401) {
-      setCookie("token", "", 0);
-      res.push("/login");
-    }
-  });
-}
+// export function RefreshToken() {}
 
 // Helper set/get cookie (client-side)
 function setCookie(name: string, value: string, maxAgeSeconds: number) {
