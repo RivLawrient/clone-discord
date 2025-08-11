@@ -22,27 +22,31 @@ export default function AuthProvider({
       },
     }).then(async (resp) => {
       const res = await resp.json();
-      const data: UserCurrent = res.data;
-      console.log(data);
-      setUser(data);
+
+      if (resp.ok) {
+        const data: UserCurrent = res.data;
+        setUser(data);
+        setLoading(false);
+      }
 
       if (resp.status === 401) {
+        console.log("jwt expired");
         fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
           method: "GET",
-          credentials: "include", // penting! agar refresh_token terkirim
+          credentials: "include",
         }).then(async (resp) => {
           const res = await resp.json();
-          console.log(res);
+
           if (resp.ok) {
-            setCookie("token", res.data.token, 3600); // 1 jam, sesuaikan
-            router.refresh();
+            setCookie("token", res.data.token, 3600);
+            window.location.reload();
           } else {
             setCookie("token", "", 0);
-            router.refresh();
+            window.location.reload();
           }
+          // setLoading(false);
         });
       }
-      setLoading(false);
     });
   }, []);
 
@@ -51,9 +55,6 @@ export default function AuthProvider({
   return <>{children}</>;
 }
 
-// export function RefreshToken() {}
-
-// Helper set/get cookie (client-side)
 function setCookie(name: string, value: string, maxAgeSeconds: number) {
   document.cookie = `${name}=${value}; max-age=${maxAgeSeconds}; path=/`;
 }

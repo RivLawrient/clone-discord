@@ -38,6 +38,14 @@ export default function Page() {
   const router = useRouter();
 
   const register_handle = () => {
+    if (!input.birthdate || isNaN(Date.parse(input.birthdate))) {
+      setError((prev) => ({
+        ...prev,
+        birthdate: "invalid birthdate",
+      }));
+      return; // Jangan lanjut submit
+    }
+
     setLoading(true);
     // console.log("b", input.birthdate);
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/register`, {

@@ -13,7 +13,7 @@ export default async function Layout(props: { children: React.ReactNode }) {
 
   return (
     <AuthProvider>
-      <div className="fixed grid h-screen w-screen grid-rows-[auto_1fr] bg-neutral-950 text-white">
+      <div className="bg-discord-bg fixed grid h-screen w-screen grid-rows-[auto_1fr] text-white">
         <Header />
         <div className="grid min-h-0 grid-cols-[auto_auto_1fr]">
           <Sidebar />

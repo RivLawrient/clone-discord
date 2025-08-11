@@ -1,3 +1,3 @@
 export default function Layout(props: { children: React.ReactNode }) {
-  return props.children;
+  return <div className="bg-layout-bg">{props.children}</div>;
 }
