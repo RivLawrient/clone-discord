@@ -1,9 +1,6 @@
 package configs
 
 import (
-	refreshtoken "be-app/internal/app/domain/refresh_token"
-	"be-app/internal/app/domain/user"
-	userprofile "be-app/internal/app/domain/user_profile"
 	"fmt"
 	"os"
 
@@ -26,8 +23,8 @@ func NewDB() *gorm.DB {
 		panic(err)
 	}
 
-	db.Migrator().DropTable(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{})
-	db.AutoMigrate(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{})
+	// db.Migrator().DropTable(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{}, &friend.Friend{})
+	// db.AutoMigrate(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{}, &friend.Friend{})
 
 	return db
 }

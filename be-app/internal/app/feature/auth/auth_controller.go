@@ -6,12 +6,22 @@ import (
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
+	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
+)
+
+type StatusActivity string
+
+const (
+	StatusOnline  StatusActivity = "Online"
+	StatusOffline StatusActivity = "Invisible"
+	StatusIdle    StatusActivity = "Idle"
+	StatusDND     StatusActivity = "Do Not Disturb"
 )
 
 type Controller struct {
@@ -66,13 +76,14 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 		name = request.Username
 	}
 	profile := userprofile.UserProfile{
-		ID:        uuid.NewString(),
-		UserId:    users.ID,
-		Name:      name,
-		Username:  request.Username,
-		Bio:       "",
-		Avatar:    "",
-		Birthdate: birth,
+		ID:             uuid.NewString(),
+		UserId:         users.ID,
+		Name:           name,
+		Username:       request.Username,
+		Bio:            "",
+		Avatar:         "",
+		Birthdate:      birth,
+		StatusActivity: string(StatusOffline),
 	}
 
 	if err := a.ProfileRepo.Create(tx, &profile); err != nil {
@@ -126,8 +137,7 @@ func (a Controller) GenerateRefreshToken(c *fiber.Ctx, user_id string) (*refresh
 	rt.Token = uuid.NewString()
 	rt.UserAgent = c.Get("User-Agent")
 	rt.IPAddress = c.IP()
-	// rt.ExpiresAt = time.Now().Add(1 * time.Minute)
-	rt.ExpiresAt = time.Now().Add(7 * 24 * time.Hour)
+	rt.ExpiresAt = time.Now().Add(200 * time.Hour)
 
 	if err := a.RTokenRepo.Create(tx, &rt); err != nil {
 		return nil, err
@@ -138,6 +148,7 @@ func (a Controller) GenerateRefreshToken(c *fiber.Ctx, user_id string) (*refresh
 	}
 	return &rt, nil
 }
+
 func (a Controller) RemoveRefreshToken(user_id string) error {
 	if err := a.RTokenRepo.DeleteByUserId(a.DB, user_id); err != nil {
 		return err
@@ -145,11 +156,16 @@ func (a Controller) RemoveRefreshToken(user_id string) error {
 
 	return nil
 }
+
 func (a Controller) ValidateRefreshToken(token string) (*refreshtoken.RefreshToken, error) {
 	var rt refreshtoken.RefreshToken
 	if err := a.RTokenRepo.FindByToken(a.DB, token, &rt); err != nil {
 		return nil, err
 	}
+
+	fmt.Println("exp", rt.ExpiresAt)
+	fmt.Println("now", time.Now())
+	fmt.Println("is", rt.ExpiresAt.Before(time.Now()))
 
 	if rt.ExpiresAt.Before(time.Now()) {
 		return nil, errs.ErrTokenExpired

@@ -28,6 +28,7 @@ const server: Server[] = Array.from({ length: 28 }, (_, i) => ({
 export default function Sidebar() {
   const [list, setList] = useState(server);
   const [drag, setDrag] = useState<number>(0);
+  const [isdrag, setIsdrag] = useState(false);
 
   return (
     <div
@@ -51,6 +52,8 @@ export default function Sidebar() {
             drag={drag}
             setDrag={setDrag}
             setList={setList}
+            isdrag={isdrag}
+            setIsdrag={setIsdrag}
           />
         ))}
     </div>
@@ -89,25 +92,34 @@ function ServerBtn(props: {
   id: string;
   position: number;
   drag: number;
+  isdrag: boolean;
   setDrag: React.Dispatch<SetStateAction<number>>;
   setList: React.Dispatch<SetStateAction<Server[]>>;
+  setIsdrag: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const router = useRouter();
   const path_channel = usePathname().split("/")[2];
   const is_current_path = path_channel === props.id;
   const img = props.id === server[0].id && "/goku.jpg";
+
   return (
     <div className="relative">
-      <DragZone
-        id={props.id}
-        posisiton={props.position}
-        drag={props.drag}
-        setList={props.setList}
-      />
+      {props.isdrag && (
+        <DragZone
+          id={props.id}
+          posisiton={props.position}
+          drag={props.drag}
+          setList={props.setList}
+        />
+      )}
       <TooltipDesc side="right" text={props.label}>
         <div
           draggable
-          onDragStart={() => props.setDrag(props.position)}
+          onDragStart={() => {
+            props.setDrag(props.position);
+            props.setIsdrag(true);
+          }}
+          onDragEnd={() => props.setIsdrag(false)}
           onClick={() => router.push("/channels/" + props.id)}
           className={twMerge(
             "peer bg-server-btn-bg hover:bg-server-btn-hover mx-4 flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-xl font-semibold",
@@ -125,6 +137,7 @@ function ServerBtn(props: {
           )}
         </div>
       </TooltipDesc>
+
       <div
         className={twMerge(
           "absolute top-0 bottom-0 left-0 w-1 self-center rounded-r-lg bg-white transition-all",

@@ -80,7 +80,8 @@ func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		// Expires:  refreshToken.ExpiresAt,
+		// Expires:  time.Now().Add(7 * 24 * time.Hour),
 		// Expires: time.Now().Add(2 * time.Minute),
 	})
 
@@ -140,7 +141,7 @@ func (a Handler) LoginHandler(c *fiber.Ctx) error {
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
-		Expires:  time.Now().Add(7 * 24 * time.Hour),
+		Expires:  refreshToken.ExpiresAt,
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -151,6 +152,7 @@ func (a Handler) LoginHandler(c *fiber.Ctx) error {
 		},
 	})
 }
+
 func (a Handler) MeHandler(c *fiber.Ctx) error {
 	user_id := c.Locals("user_id").(string)
 
@@ -170,14 +172,16 @@ func (a Handler) MeHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.AuthMeReponse]{
 		Message: "user logged",
 		Data: dto.AuthMeReponse{
-			Email:    response.Email,
-			Name:     response.Profile.Name,
-			Username: response.Profile.Username,
-			Bio:      response.Profile.Bio,
-			Avatar:   response.Profile.Avatar,
+			Email:          response.Email,
+			Name:           response.Profile.Name,
+			Username:       response.Profile.Username,
+			Bio:            response.Profile.Bio,
+			Avatar:         response.Profile.Avatar,
+			StatusActivity: response.Profile.StatusActivity,
 		},
 	})
 }
+
 func (a Handler) RefreshJWTHandler(c *fiber.Ctx) error {
 	cookie_token := c.Cookies("refresh_token")
 	if cookie_token == "" {

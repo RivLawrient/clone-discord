@@ -1,65 +1,70 @@
 "use client";
 
 import { useAtom } from "jotai";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { userAtom, UserCurrent } from "../_state/user-atom";
+import { apiCall, GetCookie } from "../_helper/api-client";
+import { friendAtom } from "../_state/friend-atom";
 
-export default function AuthProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AuthProvider(props: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
-  const router = useRouter();
   const [user, setUser] = useAtom(userAtom);
+  const [friend, setFriend] = useAtom(friendAtom);
+
+  // useEffect(() => {
+  //   apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
+  //     method: "GET",
+  //   }).then(async (resp) => {
+  //     const res = await resp.json();
+  //     if (resp.ok) {
+  //       const data: UserCurrent = res.data;
+  //       setUser(data);
+  //       setLoading(false);
+  //     }
+  //   });
+  // }, []);
+
+  // useEffect(() => {
+  //   apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
+  //     method: "GET",
+  //     headers: {
+  //       Authorization: `Bearer ${GetCookie("token")}`,
+  //     },
+  //   }).then(async (resp) => {
+  //     const res = await resp.json();
+  //     if (resp.ok) {
+  //       setFriend(res.data);
+  //       setLoading(false);
+  //     }
+  //   });
+  // }, []);
+  const [loadingCount, setLoadingCount] = useState(2); // ada 2 request
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${getCookie("token")}`,
-      },
     }).then(async (resp) => {
-      const res = await resp.json();
-
       if (resp.ok) {
-        const data: UserCurrent = res.data;
-        setUser(data);
-        setLoading(false);
-      }
-
-      if (resp.status === 401) {
-        console.log("jwt expired");
-        fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
-          method: "GET",
-          credentials: "include",
-        }).then(async (resp) => {
-          const res = await resp.json();
-
-          if (resp.ok) {
-            setCookie("token", res.data.token, 3600);
-            window.location.reload();
-          } else {
-            setCookie("token", "", 0);
-            window.location.reload();
-          }
-          // setLoading(false);
-        });
+        const res = await resp.json();
+        setUser(res.data);
+        setLoadingCount((p) => p - 1);
       }
     });
   }, []);
 
-  if (loading) return <p>Loading...</p>;
+  useEffect(() => {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
+      method: "GET",
+    }).then(async (resp) => {
+      if (resp.ok) {
+        const res = await resp.json();
+        setFriend(res.data);
+        setLoadingCount((p) => p - 1);
+      }
+    });
+  }, []);
 
-  return <>{children}</>;
-}
+  if (loadingCount > 0) return <p>Loading...</p>;
 
-function setCookie(name: string, value: string, maxAgeSeconds: number) {
-  document.cookie = `${name}=${value}; max-age=${maxAgeSeconds}; path=/`;
-}
-
-function getCookie(name: string) {
-  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
-  return match ? match[2] : null;
+  return <>{props.children}</>;
 }

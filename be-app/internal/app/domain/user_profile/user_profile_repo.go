@@ -30,3 +30,17 @@ func (r Repo) CheckUsernameDuplicate(db *gorm.DB, username string) error {
 
 	return nil
 }
+
+func (r Repo) GetUserIDByUsername(db *gorm.DB, username string, userID *string) error {
+	var profile UserProfile
+	err := db.Select("user_id").Where("username = ?", username).First(&profile).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return errs.ErrUserNotFound // error custom kalau data gak ketemu
+		}
+		return err
+	}
+
+	*userID = profile.UserId
+	return nil
+}

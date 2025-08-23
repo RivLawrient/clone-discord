@@ -10,4 +10,5 @@ var (
 	ErrTokenNotFound = errors.New("token not found")
 	ErrTokenExpired  = errors.New("token is expired")
 	ErrInternal      = errors.New("internal server error")
+	ErrFriendAdded   = errors.New("user already added to your friend")
 )

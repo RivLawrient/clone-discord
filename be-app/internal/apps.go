@@ -1,10 +1,12 @@
 package internal
 
 import (
+	"be-app/internal/app/domain/friend"
 	refreshtoken "be-app/internal/app/domain/refresh_token"
 	"be-app/internal/app/domain/user"
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/app/feature/auth"
+	"be-app/internal/app/feature/relations"
 	"be-app/internal/route"
 
 	"github.com/go-playground/validator/v10"
@@ -22,12 +24,16 @@ func Apps(a *AppsConfig) {
 	userRepo := user.NewRepo()
 	profileRepo := userprofile.NewRepo()
 	rTokenRepo := refreshtoken.NewRepo()
+	friendRepo := friend.NewRepo()
 
 	authController := auth.NewController(a.DB, userRepo, profileRepo, rTokenRepo)
 	authHandler := auth.NewHandler(*a.Validate, authController)
+	relationsController := relations.NewController(a.DB, friendRepo, profileRepo)
+	relationsHandler := relations.NewHandler(*a.Validate, relationsController)
 
 	route.Routes{
-		App:         a.App,
-		AuthHandler: authHandler,
+		App:              a.App,
+		AuthHandler:      authHandler,
+		RealtionsHandler: relationsHandler,
 	}.SetupRoutes()
 }

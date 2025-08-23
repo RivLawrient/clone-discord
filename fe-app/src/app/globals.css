@@ -12,7 +12,22 @@
 
   --color-discord-bg: #121214;
   --color-discord-border-1: #232326;
+  --color-discord-border-2: #28282c;
   --color-layout-bg: #1b1b1f;
+  --color-btn-hover-1: #1c1c1f;
+  --color-btn-select-1: #2d2d30;
+  --color-btn-bg-1: #5765f2;
+  --color-inpt-bg-1: #18181c;
+  --color-inpt-border-1: #313136;
+  --color-inpt-border-2: #5197ed;
+  --color-list-border-3:#29292e;
+
+  --color-btn-hover-2: #242428;
+  --color-btn-select-2: #333338;
+
+  --color-red-text:#f57976;
+  --color-green-text:#52aa65;
+
 
   --color-server-btn-bg: #1d1d1e;
   --color-server-btn-hover: #5765f1;
@@ -20,7 +35,7 @@
   --color-user-bar: #202024;
   --color-user-bar-hover: #333338;
   --color-user-bar-border: #252529;
-  --color-user-bar-text: #7f7f86;
+  --color-user-bar-text: #a4a4ac;
   --color-user-bar-red: #362228;
   --color-user-bar-redhover: #412025;
   --color-user-bar-def: #aaaab1;
