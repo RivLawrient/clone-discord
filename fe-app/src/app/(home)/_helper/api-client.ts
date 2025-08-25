@@ -100,7 +100,6 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
   let hit = await do_fetch();
 
   if (hit.status === 401) {
-    console.log("401 cuy");
     await fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
       method: "GET",
       credentials: "include",
