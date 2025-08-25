@@ -216,3 +216,51 @@ func TestGetListRequestByUserId(t *testing.T) {
 	assert.Nil(t, err)
 	fmt.Println(string(bytes))
 }
+
+func TestRemoveRequest(t *testing.T) {
+	repoF := friend.NewRepo()
+	u1, u2, u3 := seedUserAndProfile(t)
+
+	err := repoF.NewFriendRequest(db, &friend.Friend{
+		ID:         uuid.NewString(),
+		SenderId:   u1.ID,
+		ReceiverId: u2.ID,
+		IsPending:  true,
+	})
+	assert.Nil(t, err)
+
+	err = repoF.NewFriendRequest(db, &friend.Friend{
+		ID:         uuid.NewString(),
+		SenderId:   u1.ID,
+		ReceiverId: u3.ID,
+		IsPending:  true,
+	})
+	assert.Nil(t, err)
+
+	err = repoF.NewFriendRequest(db, &friend.Friend{
+		ID:         uuid.NewString(),
+		SenderId:   u2.ID,
+		ReceiverId: u3.ID,
+		IsPending:  true,
+	})
+	assert.Nil(t, err)
+
+	list := []dto.FriendList{}
+	err = repoF.GetListRequestByUserId(db, u3.ID, &list)
+	assert.Nil(t, err)
+
+	bytes, err := json.MarshalIndent(list, "", "  ")
+	assert.Nil(t, err)
+	fmt.Println(string(bytes))
+
+	err = repoF.RemoveRequest(db, u1.ID, u3.ID)
+	assert.Nil(t, err)
+
+	fmt.Println("second==")
+	err = repoF.GetListRequestByUserId(db, u3.ID, &list)
+	assert.Nil(t, err)
+
+	bytes, err = json.MarshalIndent(list, "", "  ")
+	assert.Nil(t, err)
+	fmt.Println(string(bytes))
+}

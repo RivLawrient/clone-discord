@@ -153,7 +153,7 @@ func (a Handler) LoginHandler(c *fiber.Ctx) error {
 	})
 }
 
-func (a Handler) MeHandler(c *fiber.Ctx) error {
+func (a Handler) MeHandler(c *fiber.Ctx	) error {
 	user_id := c.Locals("user_id").(string)
 
 	response, err := a.AuthController.UserLogged(user_id)

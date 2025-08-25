@@ -44,3 +44,12 @@ func (r Repo) GetUserIDByUsername(db *gorm.DB, username string, userID *string) 
 	*userID = profile.UserId
 	return nil
 }
+
+func (r Repo) UpdateStatusActivity(db *gorm.DB, userID string, status string) error {
+	err := db.Model(UserProfile{}).Where("user_id = ?", userID).Update("status_activity", status).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

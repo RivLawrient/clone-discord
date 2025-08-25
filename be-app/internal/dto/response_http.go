@@ -31,3 +31,8 @@ type GroupFriendList struct {
 	Sent    *[]FriendList `json:"sent"`
 	Request *[]FriendList `json:"request"`
 }
+
+type StatusUpdate struct {
+	UserId         string `json:"user_id"`
+	StatusActivity string `json:"status_activity"`
+}

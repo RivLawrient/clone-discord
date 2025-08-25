@@ -103,3 +103,22 @@ func (r Repo) GetListRequestByUserId(db *gorm.DB, user_id string, list *[]dto.Fr
 
 	return nil
 }
+
+func (r Repo) RemoveRequest(db *gorm.DB, user_id string, other_user_id string) error {
+	err := db.Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)", user_id, other_user_id, other_user_id, user_id).Delete(&Friend{}).Error
+	if err != nil {
+
+		return err
+	}
+
+	return nil
+}
+
+func (r Repo) ChangeIsPendingFalse(db *gorm.DB, user_id string, other_user_id string) error {
+	err := db.Model(&Friend{}).Where("(sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)", user_id, other_user_id, other_user_id, user_id).Update("is_pending", false).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

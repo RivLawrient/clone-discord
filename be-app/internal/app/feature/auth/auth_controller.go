@@ -6,7 +6,6 @@ import (
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
-	"fmt"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -163,9 +162,9 @@ func (a Controller) ValidateRefreshToken(token string) (*refreshtoken.RefreshTok
 		return nil, err
 	}
 
-	fmt.Println("exp", rt.ExpiresAt)
-	fmt.Println("now", time.Now())
-	fmt.Println("is", rt.ExpiresAt.Before(time.Now()))
+	// fmt.Println("exp", rt.ExpiresAt)
+	// fmt.Println("now", time.Now())
+	// fmt.Println("is", rt.ExpiresAt.Before(time.Now()))
 
 	if rt.ExpiresAt.Before(time.Now()) {
 		return nil, errs.ErrTokenExpired

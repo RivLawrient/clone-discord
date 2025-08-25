@@ -2,11 +2,10 @@ package route
 
 import (
 	"be-app/internal/app/feature/auth"
+	"be-app/internal/app/feature/hub"
 	"be-app/internal/app/feature/relations"
 	"be-app/internal/dto"
 	"be-app/internal/middleware"
-	"log"
-	"sync"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -17,10 +16,8 @@ type Routes struct {
 	App              *fiber.App
 	AuthHandler      auth.Handler
 	RealtionsHandler relations.Handler
+	HubHandler       hub.Handler
 }
-
-var clients = make(map[*websocket.Conn]bool)
-var mu sync.Mutex
 
 func (r Routes) SetupRoutes() {
 	r.App.Use(cors.New(cors.Config{
@@ -42,6 +39,10 @@ func (r Routes) SetupRoutes() {
 
 	r.App.Post("/friend/add/:username", middleware.RequireJWTAuth(), r.RealtionsHandler.AddFriendHandler)
 	r.App.Get("/friend/list", middleware.RequireJWTAuth(), r.RealtionsHandler.GetListFriendHandler)
+	r.App.Delete("/friend/cancel/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.CancelSentFriendHandler)
+	r.App.Delete("/friend/decline/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.DeclineRequestFriendHandler)
+	r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
+	r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
 
 	r.App.Use("/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {
@@ -49,46 +50,7 @@ func (r Routes) SetupRoutes() {
 		}
 		return fiber.ErrUpgradeRequired
 	})
-	r.App.Get("/ws", websocket.New(func(c *websocket.Conn) {
-		// Tambahkan client ke daftar
-		mu.Lock()
-		clients[c] = true
-		mu.Unlock()
-
-		log.Println("Client connected")
-		defer func() {
-			// Hapus dari daftar ketika disconnect
-			mu.Lock()
-			delete(clients, c)
-			mu.Unlock()
-			log.Println("Client disconnected")
-			log.Printf("current connected: %d", len(clients))
-			c.Close()
-		}()
-
-		log.Printf("current connected: %d", len(clients))
-		// Loop baca pesan dari client
-		for {
-			_, msg, err := c.ReadMessage()
-			if err != nil {
-				log.Println("Read error:", err)
-				break
-			}
-
-			log.Printf("Received: %s", msg)
-
-			// Kirim pesan ke semua client lain
-			mu.Lock()
-			for conn := range clients {
-				if conn != c { // jangan kirim ke pengirim
-					if err := conn.WriteMessage(websocket.TextMessage, msg); err != nil {
-						log.Println("Write error:", err)
-					}
-				}
-			}
-			mu.Unlock()
-		}
-	}))
+	r.App.Get("/ws", websocket.New(r.HubHandler.Socket))
 }
 
 func RouteNotFound(c *fiber.Ctx, err error) error {

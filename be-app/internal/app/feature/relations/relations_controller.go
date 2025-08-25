@@ -97,3 +97,68 @@ func (c Controller) ListRelations(user_id string) (*dto.GroupFriendList, error) 
 		Request: &request,
 	}, nil
 }
+
+func (c Controller) ListSentRelations(user_id string) (*[]dto.FriendList, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	sent := []dto.FriendList{}
+
+	if err := c.FriendRepo.GetListSentByUserId(tx, user_id, &sent); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &sent, nil
+}
+
+func (c Controller) ListReqRelations(user_id string) (*[]dto.FriendList, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	request := []dto.FriendList{}
+
+	if err := c.FriendRepo.GetListRequestByUserId(tx, user_id, &request); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &request, nil
+}
+
+func (c Controller) DeleteRelation(sender_user_id string, receiver_user_id string) error {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	err := c.FriendRepo.RemoveRequest(tx, sender_user_id, receiver_user_id)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+func (c Controller) AcceptRequest(sender_user_id string, receiver_user_id string) error {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	err := c.FriendRepo.ChangeIsPendingFalse(tx, sender_user_id, receiver_user_id)
+	if err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
