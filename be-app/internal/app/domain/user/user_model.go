@@ -2,6 +2,8 @@ package user
 
 import (
 	"be-app/internal/app/domain/friend"
+	refreshtoken "be-app/internal/app/domain/refresh_token"
+	textchatuser "be-app/internal/app/domain/text_chat_user"
 	userprofile "be-app/internal/app/domain/user_profile"
 	"time"
 )
@@ -13,9 +15,15 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Profile         userprofile.UserProfile `gorm:"foreignKey:UserId;constraint:OnDelete:SET NULL"`
-	SentFriends     []friend.Friend         `gorm:"foreignKey:SenderId;constraint:OnDelete:CASCADE"`
-	ReceivedFriends []friend.Friend         `gorm:"foreignKey:ReceiverId;constraint:OnDelete:CASCADE"`
+	Profile userprofile.UserProfile `gorm:"foreignKey:UserId;constraint:OnDelete:SET NULL"`
+
+	Refresh refreshtoken.RefreshToken `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+
+	SentFriends     []friend.Friend `gorm:"foreignKey:SenderId;constraint:OnDelete:CASCADE"`
+	ReceivedFriends []friend.Friend `gorm:"foreignKey:ReceiverId;constraint:OnDelete:CASCADE"`
+
+	SenderTextChat   []textchatuser.TextChatUser `gorm:"foreignKey:SenderId;constraint:OnDelete:CASCADE"`
+	ReceiverTextChat []textchatuser.TextChatUser `gorm:"foreignKey:ReceiverId;constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) TableName() string {

@@ -2,10 +2,12 @@ package configs
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 func NewDB() *gorm.DB {
@@ -18,13 +20,34 @@ func NewDB() *gorm.DB {
 		os.Getenv("DB_PORT"),
 	)
 
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: logger.New(
+			log.New(os.Stdout, "\r\n", log.LstdFlags),
+			logger.Config{
+				LogLevel: logger.Info,
+				Colorful: true,
+			},
+		),
+	})
+
 	if err != nil {
 		panic(err)
 	}
 
-	// db.Migrator().DropTable(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{}, &friend.Friend{})
-	// db.AutoMigrate(&user.User{}, &userprofile.UserProfile{}, &refreshtoken.RefreshToken{}, &friend.Friend{})
+	// db.Migrator().DropTable(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// )
+	// db.AutoMigrate(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// )
 
 	return db
 }

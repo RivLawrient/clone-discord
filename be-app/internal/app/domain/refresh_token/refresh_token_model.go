@@ -4,7 +4,7 @@ import "time"
 
 type RefreshToken struct {
 	ID        string `gorm:"primaryKey;type:uuid"`
-	UserID    string `gorm:"type:uuid;not null;unique"`
+	UserID    string `gorm:"unique;not null"`
 	Token     string `gorm:"not null;unique"`
 	UserAgent string
 	IPAddress string

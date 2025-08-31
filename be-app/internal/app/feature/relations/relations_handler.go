@@ -4,6 +4,7 @@ import (
 	"be-app/internal/app/domain/friend"
 	"be-app/internal/app/feature/hub"
 	"be-app/internal/dto"
+	"be-app/internal/errs"
 	"encoding/json"
 
 	"github.com/go-playground/validator/v10"
@@ -180,5 +181,26 @@ func (h *Handler) RemoveFriendHandler(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
 		Message: "success remove friend",
+	})
+}
+
+func (h *Handler) GetOtherUser(c *fiber.Ctx) error {
+	username := c.Params("username")
+
+	user, err := h.RealtionsController.OtherUserByUsername(username)
+	if err != nil {
+		if err == errs.ErrUserNotFound {
+			return c.Status(fiber.StatusNotFound).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.OtherUser]{
+		Message: "success get data",
+		Data:    *user,
 	})
 }

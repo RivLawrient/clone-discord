@@ -16,3 +16,7 @@ type LoginRequest struct {
 type NewFriendRequest struct {
 	Username string `json:"username" validate:"required"`
 }
+
+type TextChatRequest struct {
+	Text string `json:"text" validate:"required"`
+}

@@ -1,11 +1,13 @@
 import {
   LucideIcon,
+  PlusIcon,
   RabbitIcon,
   StoreIcon,
   UserRoundCheckIcon,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
+import TooltipDesc from "../tooltip-desc";
 
 export default function FriendInnerSidebar() {
   return (
@@ -21,7 +23,20 @@ export default function FriendInnerSidebar() {
           <OptionBtn label="Get Nitro" icon={RabbitIcon} paths="getnitro" />
           <OptionBtn label="Shop" icon={StoreIcon} paths="store" />
         </div>
-        <div>user list</div>
+        <div>
+          <div className="mt-2 flex items-center p-2">
+            <h1 className="grow text-xs font-semibold brightness-50 hover:brightness-100">
+              Direct Messages
+            </h1>
+            <TooltipDesc side="top" text="Create DM">
+              <PlusIcon
+                size={15}
+                strokeWidth={3}
+                className="cursor-pointer brightness-50 hover:brightness-100"
+              />
+            </TooltipDesc>
+          </div>
+        </div>
       </div>
     </div>
   );

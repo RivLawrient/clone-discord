@@ -53,3 +53,12 @@ func (r Repo) UpdateStatusActivity(db *gorm.DB, userID string, status string) er
 
 	return nil
 }
+
+func (r Repo) GetByUsername(db *gorm.DB, username string, data *UserProfile) error {
+	err := db.Model(&UserProfile{}).Where("username = ?", username).First(&data).Error
+	if err != nil {
+		return errs.ErrUserNotFound
+	}
+
+	return nil
+}

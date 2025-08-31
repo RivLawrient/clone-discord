@@ -2,6 +2,7 @@ package route
 
 import (
 	"be-app/internal/app/feature/auth"
+	"be-app/internal/app/feature/chatting"
 	"be-app/internal/app/feature/hub"
 	"be-app/internal/app/feature/relations"
 	"be-app/internal/dto"
@@ -17,6 +18,7 @@ type Routes struct {
 	AuthHandler      auth.Handler
 	RealtionsHandler relations.Handler
 	HubHandler       hub.Handler
+	ChattingHandler  chatting.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -37,12 +39,17 @@ func (r Routes) SetupRoutes() {
 	r.App.Get("/auth/refresh", r.AuthHandler.RefreshJWTHandler)
 	r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
 
+	r.App.Get("/user/:username", r.RealtionsHandler.GetOtherUser)
+
 	r.App.Post("/friend/add/:username", middleware.RequireJWTAuth(), r.RealtionsHandler.AddFriendHandler)
 	r.App.Get("/friend/list", middleware.RequireJWTAuth(), r.RealtionsHandler.GetListFriendHandler)
 	r.App.Delete("/friend/cancel/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.CancelSentFriendHandler)
 	r.App.Delete("/friend/decline/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.DeclineRequestFriendHandler)
 	r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
 	r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
+
+	r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
+	r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)
 
 	r.App.Use("/ws", func(c *fiber.Ctx) error {
 		if websocket.IsWebSocketUpgrade(c) {

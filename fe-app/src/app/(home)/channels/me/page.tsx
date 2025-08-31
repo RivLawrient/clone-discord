@@ -5,7 +5,6 @@ import {
   MoreVerticalIcon,
   SearchIcon,
   UserCheck2Icon,
-  X,
   XIcon,
 } from "lucide-react";
 import { useState } from "react";
@@ -214,37 +213,6 @@ function AddFriendView() {
   );
 }
 
-// function ListFriendView(props: { tab: string; data: FriendList[] }) {
-//   const [input, setInput] = useState("");
-
-//   return (
-//     <div className="pt-3 pr-4 pl-6">
-//       <>
-//         <SearchInpt
-//           value={input}
-//           setValue={(e) => setInput(e)}
-//           reset={() => setInput("")}
-//         />
-//         <div className="my-4 text-sm font-semibold transition-all">
-//           {props.tab === "online"
-//             ? "Online - " +
-//               props.data.filter((v) => v.status_activity != "Invisible").length
-//             : props.tab === "all" && "All friends - " + props.data.length}
-//         </div>
-//         {props.tab === "online" &&
-//           props.data.map(
-//             (v) =>
-//               v.status_activity != "Invisible" && (
-//                 <ContentListFriend key={v.user_id} data={v} />
-//               ),
-//           )}
-//         {props.tab === "all" &&
-//           props.data.map((v) => <ContentListFriend key={v.user_id} data={v} />)}
-//       </>
-//     </div>
-//   );
-// }
-
 function ListFriendView(props: { tab: string; data: FriendList[] }) {
   const [input, setInput] = useState("");
 
@@ -261,26 +229,45 @@ function ListFriendView(props: { tab: string; data: FriendList[] }) {
       v.name?.toLowerCase().includes(input.toLowerCase()),
   );
 
-  // Generate label untuk header (mengikuti hasil search)
-  const headerLabel =
-    props.tab === "online"
-      ? `Online - ${filteredData.length}`
-      : `All friends - ${filteredData.length}`;
+  // Generate label untuk header
+  const getHeaderLabel = () => {
+    const baseLabel = props.tab === "online" ? "Online" : "All friends";
+
+    // Jika tidak ada input search, tampilkan jumlah normal
+    if (!input.trim()) {
+      return `${baseLabel} - ${filteredData.length}`;
+    }
+
+    // Jika ada input search tapi tidak ada hasil
+    if (input.trim() && filteredData.length === 0) {
+      return "No one with that name could be found.";
+    }
+
+    // Jika ada input search dan ada hasil
+    return `${baseLabel} - ${filteredData.length}`;
+  };
+
+  const headerLabel = getHeaderLabel();
 
   return (
-    <div className="pt-3 pr-4 pl-6">
+    <div className={twMerge("pt-3 pr-4 pl-6")}>
       <SearchInpt
         value={input}
         setValue={setInput}
         reset={() => setInput("")}
       />
 
-      {filteredData.length > 0 && (
-        <div className="my-4 text-sm font-semibold transition-all">
-          {headerLabel}
-        </div>
-      )}
+      {/* Tampilkan header label selalu, baik ada hasil atau tidak */}
+      <div
+        className={twMerge(
+          "my-4 text-sm font-semibold transition-all",
+          input.trim() && filteredData.length === 0 && "h-max",
+        )}
+      >
+        {headerLabel}
+      </div>
 
+      {/* Render list hanya jika ada data */}
       {filteredData.map((v) => (
         <ContentListFriend key={v.user_id} data={v} />
       ))}

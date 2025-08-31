@@ -32,7 +32,24 @@ type GroupFriendList struct {
 	Request *[]FriendList `json:"request"`
 }
 
+type OtherUser struct {
+	UserId         string    `json:"user_id"`
+	Name           string    `json:"name"`
+	Username       string    `json:"username"`
+	Avatar         string    `json:"avatar"`
+	CreatedAt      time.Time `json:"created_at"`
+	StatusActivity string    `json:"status_activity"`
+}
+
 type StatusUpdate struct {
 	UserId         string `json:"user_id"`
 	StatusActivity string `json:"status_activity"`
+}
+
+type TextChatDMList struct {
+	ID         string    `json:"id"`
+	ReceiverId string    `json:"receiver_id"`
+	SenderId   string    `json:"sender_id"`
+	Text       string    `json:"text"`
+	CreatedAt  time.Time `json:"created_at"`
 }

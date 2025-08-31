@@ -15,61 +15,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// var user1, user2, user3 user.User
-// var profile1, profile2, profile3 userprofile.UserProfile
-
-// func TestMain(m *testing.M) {
-// 	repoUser := user.NewRepo()
-// 	repoProfile := userprofile.NewRepo()
-
-// 	user1 = user.User{
-// 		ID:       uuid.NewString(),
-// 		Email:    "san@gm.com",
-// 		Password: "rahasia",
-// 	}
-// 	user2 = user.User{
-// 		ID:       uuid.NewString(),
-// 		Email:    "san2@gm.com",
-// 		Password: "rahasia",
-// 	}
-// 	user3 = user.User{
-// 		ID:       uuid.NewString(),
-// 		Email:    "san3@gm.com",
-// 		Password: "rahasia",
-// 	}
-// 	repoUser.NewUser(db, &user1)
-// 	repoUser.NewUser(db, &user2)
-// 	repoUser.NewUser(db, &user3)
-
-// 	profile1 = userprofile.UserProfile{
-// 		ID:        uuid.NewString(),
-// 		UserId:    user1.ID,
-// 		Name:      "san",
-// 		Username:  "san",
-// 		Birthdate: time.Now(),
-// 	}
-// 	profile2 = userprofile.UserProfile{
-// 		ID:        uuid.NewString(),
-// 		UserId:    user2.ID,
-// 		Name:      "san2",
-// 		Username:  "san2",
-// 		Birthdate: time.Now(),
-// 	}
-// 	profile3 = userprofile.UserProfile{
-// 		ID:        uuid.NewString(),
-// 		UserId:    user3.ID,
-// 		Name:      "san3",
-// 		Username:  "san3",
-// 		Birthdate: time.Now(),
-// 	}
-
-// 	repoProfile.Create(db, &profile1)
-// 	repoProfile.Create(db, &profile2)
-// 	repoProfile.Create(db, &profile3)
-
-// 	m.Run()
-// }
-
 func seedUserAndProfile(t *testing.T) (user.User, user.User, user.User) {
 	repoUser := user.NewRepo()
 	repoProfile := userprofile.NewRepo()

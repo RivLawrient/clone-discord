@@ -162,3 +162,28 @@ func (c Controller) AcceptRequest(sender_user_id string, receiver_user_id string
 
 	return nil
 }
+
+func (c Controller) OtherUserByUsername(username string) (*dto.OtherUser, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	user := userprofile.UserProfile{}
+	err := c.ProfileRepo.GetByUsername(tx, username, &user)
+	if err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.OtherUser{
+		UserId:         user.UserId,
+		Name:           user.Name,
+		Username:       user.Username,
+		Avatar:         user.Avatar,
+		CreatedAt:      user.CreatedAt,
+		StatusActivity: user.StatusActivity,
+	}, nil
+}
+

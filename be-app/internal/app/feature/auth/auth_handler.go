@@ -5,6 +5,7 @@ import (
 	"be-app/internal/errs"
 	"be-app/internal/helper"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -25,7 +26,8 @@ func NewHandler(validate validator.Validate, authController Controller) Handler 
 
 func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 	request := new(dto.RegisterRequest)
-	c.BodyParser(request)
+	errd := c.BodyParser(request)
+	log.Println(errd)
 
 	if err := a.Validate.Struct(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
@@ -153,7 +155,7 @@ func (a Handler) LoginHandler(c *fiber.Ctx) error {
 	})
 }
 
-func (a Handler) MeHandler(c *fiber.Ctx	) error {
+func (a Handler) MeHandler(c *fiber.Ctx) error {
 	user_id := c.Locals("user_id").(string)
 
 	response, err := a.AuthController.UserLogged(user_id)

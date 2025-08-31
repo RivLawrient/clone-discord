@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-
-	"github.com/go-playground/validator/v10"
 )
 
 func main() {
@@ -16,7 +14,6 @@ func main() {
 	db := configs.NewDB()
 	validate := configs.NewValidator()
 
-	validator.New()
 	internal.Apps(&internal.AppsConfig{
 		DB:       db,
 		App:      server,

@@ -53,7 +53,6 @@ import (
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/dto"
 	"encoding/json"
-	"fmt"
 	"sync"
 
 	"github.com/gofiber/fiber/v2"
@@ -133,15 +132,12 @@ func (h *Controller) UpdateStatus(user_id string, status_activity string) error 
 	h.mu.Lock()
 	defer h.mu.Unlock()
 	for _, fr := range dataList {
-		fmt.Println("user", fr.UserId)
 		if conns, ok := h.clients[fr.UserId]; ok {
 			for _, conn := range conns {
 				err := conn.WriteMessage(websocket.TextMessage, dataJson)
 				if err != nil {
-					fmt.Println("Error send:", err)
 					h.RemoveClient(user_id, conn)
 				}
-				fmt.Println("send to :", fr.Username)
 			}
 		}
 	}
@@ -155,10 +151,8 @@ func (h *Controller) UpdateStatus(user_id string, status_activity string) error 
 		for _, conn := range conns {
 			err := conn.WriteMessage(websocket.TextMessage, selfJson)
 			if err != nil {
-				fmt.Println("Error send:", err)
 				h.RemoveClient(user_id, conn)
 			}
-			fmt.Println("sendiri ", user_id)
 		}
 	}
 
@@ -172,7 +166,6 @@ func (h *Controller) SendToUser(userID string, message []byte) {
 		for _, conn := range conns {
 			err := conn.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
-				fmt.Println("Error send:", err)
 				h.RemoveClient(userID, conn)
 			}
 		}
@@ -186,7 +179,6 @@ func (h *Controller) Broadcast(message []byte) {
 		for _, conn := range conns {
 			err := conn.WriteMessage(websocket.TextMessage, message)
 			if err != nil {
-				fmt.Println("Error send to", userID, ":", err)
 				h.RemoveClient(userID, conn)
 			}
 		}
