@@ -16,7 +16,17 @@ import {
   XIcon,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { Fragment, useEffect, useRef, useState } from "react";
+import {
+  ForwardedRef,
+  forwardRef,
+  Fragment,
+  Ref,
+  RefAttributes,
+  RefObject,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
 export type OtherUser = {
   user_id: string;
@@ -44,6 +54,16 @@ export default function Page() {
   const [user, setUser] = useAtom(userAtom);
 
   useEffect(() => {
+    const handleMessage = (e: MessageEvent) => {
+      const data = JSON.parse(e.data);
+      if (data.dm) {
+        if (data.dm.sender_id && other?.user_id) {
+          setText((v) => [...v, data.dm]);
+          console.log("baru");
+        }
+      }
+    };
+
     if (socket) {
       if (!other) {
         fetch(`${process.env.NEXT_PUBLIC_HOST_API}user/${path}`)
@@ -64,24 +84,19 @@ export default function Page() {
                   setLoading(false);
                 })
                 .catch(() => {});
+            } else {
+              setLoading(false);
             }
           })
           .catch(() => {});
       }
-
-      if (other) {
-        socket.onmessage = (e) => {
-          const data = JSON.parse(e.data);
-          if (data.dm) {
-            if (data.dm.sender_id && other.user_id) {
-              setText((v) => [...v, data.dm]);
-              console.log("baru");
-            }
-          }
-        };
-      }
+      socket.addEventListener("message", handleMessage);
     }
     return () => {
+      if (socket) {
+        socket.removeEventListener("message", handleMessage);
+      }
+
       console.log("User leaving page");
     };
   }, [socket, other]);
@@ -98,7 +113,6 @@ export default function Page() {
     );
   } else {
     return (
-      // <div className="grid h-full min-h-0 grid-rows-[auto_1fr_auto]">
       <div className="flex h-full min-h-0 min-w-0 flex-col">
         <div className="border-discord-border-2 flex h-12 items-center gap-3 border-t border-b px-4 py-2">
           <div className="flex grow items-center gap-2">
@@ -113,7 +127,7 @@ export default function Page() {
           </div>
           <div className="flex">
             <div className="mr-5 flex items-center gap-5 brightness-75">
-              <TooltipDesc side="bottom" text="Start Voice Call">
+              {/* <TooltipDesc side="bottom" text="Start Voice Call">
                 <PhoneCallIcon
                   size={20}
                   fill="white"
@@ -122,17 +136,7 @@ export default function Page() {
               </TooltipDesc>
               <TooltipDesc side="bottom" text="Start Video Call">
                 <VideoIcon size={20} fill="white" className="cursor-pointer" />
-              </TooltipDesc>
-              <TooltipDesc side="bottom" text="Pinned Messages">
-                <PinIcon size={20} fill="white" className="cursor-pointer" />
-              </TooltipDesc>
-              <TooltipDesc side="bottom" text="Add Friends to DM">
-                <UserPlusIcon
-                  size={20}
-                  fill="white"
-                  className="cursor-pointer"
-                />
-              </TooltipDesc>
+              </TooltipDesc> */}
               <TooltipDesc side="bottom" text="Show User Profile">
                 <UserCircleIcon size={20} className="cursor-pointer" />
               </TooltipDesc>
@@ -158,102 +162,8 @@ export default function Page() {
           </div>
         </div>
 
-        {/* chat list */}
-        <div className="flex min-h-0 min-w-0 grow flex-col overflow-y-scroll break-words whitespace-break-spaces">
-          <div className="flex-1" />
-          <div className="m-4">
-            <UserAvatar
-              StatusUser="Idle"
-              whitout_status
-              withIndicator={false}
-              avatar={other.avatar}
-              name={other.name}
-              px={80}
-            />
-            <h1 className="my-2 text-4xl font-semibold">{other.name}</h1>
-            <h2 className="text-2xl font-semibold">{other.username}</h2>
-          </div>
-          <div className="mb-2 min-w-0">
-            {text?.map((v, i, a) => {
-              const current = v.sender_id === other.user_id ? other : user;
-              const before = i > 0 ? a[i - 1] : v;
-
-              const current_date = new Date(v.created_at);
-              const before_date = new Date(before.created_at);
-
-              const month = current_date.toLocaleString("default", {
-                month: "long",
-              });
-
-              const time = current_date.toLocaleTimeString("en-US", {
-                hour: "numeric",
-                minute: "2-digit",
-                hour12: true,
-              });
-
-              const now = new Date();
-              return (
-                <Fragment key={v.id}>
-                  {(i === 0 ||
-                    current_date.getDate() != before_date.getDate()) && (
-                    <div className="m-4 flex flex-row items-center">
-                      <hr className="grow border border-[#29292d]" />
-                      <span className="mx-2 text-[10px] font-semibold brightness-75">
-                        {month} {current_date.getDate()},{" "}
-                        {current_date.getFullYear()}
-                      </span>
-                      <hr className="grow border border-[#29292d]" />
-                    </div>
-                  )}
-                  <div className="group flex items-start px-4 hover:bg-[#242428]">
-                    {i === 0 ||
-                    before.sender_id != v.sender_id ||
-                    current_date.getDate() != before_date.getDate() ? (
-                      <>
-                        <UserAvatar
-                          StatusUser={current.status_activity}
-                          avatar={current.avatar}
-                          name={current.name}
-                          px={40}
-                          whitout_status
-                          withIndicator={false}
-                        />
-
-                        <div className="ml-3 flex min-w-0 flex-col">
-                          <h1 className="font-semibold">
-                            {current.name}{" "}
-                            <span className="ml-1 text-xs font-normal brightness-50">
-                              {now.getDate() === current_date.getDate() &&
-                              now.getMonth() === current_date.getMonth()
-                                ? time
-                                : current_date.getMonth() +
-                                  "/" +
-                                  current_date.getDate() +
-                                  "/" +
-                                  current_date.toLocaleString("en-US", {
-                                    year: "2-digit",
-                                  }) +
-                                  ", " +
-                                  time}
-                            </span>
-                          </h1>
-                          <h1 className="brightness-95">{v.text}</h1>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="relative flex min-w-0 flex-col pl-[52px]">
-                        <h1 className="">{v.text}</h1>
-                        <span className="absolute left-0 mt-1 hidden items-center text-[10px] font-normal brightness-75 group-hover:flex">
-                          {time}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </Fragment>
-              );
-            })}
-          </div>
-        </div>
+        {/* chat section */}
+        <ChatSection other={other} text={text} />
 
         {/* input chat */}
         <InputChat
@@ -269,7 +179,6 @@ function InputChat(props: { data_user: OtherUser; text_url: string }) {
   const [input, setInput] = useState("");
   const [row, setRow] = useState(1);
   const inputTagRef = useRef<HTMLTextAreaElement | null>(null);
-  const [user, setUser] = useAtom(userAtom);
 
   useEffect(() => {
     let enter_detect = input.split("\n").length - 1;
@@ -335,6 +244,122 @@ function InputChat(props: { data_user: OtherUser; text_url: string }) {
           className="group grow resize-none py-3.5 outline-none"
           rows={row}
         />
+      </div>
+    </div>
+  );
+}
+
+function ChatSection(props: { other: OtherUser; text: TextChat[] }) {
+  const [user, setUser] = useAtom(userAtom);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.scrollTop = ref.current.scrollHeight;
+    }
+  }, [
+    ref,
+    props.text.filter((v) => v.sender_id != props.other.user_id).length,
+  ]);
+
+  return (
+    <div
+      ref={ref}
+      className="flex min-h-0 min-w-0 grow flex-col overflow-y-scroll break-words whitespace-break-spaces"
+    >
+      <div className="flex-1" />
+      <div className="m-4">
+        <UserAvatar
+          StatusUser="Idle"
+          whitout_status
+          withIndicator={false}
+          avatar={props.other.avatar}
+          name={props.other.name}
+          px={80}
+        />
+        <h1 className="my-2 text-4xl font-semibold">{props.other.name}</h1>
+        <h2 className="text-2xl font-semibold">{props.other.username}</h2>
+      </div>
+      <div className="mb-2 min-w-0">
+        {props.text.map((v, i, a) => {
+          const current =
+            v.sender_id === props.other.user_id ? props.other : user;
+          const before = i > 0 ? a[i - 1] : v;
+
+          const current_date = new Date(v.created_at);
+          const before_date = new Date(before.created_at);
+
+          const month = current_date.toLocaleString("default", {
+            month: "long",
+          });
+
+          const time = current_date.toLocaleTimeString("en-US", {
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          });
+
+          const now = new Date();
+          return (
+            <Fragment key={v.id}>
+              {(i === 0 || current_date.getDate() != before_date.getDate()) && (
+                <div className="m-4 flex flex-row items-center">
+                  <hr className="grow border border-[#29292d]" />
+                  <span className="mx-2 text-[10px] font-semibold brightness-75">
+                    {month} {current_date.getDate()},{" "}
+                    {current_date.getFullYear()}
+                  </span>
+                  <hr className="grow border border-[#29292d]" />
+                </div>
+              )}
+              <div className="group mr-3 flex items-start rounded-r-lg px-4 hover:bg-[#242428]">
+                {i === 0 ||
+                before.sender_id != v.sender_id ||
+                current_date.getDate() != before_date.getDate() ? (
+                  <>
+                    <div className="pt-1">
+                      <UserAvatar
+                        StatusUser={current.status_activity}
+                        avatar={current.avatar}
+                        name={current.name}
+                        px={40}
+                        whitout_status
+                        withIndicator={false}
+                      />
+                    </div>
+                    <div className="ml-3 flex min-w-0 flex-col">
+                      <h1 className="font-semibold">
+                        {current.name}{" "}
+                        <span className="ml-1 text-xs font-normal brightness-50">
+                          {now.getDate() === current_date.getDate() &&
+                          now.getMonth() === current_date.getMonth()
+                            ? time
+                            : current_date.getMonth() +
+                              "/" +
+                              current_date.getDate() +
+                              "/" +
+                              current_date.toLocaleString("en-US", {
+                                year: "2-digit",
+                              }) +
+                              ", " +
+                              time}
+                        </span>
+                      </h1>
+                      <h1 className="brightness-95">{v.text}</h1>
+                    </div>
+                  </>
+                ) : (
+                  <div className="relative flex min-w-0 flex-col pl-[52px]">
+                    <h1 className="">{v.text}</h1>
+                    <span className="absolute left-0 mt-1 hidden items-center text-[10px] font-normal brightness-75 group-hover:flex">
+                      {time}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </Fragment>
+          );
+        })}
       </div>
     </div>
   );

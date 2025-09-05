@@ -32,18 +32,23 @@ export default function Page() {
         </div>
         <div className="bg-btn-select-2 size-1 rounded-full" />
         <div className="flex gap-4">
-          <TabBtn
-            label="Online"
-            variant={1}
-            active={tab == "online"}
-            onClick={() => setTab("online")}
-          />
-          <TabBtn
-            label="All"
-            variant={1}
-            active={tab == "all"}
-            onClick={() => setTab("all")}
-          />
+          {friend.all.filter((v) => v.status_activity !== "Invisible").length >
+            0 && (
+            <TabBtn
+              label="Online"
+              variant={1}
+              active={tab == "online"}
+              onClick={() => setTab("online")}
+            />
+          )}
+          {friend.all.length > 0 && (
+            <TabBtn
+              label="All"
+              variant={1}
+              active={tab == "all"}
+              onClick={() => setTab("all")}
+            />
+          )}
           {(friend.request.length > 0 || friend.sent.length > 0) && (
             <TabBtn
               label="Pending"
@@ -119,10 +124,6 @@ function SearchInpt(props: {
       )}
     </div>
   );
-}
-
-function ListFriend() {
-  return <div></div>;
 }
 
 function AddFriendView() {

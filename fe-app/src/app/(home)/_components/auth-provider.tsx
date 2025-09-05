@@ -244,8 +244,6 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   const socketRef = useRef<WebSocket | null>(null);
   const [socket, setSocket] = useAtom(socketAtom);
   const lastStatus = useRef<"online" | "idle">("online");
-  const route = usePathname().split("/");
-  const reconnectTimeout = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {

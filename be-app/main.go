@@ -10,14 +10,15 @@ import (
 
 func main() {
 	configs.LoadEnv()
-	server := configs.NewFiber()
 	db := configs.NewDB()
 	validate := configs.NewValidator()
+	fiber := configs.NewFiber()
 
 	internal.Apps(&internal.AppsConfig{
 		DB:       db,
-		App:      server,
+		App:      fiber,
 		Validate: validate,
 	})
-	log.Fatal(server.Listen(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))
+
+	log.Fatal(fiber.Listen(fmt.Sprintf(":%s", os.Getenv("APP_PORT"))))
 }

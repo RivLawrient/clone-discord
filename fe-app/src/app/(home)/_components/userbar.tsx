@@ -83,7 +83,7 @@ function BtnAttribute(props: {
     <div
       onClick={props.on_click}
       className={twMerge(
-        "cursor-pointer rounded-lg p-1.5",
+        "cursor-pointer rounded-lg p-1.5 transition-all",
         props.status
           ? "hover:bg-user-bar-hover"
           : "bg-user-bar-red hover:bg-user-bar-redhover",
@@ -92,7 +92,7 @@ function BtnAttribute(props: {
       <Icon
         size={22}
         className={twMerge(
-          "",
+          "transition-all",
           props.status ? "text-user-bar-def" : "text-red-500",
         )}
       />
