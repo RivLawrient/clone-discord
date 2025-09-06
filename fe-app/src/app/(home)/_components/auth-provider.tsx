@@ -378,5 +378,8 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
       };
     }
   }, [loadingCount]);
+
+  if (loadingCount > 0) return <>Loading ...</>;
+
   return <>{props.children}</>;
 }

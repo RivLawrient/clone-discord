@@ -49,10 +49,10 @@ export default function Page() {
           }));
           const data: responseSucces = res.data;
           Cookies.set("token", data.token, {
-            // expires: 7, // dalam hari, artinya token disimpan selama 7 hari
             secure: true, // aktifkan ini kalau pakai HTTPS
             sameSite: "strict", // tambahkan ini untuk menghindari CSRF
           });
+
           router.refresh();
         }
         if (resp.status === 400) {
