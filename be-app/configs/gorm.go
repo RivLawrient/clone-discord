@@ -1,11 +1,6 @@
 package configs
 
 import (
-	"be-app/internal/app/domain/friend"
-	refreshtoken "be-app/internal/app/domain/refresh_token"
-	textchatuser "be-app/internal/app/domain/text_chat_user"
-	"be-app/internal/app/domain/user"
-	userprofile "be-app/internal/app/domain/user_profile"
 	"fmt"
 	"log"
 	"os"
@@ -33,7 +28,6 @@ func NewDB() *gorm.DB {
 			os.Getenv("DB_PORT"),
 		)
 	}
-
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.New(
 			log.New(os.Stdout, "\r\n", log.LstdFlags),
@@ -48,20 +42,20 @@ func NewDB() *gorm.DB {
 		panic(err)
 	}
 
-	db.Migrator().DropTable(
-		&user.User{},
-		&userprofile.UserProfile{},
-		&refreshtoken.RefreshToken{},
-		&friend.Friend{},
-		&textchatuser.TextChatUser{},
-	)
-	db.AutoMigrate(
-		&user.User{},
-		&userprofile.UserProfile{},
-		&refreshtoken.RefreshToken{},
-		&friend.Friend{},
-		&textchatuser.TextChatUser{},
-	)
-
+	// db.Migrator().DropTable(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// )
+	// db.AutoMigrate(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// )
+ 
 	return db
 }
