@@ -3,7 +3,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { Label, Separator } from "radix-ui";
 import { SetStateAction, useState } from "react";
 import { twMerge } from "tailwind-merge";
-import TooltipDesc from "./tooltip-desc";
+import TooltipDesc from "../tooltip-desc";
 
 interface Server {
   id: string;

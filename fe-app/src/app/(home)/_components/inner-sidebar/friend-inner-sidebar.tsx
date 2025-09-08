@@ -8,12 +8,18 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 import TooltipDesc from "../tooltip-desc";
+import useInnerSidebar from "./useInnerSidebar";
 
 export default function FriendInnerSidebar() {
+  const hook = useInnerSidebar();
+
   return (
     <div className="flex flex-col">
       <div className="border-discord-border-1 border-b p-2">
-        <button className="bg-discord-border-1 w-full min-w-0 cursor-pointer truncate rounded-lg border border-[#262629] p-2 text-center text-xs leading-none font-semibold hover:brightness-120">
+        <button
+          onClick={hook.hello}
+          className="bg-discord-border-1 w-full min-w-0 cursor-pointer truncate rounded-lg border border-[#262629] p-2 text-center text-xs leading-none font-semibold hover:brightness-120"
+        >
           Find or start a convertation
         </button>
       </div>

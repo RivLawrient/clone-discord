@@ -1,5 +1,5 @@
-import InnerSidebar from "./_components/inner-sidebar";
-import Sidebar from "./_components/sidebar";
+import InnerSidebar from "./_components/inner-sidebar/inner-sidebar";
+import Sidebar from "./_components/sidebar/sidebar";
 import Header from "./_components/header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
