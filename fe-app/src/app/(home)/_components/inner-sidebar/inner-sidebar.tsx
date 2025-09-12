@@ -1,7 +1,7 @@
 "use client";
 
 import UserBar from "../userbar";
-import ServerInnerSidebar from "./server-inner-sidebar";
+import ServerInnerSidebar from "./server/server-inner-sidebar";
 import FriendInnerSidebar from "./friend-inner-sidebar";
 import useInnerSidebar from "./useInnerSidebar";
 
@@ -12,7 +12,7 @@ export default function InnerSidebar() {
     <div
       ref={hook.sidebarRef}
       style={{ width: hook.width }}
-      className="border-discord-border-1 relative h-full rounded-ss-xl border-t border-l"
+      className="border-discord-border-1 relative h-full min-h-0 rounded-ss-xl border-t border-l"
     >
       {hook.path === "me" ? <FriendInnerSidebar /> : <ServerInnerSidebar />}
 

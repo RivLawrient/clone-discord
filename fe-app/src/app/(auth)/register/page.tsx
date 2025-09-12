@@ -7,7 +7,7 @@ export default function Page() {
   const hookregister = useRegister();
 
   return (
-    <div className="bg-canvas-auth flex flex-col rounded-lg p-8">
+    <div className="bg-canvas-auth flex animate-[dialog-show_300ms] flex-col rounded-lg p-8">
       <h1 className="mb-5 text-center text-2xl font-semibold text-white">
         Create an account
       </h1>

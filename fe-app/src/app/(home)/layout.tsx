@@ -4,7 +4,6 @@ import Header from "./_components/header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AuthProvider from "./_components/auth-provider";
-import FriendProvider from "./_components/friend-provider";
 
 export default async function Layout(props: { children: React.ReactNode }) {
   console.log("aku layout auth");

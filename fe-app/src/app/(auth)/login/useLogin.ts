@@ -80,6 +80,6 @@ export default function useLogin() {
     setInput,
     error,
     loading,
-    router
+    router,
   };
 }

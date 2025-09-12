@@ -17,6 +17,7 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
     }).then(async (resp) => {
       const res = await resp.json();
       if (resp.ok) {
+        document.cookie = `token=${res.data.token}; path=/`;
         hit = await fetch(url, {
           ...init,
           headers: {
@@ -24,7 +25,6 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
             "Content-Type": "application/json",
           },
         });
-        document.cookie = `token=${res.data.token}; path=/`;
       }
 
       if (resp.status === 401) {

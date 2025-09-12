@@ -16,7 +16,7 @@ export default function TooltipDesc(props: {
         <Tooltip.Portal>
           <Tooltip.Content
             side={props.side}
-            className="bg-tooltip-bg border-tooltip-border text-tooltip-text z-[50] rounded-lg border p-3 text-[14px] leading-none font-bold shadow-2xl transition-all"
+            className="bg-tooltip-bg border-tooltip-border text-tooltip-text z-[50] rounded-lg border p-3 text-[14px] leading-none font-bold shadow-2xl transition-all data-[state=closed]:animate-[dropdown-hide_150ms] data-[state=open]:animate-[dropdown-show_150ms]"
             sideOffset={3}
           >
             {props.text}

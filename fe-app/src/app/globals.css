@@ -48,3 +48,46 @@ body{
   height: 100vh;
   width: 100vw;
 }
+
+@keyframes dialog-show {
+  from {
+    transform: translate(0, -10%);
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-hide {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+    transform: translate(0, -10%);
+  }
+}
+
+@keyframes dropdown-show {
+  from {
+    transform: scale(0%);
+    opacity: 0;
+  }
+  to {
+    transform: scale(100%);
+    opacity: 1;
+  }
+}
+
+@keyframes dropdown-hide {
+  from {
+    transform: scale(100%);
+    opacity: 1;
+  }
+  to {
+    transform: scale(0%);
+    opacity: 0;
+  }
+  
+}
