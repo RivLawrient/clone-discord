@@ -79,7 +79,7 @@ func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    refreshToken.Token,
 		HTTPOnly: true,
-		Secure:   true,
+		// Secure:   true,
 		SameSite: "Strict",
 		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
 		// Expires:  refreshToken.ExpiresAt,
@@ -140,10 +140,10 @@ func (a Handler) LoginHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    refreshToken.Token,
 		HTTPOnly: true,
-		Secure:   true,
+		// Secure:   true,
 		SameSite: "Strict",
 		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
-		Expires:  refreshToken.ExpiresAt,
+		// Expires:  refreshToken.ExpiresAt,
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{

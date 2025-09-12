@@ -1,4 +1,4 @@
-package server
+package joinserver
 
 type Repo struct {
 }
