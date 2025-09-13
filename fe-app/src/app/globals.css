@@ -91,3 +91,18 @@ body{
   }
   
 }
+
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px; /* lebar scrollbar */
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent; /* warna track */
+  border-radius: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #555; /* warna thumb */
+  border-radius: 4px;
+}

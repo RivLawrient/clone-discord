@@ -7,10 +7,10 @@ export type ServerList = {
   position: number;
 };
 
-const server: ServerList[] = Array.from({ length: 30 }, (_, i) => ({
-  id: randomUUID.toString(),
-  name: "sserver-" + i,
-  position: i,
-}));
+// const server: ServerList[] = Array.from({ length: 30 }, (_, i) => ({
+//   id: i.toString(),
+//   name: i + "_sserver-" + i,
+//   position: i,
+// }));
 
-export const serverAtom = atom<ServerList[]>(server);
+export const serverAtom = atom<ServerList[]>([]);

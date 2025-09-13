@@ -4,6 +4,8 @@ import { Label, Separator } from "radix-ui";
 import { SetStateAction, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TooltipDesc from "../tooltip-desc";
+import { useAtom } from "jotai";
+import { serverAtom, ServerList } from "../../_state/server-atom";
 
 interface Server {
   id: string;
@@ -26,7 +28,8 @@ const server: Server[] = Array.from({ length: 28 }, (_, i) => ({
 }));
 
 export default function Sidebar() {
-  const [list, setList] = useState(server);
+  const [list, setList] = useAtom(serverAtom);
+  // const [list, setList] = useState(server);
   const [drag, setDrag] = useState<number>(0);
   const [isdrag, setIsdrag] = useState(false);
 
@@ -94,7 +97,7 @@ function ServerBtn(props: {
   drag: number;
   isdrag: boolean;
   setDrag: React.Dispatch<SetStateAction<number>>;
-  setList: React.Dispatch<SetStateAction<Server[]>>;
+  setList: React.Dispatch<SetStateAction<ServerList[]>>;
   setIsdrag: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const router = useRouter();
@@ -162,7 +165,7 @@ function DragZone(props: {
   on_last?: boolean;
   posisiton: number;
   drag: number;
-  setList: React.Dispatch<SetStateAction<Server[]>>;
+  setList: React.Dispatch<SetStateAction<ServerList[]>>;
 }) {
   const [enter, setEnter] = useState(false);
 

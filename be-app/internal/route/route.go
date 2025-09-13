@@ -3,6 +3,7 @@ package route
 import (
 	"be-app/internal/app/feature/auth"
 	"be-app/internal/app/feature/chatting"
+	"be-app/internal/app/feature/grouping"
 	"be-app/internal/app/feature/hub"
 	"be-app/internal/app/feature/relations"
 	"be-app/internal/dto"
@@ -19,6 +20,7 @@ type Routes struct {
 	RealtionsHandler relations.Handler
 	HubHandler       hub.Handler
 	ChattingHandler  chatting.Handler
+	GroupingHandler  grouping.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -47,6 +49,9 @@ func (r Routes) SetupRoutes() {
 	r.App.Delete("/friend/decline/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.DeclineRequestFriendHandler)
 	r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
 	r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
+
+	r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GenerateFiveServerHandler)
+	r.App.Get("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GetJoinServerHandler)
 
 	r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
 	r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)

@@ -53,3 +53,9 @@ type TextChatDMList struct {
 	Text       string    `json:"text"`
 	CreatedAt  time.Time `json:"created_at"`
 }
+
+type ServerList struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	Position int    `json:"position"`
+}

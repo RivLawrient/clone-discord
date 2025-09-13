@@ -1,13 +1,6 @@
 package configs
 
 import (
-	"be-app/internal/app/domain/friend"
-	joinserver "be-app/internal/app/domain/join_server"
-	refreshtoken "be-app/internal/app/domain/refresh_token"
-	"be-app/internal/app/domain/server"
-	textchatuser "be-app/internal/app/domain/text_chat_user"
-	"be-app/internal/app/domain/user"
-	userprofile "be-app/internal/app/domain/user_profile"
 	"fmt"
 	"log"
 	"os"
@@ -49,24 +42,25 @@ func NewDB() *gorm.DB {
 		panic(err)
 	}
 
-	db.Migrator().DropTable(
-		&user.User{},
-		&userprofile.UserProfile{},
-		&refreshtoken.RefreshToken{},
-		&friend.Friend{},
-		&textchatuser.TextChatUser{},
-		&server.Server{},
-		&joinserver.JoinServer{},
-	)
-	db.AutoMigrate(
-		&user.User{},
-		&userprofile.UserProfile{},
-		&refreshtoken.RefreshToken{},
-		&friend.Friend{},
-		&textchatuser.TextChatUser{},
-		&server.Server{},
-		&joinserver.JoinServer{},
-	)
+	// db.Migrator().DropTable(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// 	&server.Server{},
+	// 	&joinserver.JoinServer{},
+	// )
+
+	// db.AutoMigrate(
+	// 	&user.User{},
+	// 	&userprofile.UserProfile{},
+	// 	&refreshtoken.RefreshToken{},
+	// 	&friend.Friend{},
+	// 	&textchatuser.TextChatUser{},
+	// 	&server.Server{},
+	// 	&joinserver.JoinServer{},
+	// )
 
 	return db
 }

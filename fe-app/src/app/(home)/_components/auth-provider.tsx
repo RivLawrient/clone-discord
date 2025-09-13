@@ -234,9 +234,11 @@ import { friendAtom } from "../_state/friend-atom";
 import { apiCall, GetCookie } from "../_helper/api-client";
 import { usePathname } from "next/navigation";
 import { socketAtom } from "../_state/socket-atom";
+import { serverAtom } from "../_state/server-atom";
+import { setServers } from "dns";
 
 export default function AuthProvider(props: { children: React.ReactNode }) {
-  const [loadingCount, setLoadingCount] = useState(2);
+  const [loadingCount, setLoadingCount] = useState(3);
   const [user, setUser] = useAtom(userAtom);
   const [friend, setFriend] = useAtom(friendAtom);
   const idleDelay = 1 * 60 * 1000; // 1 menit
@@ -244,6 +246,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   const socketRef = useRef<WebSocket | null>(null);
   const [socket, setSocket] = useAtom(socketAtom);
   const lastStatus = useRef<"online" | "idle">("online");
+  const [server, setServer] = useAtom(serverAtom);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -267,6 +270,20 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
         if (resp.ok) {
           const res = await resp.json();
           setFriend(res.data);
+          setLoadingCount((p) => p - 1);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
+      method: "GET",
+    })
+      .then(async (resp) => {
+        if (resp.ok) {
+          const res = await resp.json();
+          setServer(res.data);
           setLoadingCount((p) => p - 1);
         }
       })
