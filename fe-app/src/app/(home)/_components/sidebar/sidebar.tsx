@@ -81,7 +81,7 @@ function DMBtn() {
       </TooltipDesc>
       <div
         className={twMerge(
-          "absolute top-0 bottom-0 left-0 w-1 self-center rounded-r-lg bg-white transition-all",
+          "absolute top-0 bottom-0 left-0 my-auto w-1 rounded-r-lg bg-white transition-all",
           path === "me" ? "h-10" : "h-0 peer-hover:h-5",
         )}
       />
