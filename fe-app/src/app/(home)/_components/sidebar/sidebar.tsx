@@ -67,7 +67,7 @@ function DMBtn() {
   const path = usePathname().split("/")[2];
   const router = useRouter();
   return (
-    <div className="relative">
+    <div className="relative flex">
       <TooltipDesc text="Direct Messages" side={"right"}>
         <div
           onClick={() => router.push("/channels/me")}
@@ -143,7 +143,7 @@ function ServerBtn(props: {
 
       <div
         className={twMerge(
-          "absolute top-0 bottom-0 left-0 w-1 self-center rounded-r-lg bg-white transition-all",
+          "absolute top-0 bottom-0 left-0 my-auto w-1 rounded-r-lg bg-white transition-all",
           is_current_path ? "h-10" : "h-0 peer-hover:h-5",
         )}
       />

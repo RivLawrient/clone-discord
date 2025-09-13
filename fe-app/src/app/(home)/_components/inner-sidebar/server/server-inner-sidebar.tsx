@@ -18,11 +18,11 @@ export default function ServerInnerSidebar() {
     (_, i, a) => `v1.2.0-beta.${a.length - i}`,
   );
   return (
-    <div className="pb-16j grid h-full min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-ss-xl">
+    <div className="grid h-full min-h-0 grid-rows-[auto_1fr] overflow-hidden rounded-ss-xl pb-16">
       <DropdownServerInnerSidebar />
       <div className="custom-scrollbar min-h-0 overflow-y-scroll">
         {TAGS.map((v, i) => (
-          <div>tes {i}</div>
+          <div key={i}>tes {i}</div>
         ))}
       </div>
     </div>
