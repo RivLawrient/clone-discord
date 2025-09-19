@@ -92,6 +92,73 @@ body{
   
 }
 
+@keyframes modal-show {
+  from {
+    transform: scale(50%);
+    opacity: 0;
+  }
+  to {
+    transform: scale(100%);
+    opacity: 1;
+  }
+}
+
+@keyframes modal-hide {
+  from {
+    transform: scale(100%);
+    opacity: 1;
+  }
+  to {
+    transform: scale(50%);
+    opacity: 0;
+  }
+  
+}
+
+@keyframes to-left {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to{
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  
+}
+@keyframes to-right {
+  
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  to{
+    opacity: 0;
+    transform: translateX(100%);
+  }
+}
+
+@keyframes from-left {
+ from{
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  } 
+}
+
+@keyframes from-right {
+ from{
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }  
+}
 
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px; /* lebar scrollbar */

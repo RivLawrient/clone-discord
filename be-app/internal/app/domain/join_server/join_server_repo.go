@@ -26,5 +26,6 @@ func (r Repo) GetListByUserId(db *gorm.DB, data *[]dto.ServerList, userid string
 		Select("server.id, server.name, join_server.position").
 		Joins("JOIN server ON server.id = join_server.server_id").
 		Where("join_server.user_id = ?", userid).
+		Order("position ASC").
 		Scan(data).Error
 }

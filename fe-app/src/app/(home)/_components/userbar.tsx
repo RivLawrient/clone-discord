@@ -12,6 +12,8 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
+import SettingView from "./setting/setting-modal";
+import SettingModal from "./setting/setting-modal";
 
 export default function UserBar() {
   const [user, setUser] = useAtom(userAtom);
@@ -102,13 +104,15 @@ function BtnAttribute(props: {
 
 function BtnSettings() {
   return (
-    <TooltipDesc text="User Settings" side="top">
-      <div className="hover:bg-user-bar-hover group cursor-pointer rounded-lg p-1.5">
-        <SettingsIcon
-          size={22}
-          className="text-user-bar-def group-hover:animate-spin"
-        />
-      </div>
-    </TooltipDesc>
+    <SettingModal>
+      <TooltipDesc text="User Settings" side="top">
+        <div className="hover:bg-user-bar-hover group cursor-pointer rounded-lg p-1.5 outline-none">
+          <SettingsIcon
+            size={22}
+            className="text-user-bar-def group-hover:animate-spin"
+          />
+        </div>
+      </TooltipDesc>
+    </SettingModal>
   );
 }

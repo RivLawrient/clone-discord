@@ -1,11 +1,12 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { Label, Separator } from "radix-ui";
 import { SetStateAction, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TooltipDesc from "../tooltip-desc";
 import { useAtom } from "jotai";
 import { serverAtom, ServerList } from "../../_state/server-atom";
+import { apiCall } from "../../_helper/api-client";
+import AddServerBtn from "./add-server-btn";
 
 interface Server {
   id: string;
@@ -21,7 +22,7 @@ interface Server {
 //   position: i + 1,
 // }));
 const server: Server[] = Array.from({ length: 28 }, (_, i) => ({
-  id: `server-${i + 1}`, // ID stabil dan konsisten di SSR & CSR
+  id: `server-${i + 1}`,
   name: `Server ${i + 1}`,
   picture: `https://via.placeholder.com/40x40.png?text=${i + 1}`,
   position: i + 1,
@@ -59,6 +60,7 @@ export default function Sidebar() {
             setIsdrag={setIsdrag}
           />
         ))}
+      <AddServerBtn />
     </div>
   );
 }
@@ -169,6 +171,7 @@ function DragZone(props: {
 }) {
   const [enter, setEnter] = useState(false);
 
+  const [list, setList] = useAtom(serverAtom);
   return (
     <>
       <div
@@ -195,7 +198,6 @@ function DragZone(props: {
 
           if (props.posisiton != props.drag) {
             setEnter(false);
-            // console.log(zone, props.drag);
 
             // drag ke atas
             zone < props.drag &&
@@ -220,6 +222,35 @@ function DragZone(props: {
                       : vv,
                 ),
               );
+
+            const data = list.find((v) => v.position === props.drag);
+            const current = list;
+
+            if (data) {
+              console.log(zone, data.id, data.position);
+
+              apiCall(
+                `${process.env.NEXT_PUBLIC_HOST_API}server/${data.id}/${zone}`,
+                {
+                  method: "PUT",
+                },
+              )
+                .then(async (resp) => {
+                  if (resp.ok) {
+                    const res = await resp.json();
+                    // setList(res.data);
+                  } else {
+                    setTimeout(() => {
+                      setList(current);
+                    }, 2000);
+                  }
+                })
+                .catch(() => {
+                  setTimeout(() => {
+                    setList(current);
+                  }, 2000);
+                });
+            }
           }
         }}
         className={twMerge(

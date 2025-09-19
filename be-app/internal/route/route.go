@@ -52,6 +52,7 @@ func (r Routes) SetupRoutes() {
 
 	r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GenerateFiveServerHandler)
 	r.App.Get("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GetJoinServerHandler)
+	r.App.Put("/server/:id/:position", middleware.RequireJWTAuth(), r.GroupingHandler.UpdatePositionServerHandler)
 
 	r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
 	r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)
