@@ -9,7 +9,6 @@ import UserAvatar from "../user-avatar";
 import { settingTabAtom } from "../../_state/setting-tab-atom";
 
 export default function SettingModal(props: { children: React.ReactNode }) {
-  // const [tab, setTab] = useState<() => React.JSX.Element>(() => AccountView);
   const [tab, setTab] = useAtom(settingTabAtom);
   const [search, setSearch] = useState("");
   const filtered = listView.filter(([v, C]) =>
@@ -25,7 +24,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Dialog.Root>
+    <Dialog.Root open>
       <Dialog.Trigger>{props.children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Content className="fixed top-0 right-0 bottom-0 left-0 flex min-h-0">
@@ -225,12 +224,61 @@ export function AccountView() {
               value={user.name}
               onClick={() => setTab(() => ProfileView)}
             />
-            <Field title="Username" value={user.username} onClick={() => {}} />
+            <ChangeUsernameModal>
+              <Field
+                title="Username"
+                value={user.username}
+                onClick={() => {}}
+              />
+            </ChangeUsernameModal>
             <Field title="Email" value={user.email} />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function ChangeUsernameModal(props: { children: React.ReactNode }) {
+  return (
+    <Dialog.Root open>
+      <Dialog.Trigger>{props.children}</Dialog.Trigger>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/60" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-lg border border-[#3b3b41] bg-[#242429] p-5 pt-6 text-white outline-none data-[state=closed]:animate-[modal-hide_200ms] data-[state=open]:animate-[modal-show_200ms]">
+          <Dialog.Title className="text-2xl font-semibold">
+            Change Your Username
+          </Dialog.Title>
+          <h1 className="mx-6 mb-8">
+            Enter a new username and your existing password.
+          </h1>
+          <div className="flex w-full flex-col gap-2 font-semibold">
+            <h1>Username</h1>
+            <input
+              type="text"
+              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none"
+            />
+          </div>
+          <div className="mt-4 flex w-full flex-col gap-2 font-semibold">
+            <h1>Current Password</h1>
+            <input
+              type="text"
+              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none"
+            />
+          </div>
+
+          <div className="mt-8 flex w-full flex-row justify-end gap-2 font-semibold">
+            <Dialog.Close className="cursor-pointer rounded-lg bg-[#2d2d32] px-6 py-2 transition-all hover:brightness-125">
+              Cancel
+            </Dialog.Close>
+            <button className="cursor-pointer rounded-lg bg-[#5865f2] px-6 py-2 transition-all hover:bg-[#5865f2]/75">
+              Done
+            </button>
+          </div>
+          <Dialog.Description />
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 function ProfileView() {
