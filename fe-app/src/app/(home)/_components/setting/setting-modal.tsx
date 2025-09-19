@@ -24,7 +24,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <Dialog.Root open>
+    <Dialog.Root>
       <Dialog.Trigger>{props.children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Content className="fixed top-0 right-0 bottom-0 left-0 flex min-h-0">
@@ -241,8 +241,8 @@ export function AccountView() {
 
 function ChangeUsernameModal(props: { children: React.ReactNode }) {
   return (
-    <Dialog.Root open>
-      <Dialog.Trigger>{props.children}</Dialog.Trigger>
+    <Dialog.Root>
+      <Dialog.Trigger asChild>{props.children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60" />
         <Dialog.Content className="fixed top-1/2 left-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center rounded-lg border border-[#3b3b41] bg-[#242429] p-5 pt-6 text-white outline-none data-[state=closed]:animate-[modal-hide_200ms] data-[state=open]:animate-[modal-show_200ms]">
@@ -256,14 +256,14 @@ function ChangeUsernameModal(props: { children: React.ReactNode }) {
             <h1>Username</h1>
             <input
               type="text"
-              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none"
+              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none focus:border-[#5098ed]"
             />
           </div>
           <div className="mt-4 flex w-full flex-col gap-2 font-semibold">
             <h1>Current Password</h1>
             <input
               type="text"
-              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none"
+              className="rounded-lg border border-[#39393e] bg-[#212126] p-2 outline-none focus:border-[#5098ed]"
             />
           </div>
 
