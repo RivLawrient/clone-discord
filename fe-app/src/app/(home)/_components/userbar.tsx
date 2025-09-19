@@ -36,6 +36,8 @@ export default function UserBar() {
           name={user.name}
           px={40}
           StatusUser={user.status_activity}
+          indicator_outline={4}
+          indicator_size={12}
         />
         <div className="flex flex-col justify-center gap-1 truncate">
           <span className="truncate text-[14px] leading-none font-semibold">

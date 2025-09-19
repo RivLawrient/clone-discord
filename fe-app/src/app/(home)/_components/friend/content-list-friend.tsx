@@ -53,7 +53,8 @@ export default function ContentListFriend(props: {
         px={36}
         hover="outline-layout-bg"
         not_hover="group-hover:outline-btn-hover-2"
-        whitout_status={props.is_sent || props.is_pending}
+        indicator_outline={props.is_sent || props.is_pending ? undefined : 2}
+        indicator_size={props.is_sent || props.is_pending ? undefined : 10}
       />
       <div className="ml-2 flex grow flex-col justify-center gap-1.5">
         <h1 className="flex items-end leading-none font-semibold">

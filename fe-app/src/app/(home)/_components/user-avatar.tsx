@@ -1,26 +1,38 @@
 import { twMerge } from "tailwind-merge";
 import { USER_STATUS } from "../_state/user-atom";
+import { useState } from "react";
 
 export default function UserAvatar(props: {
   avatar: string;
   name: string;
-  withIndicator?: boolean;
   px: number;
   StatusUser: keyof typeof USER_STATUS;
   hover?: string;
   not_hover?: string;
-  whitout_status?: boolean;
+  indicator_size?: number;
+  indicator_outline?: number;
 }) {
+  const [hover, setHover] = useState(false);
+
   return (
     <div
       style={{ width: props.px, height: props.px, minWidth: props.px }}
       className="relative overflow-hidden"
     >
-      {!props.whitout_status && (
+      {props.indicator_outline && props.indicator_outline && (
         <div
+          onMouseEnter={() => setHover(true)}
+          onMouseLeave={() => setHover(false)}
+          style={{
+            width: props.indicator_size + "px",
+            height: props.indicator_size + "px",
+            outlineWidth: `${props.indicator_outline}px`,
+            outlineStyle: "solid",
+          }}
           className={twMerge(
-            "absolute right-0 bottom-0 size-[35%] rounded-full outline-4",
+            "absolute right-0 bottom-0 rounded-full",
             USER_STATUS[props.StatusUser],
+
             props.not_hover ? props.not_hover : "outline-user-bar",
             props.hover ? props.hover : "group-hover:outline-user-bar-hover",
           )}
