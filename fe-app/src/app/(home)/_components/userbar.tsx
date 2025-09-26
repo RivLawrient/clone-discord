@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import SettingModal from "./setting/setting-modal";
+import { mediaAtom } from "../_state/media-atom";
 
 export default function UserBar() {
   const [user, setUser] = useAtom(userAtom);
@@ -52,23 +53,8 @@ export default function UserBar() {
         </div>
       </div>
       <div className="ml-2 flex items-center gap-1">
-        <TooltipDesc text={mic ? "Mute" : "Unmute"} side="top" is_child>
-          <BtnAttribute
-            status={mic}
-            icon_on={MicIcon}
-            icon_off={MicOffIcon}
-            on_click={() => setMic(!mic)}
-          />
-        </TooltipDesc>
-
-        <TooltipDesc text={speaker ? "Deafen" : "Undeafen"} side="top" is_child>
-          <BtnAttribute
-            status={speaker}
-            icon_on={HeadphonesIcon}
-            icon_off={HeadphoneOffIcon}
-            on_click={() => setSpeaker(!speaker)}
-          />
-        </TooltipDesc>
+        <BtnMic />
+        <BtnSpeaker />
         <BtnSettings />
       </div>
     </div>
@@ -101,6 +87,43 @@ function BtnAttribute(props: {
         )}
       />
     </div>
+  );
+}
+
+function BtnMic() {
+  const [media, setMedia] = useAtom(mediaAtom);
+
+  const micHandle = () => {
+    navigator.mediaDevices.getUserMedia({ audio: true });
+  };
+  return (
+    <TooltipDesc text={media.micOn ? "Mute" : "Unmute"} side="top" is_child>
+      <BtnAttribute
+        status={media.micOn}
+        icon_on={MicIcon}
+        icon_off={MicOffIcon}
+        on_click={micHandle}
+      />
+    </TooltipDesc>
+  );
+}
+
+function BtnSpeaker() {
+  const [media, setMedia] = useAtom(mediaAtom);
+
+  return (
+    <TooltipDesc
+      text={media.speakerOn ? "Deafen" : "Undeafen"}
+      side="top"
+      is_child
+    >
+      <BtnAttribute
+        status={media.speakerOn}
+        icon_on={HeadphonesIcon}
+        icon_off={HeadphoneOffIcon}
+        on_click={() => setMedia((v) => ({ ...v, speakerOn: !v.speakerOn }))}
+      />
+    </TooltipDesc>
   );
 }
 

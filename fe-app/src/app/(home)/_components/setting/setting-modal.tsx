@@ -48,6 +48,14 @@ export default function SettingModal(props: { children: React.ReactNode }) {
                         USER SETTINGS
                       </h1>
                     )}
+                    {search == "" && i === 2 && (
+                      <>
+                        <hr className="mx-2 my-2.5 border-[#222225]" />
+                        <h1 className="mx-3 text-[11px] font-semibold brightness-75">
+                          APP SETTINGS
+                        </h1>
+                      </>
+                    )}
                     <button
                       onClick={() => setTab(() => C)}
                       className={twMerge(

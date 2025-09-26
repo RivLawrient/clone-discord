@@ -7,6 +7,7 @@ import { friendAtom } from "../_state/friend-atom";
 import { apiCall, GetCookie } from "../_helper/api-client";
 import { socketAtom } from "../_state/socket-atom";
 import { serverAtom } from "../_state/server-atom";
+import { mediaAtom } from "../_state/media-atom";
 
 export default function AuthProvider() {
   const [loadingCount, setLoadingCount] = useState(3);
@@ -18,6 +19,7 @@ export default function AuthProvider() {
   const [socket, setSocket] = useAtom(socketAtom);
   const lastStatus = useRef<"online" | "idle">("online");
   const [server, setServer] = useAtom(serverAtom);
+  const [media, setMedia] = useAtom(mediaAtom);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -176,6 +178,31 @@ export default function AuthProvider() {
         events.forEach((e) => window.removeEventListener(e, handleActivity));
         if (idleTimeout.current) clearTimeout(idleTimeout.current);
       };
+    }
+  }, [loadingCount]);
+
+  useEffect(() => {
+    if (loadingCount === 0) {
+      navigator.permissions
+        .query({
+          name: "microphone",
+        })
+        .then((status) => {
+          if (status.state === "denied" || status.state === "prompt") {
+            setMedia(() => ({
+              micOn: false,
+              speakerOn: true,
+            }));
+          }
+
+          if (status.state === "granted") {
+            setMedia(() => ({
+              micOn: true,
+              speakerOn: true,
+            }));
+          }
+        })
+        .catch(() => {});
     }
   }, [loadingCount]);
 
