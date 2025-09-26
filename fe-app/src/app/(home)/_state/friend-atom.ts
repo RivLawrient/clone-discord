@@ -7,6 +7,7 @@ export type FriendList = {
   name: string;
   username: string;
   avatar: string;
+  avatar_bg: string;
   status_activity: keyof typeof USER_STATUS;
 };
 

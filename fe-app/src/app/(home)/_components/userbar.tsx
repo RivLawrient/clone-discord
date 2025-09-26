@@ -12,7 +12,6 @@ import {
   SettingsIcon,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
-import SettingView from "./setting/setting-modal";
 import SettingModal from "./setting/setting-modal";
 
 export default function UserBar() {
@@ -33,6 +32,7 @@ export default function UserBar() {
       >
         <UserAvatar
           avatar={user.avatar}
+          avatarBg={user.avatar_bg}
           name={user.name}
           px={40}
           StatusUser={user.status_activity}

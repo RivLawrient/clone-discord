@@ -49,6 +49,7 @@ export default function ContentListFriend(props: {
       <UserAvatar
         StatusUser={props.data.status_activity}
         avatar={props.data.avatar}
+        avatarBg={props.data.avatar_bg}
         name={props.data.name}
         px={36}
         hover="outline-layout-bg"

@@ -46,7 +46,7 @@ func (r Repo) GetUserIDByUsername(db *gorm.DB, username string, userID *string) 
 }
 
 func (r Repo) UpdateStatusActivity(db *gorm.DB, userID string, status string) error {
-	err := db.Model(UserProfile{}).Where("user_id = ?", userID).Update("status_activity", status).Error
+	err := db.Model(&UserProfile{}).Where("user_id = ?", userID).Update("status_activity", status).Error
 	if err != nil {
 		return err
 	}
@@ -61,4 +61,24 @@ func (r Repo) GetByUsername(db *gorm.DB, username string, data *UserProfile) err
 	}
 
 	return nil
+}
+
+func (r Repo) UpdateUsernameByUserId(db *gorm.DB, user_id string, username string) error {
+	return db.Model(&UserProfile{}).Where("user_id = ?", user_id).Update("username", username).Error
+}
+
+func (r Repo) UpdateNameByUserid(db *gorm.DB, user_id string, name string) error {
+	return db.Model(&UserProfile{}).Where("user_id = ?", user_id).Update("name", name).Error
+}
+
+func (r Repo) UpdateBannerColorByUserid(db *gorm.DB, user_id string, banner_color string) error {
+	return db.Model(&UserProfile{}).Where("user_id = ?", user_id).Update("banner_color", banner_color).Error
+}
+
+func (r Repo) UpdateBioByUserid(db *gorm.DB, user_id string, bio string) error {
+	return db.Model(&UserProfile{}).Where("user_id = ?", user_id).Update("bio", bio).Error
+}
+
+func (r Repo) UpdateAvatarByUserid(db *gorm.DB, user_id string, avatar string) error {
+	return db.Model(&UserProfile{}).Where("user_id = ?", user_id).Update("avatar", avatar).Error
 }

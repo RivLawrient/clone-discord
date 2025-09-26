@@ -160,6 +160,19 @@ body{
   }  
 }
 
+@keyframes from-bottom {
+  from{
+    opacity: 0;
+    transform: translateY(100%);
+
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  
+}
+
 .custom-scrollbar::-webkit-scrollbar {
   width: 5px; /* lebar scrollbar */
 }

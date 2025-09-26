@@ -44,6 +44,7 @@ func (r Repo) GetListByUserId(db *gorm.DB, user_id string, list *[]dto.FriendLis
 			up.name,
 			up.username,
 			up.avatar,
+			up.avatar_bg,
 			f.created_at,
 			up.status_activity
 		FROM friend f
@@ -69,6 +70,7 @@ func (r Repo) GetListSentByUserId(db *gorm.DB, user_id string, list *[]dto.Frien
 			up.name,
 			up.username,
 			up.avatar,
+			up.avatar_bg,
 			f.created_at,
 			up.status_activity
 		FROM friend f
@@ -90,6 +92,7 @@ func (r Repo) GetListRequestByUserId(db *gorm.DB, user_id string, list *[]dto.Fr
 			up.name,
 			up.username,
 			up.avatar,
+			up.avatar_bg,
 			f.created_at,
 			up.status_activity
 		FROM friend f

@@ -30,16 +30,20 @@ func (r Routes) SetupRoutes() {
 		AllowHeaders:     "Content-Type, Authorization, Origin, Accept",
 		AllowCredentials: true,
 	}))
+
 	r.App.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(dto.ResponseWeb[any]{
 			Message: "This yout root api",
 		})
 	})
+
 	r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
 	r.App.Post("/auth/login", r.AuthHandler.LoginHandler)
 	r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
 	r.App.Get("/auth/refresh", r.AuthHandler.RefreshJWTHandler)
 	r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
+	r.App.Put("/auth/username", middleware.RequireJWTAuth(), r.AuthHandler.ChangeUsernameHandler)
+	r.App.Put("/auth/profile", middleware.RequireJWTAuth(), r.AuthHandler.UpdateProfileHandler)
 
 	r.App.Get("/user/:username", r.RealtionsHandler.GetOtherUser)
 
@@ -64,6 +68,15 @@ func (r Routes) SetupRoutes() {
 		return fiber.ErrUpgradeRequired
 	})
 	r.App.Get("/ws", websocket.New(r.HubHandler.Socket))
+
+	r.App.Get("/img/:id", func(c *fiber.Ctx) error {
+
+		filename := c.Params("id")
+		imageDir := "./public/"
+
+		return c.SendFile(imageDir + filename)
+
+	})
 }
 
 func RouteNotFound(c *fiber.Ctx, err error) error {

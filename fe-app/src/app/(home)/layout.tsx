@@ -12,7 +12,8 @@ export default async function Layout(props: { children: React.ReactNode }) {
   if (!cookie.has("token") && !cookie.has("refresh_token")) redirect("/login");
 
   return (
-    <AuthProvider>
+    <>
+      <AuthProvider />
       <div className="bg-discord-bg fixed grid h-screen w-screen grid-rows-[auto_1fr] text-white select-none">
         <Header />
         <div className="grid min-h-0 grid-cols-[auto_auto_1fr]">
@@ -21,6 +22,6 @@ export default async function Layout(props: { children: React.ReactNode }) {
           {props.children}
         </div>
       </div>
-    </AuthProvider>
+    </>
   );
 }

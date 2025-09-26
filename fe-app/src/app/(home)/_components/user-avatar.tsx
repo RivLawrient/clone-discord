@@ -7,10 +7,12 @@ export default function UserAvatar(props: {
   name: string;
   px: number;
   StatusUser: keyof typeof USER_STATUS;
+  avatarBg: string;
   hover?: string;
   not_hover?: string;
   indicator_size?: number;
   indicator_outline?: number;
+  preview?: boolean;
 }) {
   const [hover, setHover] = useState(false);
 
@@ -38,28 +40,53 @@ export default function UserAvatar(props: {
           )}
         />
       )}
-      <div className="flex size-full items-center justify-center overflow-hidden rounded-full bg-white text-black">
+      <div
+        style={{
+          backgroundColor: !props.avatar ? props.avatarBg : "transparent",
+        }}
+        className="flex size-full items-center justify-center overflow-hidden rounded-full text-black"
+      >
         {props.avatar == "" ? (
-          <WithoutImg name={props.name} />
+          <WithoutImg />
         ) : (
-          <WithImg avatar={props.avatar} />
+          <WithImg avatar={props.avatar} preview={props.preview} />
         )}
       </div>
     </div>
   );
 }
 
-function WithoutImg(props: { name: string }) {
-  return <span className="font-semibold">{props.name[0]?.toUpperCase()}</span>;
-}
-
-function WithImg(props: { avatar: string }) {
+function WithoutImg() {
   return (
     <img
-      //   src={process.env.NEXT_PUBLIC_API + "img/" + props.avatar}
-      src="/goku.jpg"
+      src="/dc-logo.png"
       alt="avatar"
+      className="size-[60%] object-contain"
+    />
+  );
+  // return <span className="font-semibold">{props.name[0]?.toUpperCase()}</span>;
+}
+
+function WithImg(props: { avatar: string; preview: boolean | undefined }) {
+  return (
+    <img
+      // src={process.env.NEXT_PUBLIC_HOST_API + "img/" + props.avatar}
+      src={
+        props.preview
+          ? props.avatar
+          : process.env.NEXT_PUBLIC_HOST_API + "img/" + props.avatar
+      }
+      // src="/goku.jpg"
+      alt={props.avatar}
       className="h-full w-full object-cover"
     />
   );
+}
+
+function randomHexColor(): string {
+  // Generate angka random dari 0 sampai 16777215 (0xFFFFFF)
+  const randomNum = Math.floor(Math.random() * 0xffffff);
+  // Convert ke hex dan pad agar selalu 6 digit
+  const hex = `#${randomNum.toString(16).padStart(6, "0")}`;
+  return hex;
 }

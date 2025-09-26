@@ -13,14 +13,18 @@ export type UserCurrent = {
   username: string;
   bio: string;
   avatar: string;
+  avatar_bg: string;
+  banner_color: string;
   status_activity: keyof typeof USER_STATUS;
 };
 
 export const userAtom = atom<UserCurrent>({
-  email: "",
-  name: "",
-  username: "",
+  email: "sandincl.d@gm.com",
+  name: "muhsandisv",
+  username: "lawrient",
   bio: "",
-  avatar: "",
-  status_activity: "Invisible",
+  avatar: "s",
+  avatar_bg: "#dddddd",
+  banner_color: "#ffffff",
+  status_activity: "Do Not Disturb",
 });

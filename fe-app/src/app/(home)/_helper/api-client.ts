@@ -2,10 +2,6 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
   const do_fetch = () =>
     fetch(url, {
       ...init,
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-        "Content-Type": "application/json",
-      },
     });
 
   let hit = await do_fetch();
@@ -20,10 +16,6 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
         document.cookie = `token=${res.data.token}; path=/`;
         hit = await fetch(url, {
           ...init,
-          headers: {
-            Authorization: `Bearer ${res.data.token}`,
-            "Content-Type": "application/json",
-          },
         });
       }
 

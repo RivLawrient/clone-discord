@@ -11,6 +11,8 @@ type UserProfile struct {
 	Username       string    `gorm:"type:varchar(255);unique;not null;unique"`
 	Bio            string    `gorm:"type:text"`
 	Avatar         string    `gorm:"type:varchar(255)"`
+	AvatarBg       string    `gorm:"type:varchar(7)"`
+	BannerColor    string    `gorm:"type:varchar(7)"`
 	Birthdate      time.Time `gorm:"type:date;not null"`
 	StatusActivity string    `gorm:"type:varchar(255);default:'Invisible'"`
 	CreatedAt      time.Time

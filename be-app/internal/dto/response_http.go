@@ -13,6 +13,8 @@ type AuthMeReponse struct {
 	Username       string `json:"username"`
 	Bio            string `json:"bio"`
 	Avatar         string `json:"avatar"`
+	AvatarBg       string `json:"avatar_bg"`
+	BannerColor    string `json:"banner_color"`
 	StatusActivity string `json:"status_activity"`
 }
 
@@ -22,6 +24,7 @@ type FriendList struct {
 	Name           string    `json:"name"`
 	Username       string    `json:"username"`
 	Avatar         string    `json:"avatar"`
+	AvatarBg       string    `json:"avatar_bg"`
 	CreatedAt      time.Time `json:"created_at"`
 	StatusActivity string    `json:"status_activity"`
 }

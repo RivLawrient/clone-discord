@@ -6,6 +6,8 @@ import (
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -74,6 +76,7 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 	if name == "" {
 		name = request.Username
 	}
+
 	profile := userprofile.UserProfile{
 		ID:             uuid.NewString(),
 		UserId:         users.ID,
@@ -81,6 +84,8 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 		Username:       request.Username,
 		Bio:            "",
 		Avatar:         "",
+		AvatarBg:       RandomHexColor(),
+		BannerColor:    "#ffffff",
 		Birthdate:      birth,
 		StatusActivity: string(StatusOffline),
 	}
@@ -102,6 +107,17 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 			Username: profile.Username,
 		},
 	}, nil
+}
+
+func RandomHexColor() string {
+	// bikin random generator baru dengan seed dari waktu
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	// generate angka antara 0x000000 sampai 0xFFFFFF
+	color := r.Intn(0xFFFFFF + 1)
+
+	// format ke hex string dengan 6 digit
+	return fmt.Sprintf("#%06X", color)
 }
 
 func (a Controller) LoginUser(request *dto.LoginRequest) (*user.User, error) {
@@ -185,4 +201,58 @@ func (a Controller) UserLogged(user_id string) (*user.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (a Controller) NewUsername(user_id string, username string, password string) error {
+	tx := a.DB.Begin()
+	defer tx.Rollback()
+
+	getPassword := ""
+	if err := a.UserRepo.FindPasswordById(tx, user_id, &getPassword); err != nil {
+		return err
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(getPassword), []byte(password)); err != nil {
+		return errs.ErrPasswordNotMatch
+	}
+
+	if err := a.ProfileRepo.CheckUsernameDuplicate(tx, username); err != nil {
+		return err
+	}
+
+	if err := a.ProfileRepo.UpdateUsernameByUserId(tx, user_id, username); err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (a Controller) UpdateProfile(user_id string, request dto.UpdateProfileRequest, filename string) error {
+	tx := a.DB.Begin()
+	defer tx.Rollback()
+
+	if err := a.ProfileRepo.UpdateNameByUserid(tx, user_id, request.Name); err != nil {
+		return err
+	}
+	if err := a.ProfileRepo.UpdateBannerColorByUserid(tx, user_id, request.BannerColor); err != nil {
+		return err
+	}
+
+	if err := a.ProfileRepo.UpdateBioByUserid(tx, user_id, request.Bio); err != nil {
+		return err
+	}
+
+	if err := a.ProfileRepo.UpdateAvatarByUserid(tx, user_id, filename); err != nil {
+		return err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -6,6 +6,8 @@ import (
 	"be-app/internal/helper"
 	"errors"
 	"log"
+	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/go-playground/validator/v10"
@@ -179,6 +181,8 @@ func (a Handler) MeHandler(c *fiber.Ctx) error {
 			Username:       response.Profile.Username,
 			Bio:            response.Profile.Bio,
 			Avatar:         response.Profile.Avatar,
+			AvatarBg:       response.Profile.AvatarBg,
+			BannerColor:    response.Profile.BannerColor,
 			StatusActivity: response.Profile.StatusActivity,
 		},
 	})
@@ -251,5 +255,183 @@ func (a Handler) LogoutHandler(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
 		Message: "logout success",
+	})
+}
+
+func (a Handler) ChangeUsernameHandler(c *fiber.Ctx) error {
+	user_id := c.Locals("user_id").(string)
+	request := new(dto.ChangeUsernameRequest)
+	c.BodyParser(request)
+
+	if err := a.Validate.Struct(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	c.FormFile("")
+
+	err := a.AuthController.NewUsername(user_id, request.Username, request.Password)
+	if err != nil {
+		if errors.Is(err, errs.ErrPasswordNotMatch) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+				Message: "validation failed",
+				Data: map[string]string{
+					"password": err.Error(),
+				},
+			})
+		}
+
+		if errors.Is(err, errs.ErrUsernameUsed) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+				Message: "validation failed",
+				Data: map[string]string{
+					"username": err.Error(),
+				},
+			})
+		}
+
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "something error",
+			Data:    err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "update username success",
+	})
+}
+
+func (a Handler) UpdateProfileHandler(c *fiber.Ctx) error {
+	user_id := c.Locals("user_id").(string)
+	request := new(dto.UpdateProfileRequest)
+	c.BodyParser(request)
+
+	// if err := a.Validate.Struct(request); err != nil {
+	// 	return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+	// 		Message: "validation failed",
+	// 		Data:    helper.ValidationMsg(err),
+	// 	})
+	// }
+
+	name := c.FormValue("name")
+	bannerColor := c.FormValue("banner_color")
+	bio := c.FormValue("bio")
+	avatar, err := c.FormFile("avatar")
+
+	request.Name = name
+	request.BannerColor = bannerColor
+	request.Bio = bio
+
+	if err != nil {
+		if err := a.AuthController.UpdateProfile(user_id, *request, ""); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: "something error",
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+			Message: "update profile success",
+			Data: fiber.Map{
+				"name":         name,
+				"banner_color": bannerColor,
+				"bio":          bio,
+				"avatar":       "",
+			},
+		})
+
+	}
+
+	uploadDir := "./public"
+
+	os.MkdirAll(uploadDir, os.ModePerm)
+	ext := filepath.Ext(avatar.Filename)
+	newFileName := user_id + ext
+	filePath := filepath.Join(uploadDir, newFileName)
+	c.SaveFile(avatar, filePath)
+
+	request.Avatar = avatar
+	request.Avatar.Filename = newFileName
+
+	if err := a.AuthController.UpdateProfile(user_id, *request, newFileName); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "something error",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "update profile success",
+		Data: fiber.Map{
+			"name":         name,
+			"banner_color": bannerColor,
+			"bio":          bio,
+			"avatar":       newFileName,
+		},
+	})
+}
+
+func (a Handler) Upload(c *fiber.Ctx) error {
+
+	request := new(dto.UpdateProfileRequest)
+	c.BodyParser(request)
+
+	if err := a.Validate.Struct(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	file, err := c.FormFile("file")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "lol",
+			Data:    err.Error(),
+		})
+	}
+
+	request.Avatar = file
+
+	if file != nil {
+		// Tentukan folder
+		uploadDir := "./public"
+
+		// Buat folder kalau belum ada
+		if err := os.MkdirAll(uploadDir, os.ModePerm); err != nil {
+			log.Println("failed create dir:", err)
+			return err
+		}
+
+		// Ambil ekstensi file asli (.jpg, .png, dll)
+		ext := filepath.Ext(file.Filename)
+
+		// Generate filename pakai timestamp (nanosecond supaya benar-benar unik)
+		newFileName := time.Now().Format("20060102150405") + ext
+		// Format: YYYYMMDDHHMMSS.ext
+
+		// Kalau mau lebih aman pakai nano + random:
+		// newFileName := fmt.Sprintf("%d%s", time.Now().UnixNano(), ext)
+
+		filePath := filepath.Join(uploadDir, newFileName)
+
+		// Simpan file
+		if err := c.SaveFile(file, filePath); err != nil {
+			log.Println("failed save file:", err)
+			return err
+		}
+
+		return c.JSON(fiber.Map{
+			"message": "Profile updated",
+			"avatar":  newFileName,
+		})
+	}
+
+	return c.JSON(fiber.Map{
+		"message": "Profile updated",
+		"data": fiber.Map{
+			"avatar": file,
+			"s":      request.Avatar,
+		},
 	})
 }
