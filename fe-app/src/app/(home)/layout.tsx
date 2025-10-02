@@ -9,11 +9,11 @@ export default async function Layout(props: { children: React.ReactNode }) {
   console.log("aku layout auth");
   const cookie = await cookies();
 
-  if (!cookie.has("token") && !cookie.has("refresh_token")) redirect("/login");
+  // if (!cookie.has("token") && !cookie.has("refresh_token")) redirect("/login");
 
   return (
     <>
-      <AuthProvider />
+      {/* <AuthProvider /> */}
       <div className="bg-discord-bg fixed grid h-screen w-screen grid-rows-[auto_1fr] text-white select-none">
         <Header />
         <div className="grid min-h-0 grid-cols-[auto_auto_1fr]">

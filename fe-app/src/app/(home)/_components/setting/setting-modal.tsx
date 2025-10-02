@@ -21,7 +21,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
   let CurrentTab = tab;
 
   useEffect(() => {
-    setTab(() => AccountView);
+    setTab(() => VoiceVideoView); //default view
   }, []);
 
   return (

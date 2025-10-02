@@ -1,5 +1,5 @@
 import { useAtom } from "jotai";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { userAtom } from "../_state/user-atom";
 import UserAvatar from "./user-avatar";
 import TooltipDesc from "./tooltip-desc";
@@ -14,6 +14,8 @@ import {
 import { twMerge } from "tailwind-merge";
 import SettingModal from "./setting/setting-modal";
 import { mediaAtom } from "../_state/media-atom";
+import { Dialog } from "radix-ui";
+import { SetStateAction } from "jotai";
 
 export default function UserBar() {
   const [user, setUser] = useAtom(userAtom);
@@ -92,19 +94,81 @@ function BtnAttribute(props: {
 
 function BtnMic() {
   const [media, setMedia] = useAtom(mediaAtom);
+  const [alertModal, setAlertModal] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
 
-  const micHandle = () => {
-    navigator.mediaDevices.getUserMedia({ audio: true });
+  const micHandle = async () => {
+    if (media.micOn) {
+      // 🔴 Matikan mic
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach((track) => track.stop());
+        streamRef.current = null;
+      }
+      setMedia((prev) => ({ ...prev, micOn: false }));
+    } else {
+      // 🟢 Nyalakan mic
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        streamRef.current = stream;
+        setMedia((prev) => ({ ...prev, micOn: true }));
+      } catch (err) {
+        console.error("Mic permission denied:", err);
+        setAlertModal(true); // tampilkan alert kalau user belum izin
+      }
+    }
   };
+
   return (
-    <TooltipDesc text={media.micOn ? "Mute" : "Unmute"} side="top" is_child>
-      <BtnAttribute
-        status={media.micOn}
-        icon_on={MicIcon}
-        icon_off={MicOffIcon}
-        on_click={micHandle}
-      />
-    </TooltipDesc>
+    <>
+      <MicAlertModal open={alertModal} setOpen={setAlertModal} />
+      <TooltipDesc text={media.micOn ? "Mute" : "Unmute"} side="top" is_child>
+        <BtnAttribute
+          status={media.micOn}
+          icon_on={MicIcon}
+          icon_off={MicOffIcon}
+          on_click={micHandle}
+        />
+      </TooltipDesc>
+    </>
+  );
+}
+
+function MicAlertModal(props: {
+  open: boolean;
+  setOpen: React.Dispatch<SetStateAction<boolean>>;
+}) {
+  const handleClick = () => {
+    props.setOpen(false);
+    window.open(
+      "https://support.discord.com/hc/en-us/articles/205093487-How-do-I-enable-my-mic-in-Chrome",
+      "_blank",
+    );
+  };
+
+  return (
+    <Dialog.Root open={props.open} onOpenChange={(v) => props.setOpen(v)}>
+      <Dialog.Portal>
+        <Dialog.Overlay className="fixed inset-0 bg-black/60" />
+        <Dialog.Content className="fixed top-1/2 left-1/2 flex w-[400px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-[#3b3b41] bg-[#242429] p-6 text-white data-[state=closed]:animate-[modal-hide_200ms] data-[state=open]:animate-[modal-show_200ms]">
+          <Dialog.Title className="text-xl font-semibold">
+            Microphone Access is Denied
+          </Dialog.Title>
+          <h1 className="mt-2 mb-4 brightness-75">
+            Instructions for enabling access to your microphone can be found in
+            the Discord Help Center.
+          </h1>
+
+          <button
+            onClick={handleClick}
+            className="cursor-pointer rounded-lg bg-[#5865f2] py-2 font-semibold hover:bg-[#5865f2]/75"
+          >
+            Help Desk
+          </button>
+        </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }
 
