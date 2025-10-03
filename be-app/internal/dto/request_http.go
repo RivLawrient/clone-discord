@@ -34,3 +34,8 @@ type UpdateProfileRequest struct {
 	Bio         string                `form:"bio" validate:"max=50"`
 	Avatar      *multipart.FileHeader `form:"avatar"`
 }
+
+type NewServerRequest struct {
+	Name         string                `form:"name" validate:"required"`
+	ProfileImage *multipart.FileHeader `form:"profile_image"`
+}

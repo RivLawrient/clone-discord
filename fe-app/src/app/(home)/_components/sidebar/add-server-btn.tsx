@@ -11,6 +11,8 @@ import { Dialog } from "radix-ui";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { SetStateAction, useAtom } from "jotai";
 import { userAtom } from "../../_state/user-atom";
+import { apiCall, GetCookie } from "../../_helper/api-client";
+import { serverAtom } from "../../_state/server-atom";
 
 export default function AddServerBtn() {
   return (
@@ -38,9 +40,13 @@ function ModalCreateServer(props: { children: React.ReactNode }) {
   const [current, setCurrent] = useState(0);
   const [next, setNext] = useState(0);
   const [create, setCreate] = useState(false);
+
+  const [open, setOpen] = useState(false);
   return (
     <Dialog.Root
+      open={open}
       onOpenChange={(e) => {
+        setOpen(e);
         setTimeout(() => {
           setCurrent(0);
           setNext(0);
@@ -70,6 +76,7 @@ function ModalCreateServer(props: { children: React.ReactNode }) {
               next={next}
               setCurrent={setCurrent}
               setNext={setNext}
+              setOpen={setOpen}
             />
           )}
           {current === 1 && !create && (
@@ -95,17 +102,7 @@ function Step(props: {
   setCreate: React.Dispatch<SetStateAction<boolean>>;
 }) {
   return (
-    <div
-      className={twMerge(
-        "flex flex-col items-center p-6",
-        // props.next === 1 && props.current === 0 && "animate-[to-left_300ms]",
-        // props.next === 0 && props.current === 1 && "animate-[from-left_300ms]",
-        // props.prev === 1 && props.create && "animate-[to-left_300ms]",
-        // props.prev === 1 && !props.create && "animate-[to-left_300ms]",
-        // props.prev === 1 && "animate-[to-left_300ms]",
-        // !props.create && props.prev === 1 && "animate-[from-left_300ms]",
-      )}
-    >
+    <div className={twMerge("flex flex-col items-center p-6")}>
       <Dialog.Title className="text-2xl font-semibold">
         Create Your Server
       </Dialog.Title>
@@ -151,11 +148,14 @@ function StepCreate(props: {
   next: number;
   setCurrent: React.Dispatch<SetStateAction<number>>;
   setNext: React.Dispatch<SetStateAction<number>>;
+  setOpen: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const [image, setImage] = useState<File>();
   const [user, setUser] = useAtom(userAtom);
   const [text, setText] = useState("");
   const refInput = useRef<HTMLInputElement>(null);
+  const [server, setServer] = useAtom(serverAtom);
+  const [loading, setLoading] = useState(false);
 
   const imageChangeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -180,6 +180,35 @@ function StepCreate(props: {
   const changeTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     setText(e.target.value);
   };
+
+  const createHandle = () => {
+    setLoading(true);
+    const form = new FormData();
+    form.append("name", text);
+    if (image) {
+      form.append("profile_image", image);
+    }
+
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
+      method: "POST",
+      body: form,
+      headers: {
+        Authorization: `Bearer ${GetCookie("token")}`,
+      },
+    })
+      .then(async (resp) => {
+        const res = await resp.json();
+        if (resp.ok) {
+          setServer([...server, res.data]);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        props.setOpen((p) => !p);
+        setLoading(false);
+      });
+  };
+
   return (
     <div className={twMerge("flex flex-col items-center justify-center p-6")}>
       <Dialog.Title className="text-2xl font-semibold">
@@ -189,9 +218,9 @@ function StepCreate(props: {
         Give your new server a personality with a name and an icon. You can
         always change it later.
       </span>
-      <button
+      <div
         className={twMerge(
-          "relative flex size-20 cursor-pointer flex-col items-center justify-center rounded-full border-dashed border-white/75",
+          "relative flex size-20 flex-col items-center justify-center rounded-full border-dashed border-white/75",
           !previewUrl && "border-2",
         )}
       >
@@ -200,7 +229,7 @@ function StepCreate(props: {
           accept="image/*"
           onChange={imageChangeHandle}
           className={twMerge(
-            "absolute size-full cursor-pointer rounded-full opacity-0",
+            "absolute z-10 size-full cursor-pointer rounded-full opacity-0",
           )}
           title=""
         />
@@ -219,7 +248,7 @@ function StepCreate(props: {
             </div>
           </>
         )}
-      </button>
+      </div>
       <h1 className="mt-4 mr-auto mb-2 font-semibold">Server Name</h1>
       <input
         ref={refInput}
@@ -238,16 +267,17 @@ function StepCreate(props: {
       <div className="mt-12 flex w-full justify-between">
         <button
           onClick={() => {
-            props.setNext(0);
-            setTimeout(() => {
-              props.setCurrent(0);
-            }, 200);
+            props.setCurrent(0);
           }}
           className="cursor-pointer font-semibold"
         >
           Back
         </button>
-        <button className="cursor-pointer rounded-lg bg-[#5965f2] px-6 py-2 font-semibold transition-all hover:bg-[#5965f2]/75">
+        <button
+          disabled={loading}
+          onClick={createHandle}
+          className="cursor-pointer rounded-lg bg-[#5965f2] px-6 py-2 font-semibold transition-all hover:bg-[#5965f2]/75"
+        >
           Create
         </button>
       </div>
@@ -262,18 +292,33 @@ function StepJoin(props: {
   setNext: React.Dispatch<SetStateAction<number>>;
 }) {
   return (
-    <div className={twMerge("flex flex-col p-6")}>
-      join
-      <button
-        onClick={() => {
-          props.setNext(0);
-          setTimeout(() => {
-            props.setCurrent(0);
-          }, 200);
-        }}
-      >
-        back
-      </button>
+    <div className={twMerge("flex grow flex-col items-center p-6")}>
+      <h1 className="text-2xl font-semibold">Join a Server</h1>
+      <h2 className="mt-1 text-sm">
+        Enter an invite below to join an existing server
+      </h2>
+      <div className="mt-4 flex w-full flex-col">
+        <h1 className="mb-1 font-semibold">
+          Invite Link
+          <span className="ml-1 text-[#f16f6c]">*</span>
+        </h1>
+        <input
+          type="text"
+          placeholder="tes"
+          className="rounded-lg border border-[#38383f] bg-[#212126] p-2 outline-none focus:border-[#5098ed]"
+        />
+      </div>
+      <div className="mt-12 flex w-full justify-between text-sm font-semibold">
+        <button
+          onClick={() => props.setCurrent(0)}
+          className="cursor-pointer text-[#8da1fc] hover:underline"
+        >
+          Back
+        </button>
+        <button className="cursor-pointer rounded-lg bg-[#5865f2] px-4 py-2 transition-all hover:bg-[#5865f2]/75">
+          Join Server
+        </button>
+      </div>
     </div>
   );
 }

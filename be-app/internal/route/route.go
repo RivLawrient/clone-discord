@@ -54,7 +54,7 @@ func (r Routes) SetupRoutes() {
 	r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
 	r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
 
-	r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GenerateFiveServerHandler)
+	r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.CreateServerHandler)
 	r.App.Get("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GetJoinServerHandler)
 	r.App.Put("/server/:id/:position", middleware.RequireJWTAuth(), r.GroupingHandler.UpdatePositionServerHandler)
 

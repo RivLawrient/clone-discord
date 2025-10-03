@@ -58,7 +58,8 @@ type TextChatDMList struct {
 }
 
 type ServerList struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	Position int    `json:"position"`
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	ProfileImage string `json:"profile_image"`
+	Position     int    `json:"position"`
 }

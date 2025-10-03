@@ -78,6 +78,43 @@ func (c Controller) GenerateFiveServer(userid string) error {
 	return nil
 }
 
+// make new server & save to your join_server
+func (c Controller) CreateServer(userId string, nameServer string, imageId string) (*dto.ServerList, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	data := server.Server{
+		ID:           uuid.NewString(),
+		Name:         nameServer,
+		ProfileImage: imageId,
+	}
+
+	if err := c.ServerRepo.NewServer(tx, &data); err != nil {
+		return nil, err
+	}
+
+	dataJoin := joinserver.JoinServer{
+		ID:       uuid.NewString(),
+		UserId:   userId,
+		ServerId: data.ID,
+		// Position: ,
+	}
+	if err := c.JoinServerRepo.JoinNewServer(tx, &dataJoin); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.ServerList{
+		ID:           data.ID,
+		Name:         data.Name,
+		ProfileImage: data.ProfileImage,
+		Position:     dataJoin.Position,
+	}, nil
+}
+
 func (c Controller) GetJoinServer(userid string) ([]dto.ServerList, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
@@ -160,7 +197,7 @@ func (c Controller) UpdateJoinServerPosition(userId, joinServerId string, newPos
 	// Update DB
 	for _, j := range joins {
 		if err := tx.Model(&joinserver.JoinServer{}).
-		Where("id = ?", j.ID).
+			Where("id = ?", j.ID).
 			Update("position", j.Position).Error; err != nil {
 			return nil, err
 		}

@@ -6,10 +6,11 @@ import (
 )
 
 type Server struct {
-	ID        string `gorm:"primaryKey;type:uuid"`
-	Name      string
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID           string `gorm:"primaryKey;type:uuid"`
+	Name         string
+	ProfileImage string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 
 	Join []joinserver.JoinServer `gorm:"foreignKey:ServerId;constraint:OnDelete:CASCADE"`
 }

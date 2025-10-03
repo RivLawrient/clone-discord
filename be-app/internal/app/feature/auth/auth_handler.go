@@ -385,7 +385,7 @@ func (a Handler) Upload(c *fiber.Ctx) error {
 
 	file, err := c.FormFile("file")
 	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[string]{
 			Message: "lol",
 			Data:    err.Error(),
 		})

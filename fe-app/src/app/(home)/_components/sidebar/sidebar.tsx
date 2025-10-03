@@ -5,7 +5,7 @@ import { twMerge } from "tailwind-merge";
 import TooltipDesc from "../tooltip-desc";
 import { useAtom } from "jotai";
 import { serverAtom, ServerList } from "../../_state/server-atom";
-import { apiCall } from "../../_helper/api-client";
+import { apiCall, GetCookie } from "../../_helper/api-client";
 import AddServerBtn from "./add-server-btn";
 
 interface Server {
@@ -39,7 +39,7 @@ export default function Sidebar() {
       style={{
         scrollbarWidth: "none",
       }}
-      className="flex min-h-0 flex-col gap-y-2 overflow-y-scroll select-none"
+      className="flex min-h-0 flex-col gap-y-2 overflow-y-scroll pb-20 select-none"
     >
       <DMBtn />
 
@@ -52,6 +52,7 @@ export default function Sidebar() {
             id={v.id}
             position={v.position}
             label={v.name}
+            picture={v.profile_image}
             is_last={i === a.length - 1}
             drag={drag}
             setDrag={setDrag}
@@ -93,6 +94,7 @@ function DMBtn() {
 
 function ServerBtn(props: {
   label: string;
+  picture: string;
   is_last?: boolean;
   id: string;
   position: number;
@@ -105,7 +107,7 @@ function ServerBtn(props: {
   const router = useRouter();
   const path_channel = usePathname().split("/")[2];
   const is_current_path = path_channel === props.id;
-  const img = props.id === server[0].id && "/goku.jpg";
+  // const img = props.id === server[0].id && "/goku.jpg";
 
   return (
     <div className="relative">
@@ -131,10 +133,10 @@ function ServerBtn(props: {
             is_current_path && "bg-server-btn-hover",
           )}
         >
-          {img ? (
+          {props.picture ? (
             <img
               draggable={false}
-              src={img}
+              src={process.env.NEXT_PUBLIC_HOST_API + "img/" + props.picture}
               className="size-10 object-cover select-none"
             />
           ) : (
@@ -233,6 +235,9 @@ function DragZone(props: {
                 `${process.env.NEXT_PUBLIC_HOST_API}server/${data.id}/${zone}`,
                 {
                   method: "PUT",
+                  headers: {
+                    Authorization: `Bearer ${GetCookie("token")}`,
+                  },
                 },
               )
                 .then(async (resp) => {

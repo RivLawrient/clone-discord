@@ -13,7 +13,8 @@ func ValidationMsg(err error) map[string]string {
 
 	if validationErrors, ok := err.(validator.ValidationErrors); ok {
 		for _, e := range validationErrors {
-			field := strings.ToLower(e.Field())
+
+			field := toSnakeCase(e.Field())
 
 			switch e.Tag() {
 			case "required":
@@ -35,4 +36,15 @@ func ValidationMsg(err error) map[string]string {
 	}
 
 	return errors
+}
+
+func toSnakeCase(str string) string {
+	var result []rune
+	for i, r := range str {
+		if i > 0 && r >= 'A' && r <= 'Z' {
+			result = append(result, '_')
+		}
+		result = append(result, r)
+	}
+	return strings.ToLower(string(result))
 }
