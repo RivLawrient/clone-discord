@@ -110,10 +110,10 @@ function ChangeUsernameModal(props: { children: React.ReactNode }) {
         username: username,
         password: password,
       }),
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-        "Content-Type": "application/json",
-      },
+      // headers: {
+      //   Authorization: `Bearer ${GetCookie("token")}`,
+      //   "Content-Type": "application/json",
+      // },
     })
       .then(async (resp) => {
         const res = await resp.json();

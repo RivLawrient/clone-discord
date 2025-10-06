@@ -24,10 +24,10 @@ export default function AuthProvider() {
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-        "Content-Type": "application/json",
-      },
+      // headers: {
+      //   Authorization: `Bearer ${GetCookie("token")}`,
+      //   "Content-Type": "application/json",
+      // },
     })
       .then(async (resp) => {
         if (resp.ok) {
@@ -40,40 +40,44 @@ export default function AuthProvider() {
   }, []);
 
   useEffect(() => {
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then(async (resp) => {
-        if (resp.ok) {
-          const res = await resp.json();
-          setFriend(res.data);
-          setLoadingCount((p) => p - 1);
-        }
+    if (loadingCount == 2) {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
+        method: "GET",
+        // headers: {
+        //   Authorization: `Bearer ${GetCookie("token")}`,
+        //   "Content-Type": "application/json",
+        // },
       })
-      .catch(() => {});
-  }, []);
+        .then(async (resp) => {
+          if (resp.ok) {
+            const res = await resp.json();
+            setFriend(res.data);
+            setLoadingCount((p) => p - 1);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loadingCount]);
 
   useEffect(() => {
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
-      method: "GET",
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-        "Content-Type": "application/json",
-      },
-    })
-      .then(async (resp) => {
-        if (resp.ok) {
-          const res = await resp.json();
-          setServer(res.data);
-          setLoadingCount((p) => p - 1);
-        }
+    if (loadingCount == 1) {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
+        method: "GET",
+        // headers: {
+        //   Authorization: `Bearer ${GetCookie("token")}`,
+        //   "Content-Type": "application/json",
+        // },
       })
-      .catch(() => {});
-  }, []);
+        .then(async (resp) => {
+          if (resp.ok) {
+            const res = await resp.json();
+            setServer(res.data);
+            setLoadingCount((p) => p - 1);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loadingCount]);
 
   useEffect(() => {
     const connect = () => {

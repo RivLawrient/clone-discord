@@ -192,9 +192,9 @@ function StepCreate(props: {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
       method: "POST",
       body: form,
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${GetCookie("token")}`,
+      // },
     })
       .then(async (resp) => {
         const res = await resp.json();

@@ -229,9 +229,9 @@ function SaveModal(props: {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/profile`, {
       method: "PUT",
       body: formData,
-      headers: {
-        Authorization: `Bearer ${GetCookie("token")}`,
-      },
+      // headers: {
+      //   Authorization: `Bearer ${GetCookie("token")}`,
+      // },
     }).then(async (resp) => {
       const res = await resp.json();
       if (resp.ok) {
