@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 type LoginField = {
@@ -21,7 +21,9 @@ export default function useLogin() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
+  const path = usePathname()
   const router = useRouter();
+  const returnTo = useSearchParams().get("returnTo")
 
   const login_handle = () => {
     setLoading(true);
@@ -43,7 +45,8 @@ export default function useLogin() {
           }));
           const data: ResponseSucces = res.data;
           document.cookie = `token=${data.token}; path=/`;
-          router.refresh();
+          
+          router.push(returnTo || "/");
         }
         if (resp.status === 400) {
           const data: LoginField = res.data;
@@ -74,6 +77,14 @@ export default function useLogin() {
       });
   };
 
+  const router_register = () =>{
+    if(returnTo) {
+      router.push("/register?returnTo="+returnTo)
+    }else{
+      router.push("/register")
+    }
+  }
+
   return {
     login_handle,
     input,
@@ -81,5 +92,6 @@ export default function useLogin() {
     error,
     loading,
     router,
+    router_register
   };
 }

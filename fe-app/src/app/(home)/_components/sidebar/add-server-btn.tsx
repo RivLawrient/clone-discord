@@ -3,6 +3,7 @@ import TooltipDesc from "../tooltip-desc";
 import {
   CameraIcon,
   ChevronRightIcon,
+  Loader2Icon,
   PenSquareIcon,
   PlusCircleIcon,
   PlusIcon,
@@ -35,12 +36,9 @@ export default function AddServerBtn() {
 }
 
 function ModalCreateServer(props: { children: React.ReactNode }) {
-  const [animate, setAnimate] = useState(false);
-
   const [current, setCurrent] = useState(0);
   const [next, setNext] = useState(0);
   const [create, setCreate] = useState(false);
-
   const [open, setOpen] = useState(false);
   return (
     <Dialog.Root
@@ -168,6 +166,10 @@ function StepCreate(props: {
     return URL.createObjectURL(image);
   }, [image]);
 
+  const changeTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setText(e.target.value);
+  };
+
   useEffect(() => {
     setTimeout(() => {
       if (refInput.current) {
@@ -176,10 +178,6 @@ function StepCreate(props: {
       }
     }, 100);
   }, [props.current]);
-
-  const changeTextHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setText(e.target.value);
-  };
 
   const createHandle = () => {
     setLoading(true);
@@ -192,9 +190,6 @@ function StepCreate(props: {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
       method: "POST",
       body: form,
-      // headers: {
-      //   Authorization: `Bearer ${GetCookie("token")}`,
-      // },
     })
       .then(async (resp) => {
         const res = await resp.json();
@@ -278,7 +273,11 @@ function StepCreate(props: {
           onClick={createHandle}
           className="cursor-pointer rounded-lg bg-[#5965f2] px-6 py-2 font-semibold transition-all hover:bg-[#5965f2]/75"
         >
-          Create
+          {loading ? (
+            <Loader2Icon size={20} className="mx-3 animate-spin" />
+          ) : (
+            "Create"
+          )}
         </button>
       </div>
     </div>

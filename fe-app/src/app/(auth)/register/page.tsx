@@ -73,17 +73,17 @@ export default function Page() {
         <button
           disabled={hookregister.loading}
           type="submit"
-          className="bg-blue-discord-fill hover:bg-blue-discord-fill/80 mt-5 mb-2 cursor-pointer rounded-lg py-2 font-semibold text-white transition-all"
+          className="bg-blue-discord-fill hover:bg-blue-discord-fill/80 mt-5 mb-2 flex cursor-pointer justify-center rounded-lg py-2 font-semibold text-white transition-all"
         >
           {hookregister.loading ? (
-            <LoaderCircleIcon className="animate-spin place-self-center" />
+            <LoaderCircleIcon className="animate-spin" />
           ) : (
             <>Create Account</>
           )}
         </button>
       </form>
       <label
-        onClick={() => hookregister.router.push("/login")}
+        onClick={hookregister.router_login}
         className="text-blue-discord cursor-pointer text-sm font-semibold hover:underline"
       >
         Already have an account? Log in

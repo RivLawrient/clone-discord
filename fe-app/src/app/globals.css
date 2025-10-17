@@ -173,16 +173,59 @@ body{
   
 }
 
+
+@keyframes from-top{
+  from{
+    opacity: 0;
+    transform: translateY(-20px);
+
+  }
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
+  }
+
+.custom-scrollbar {
+  overflow-y: auto;
+  scrollbar-width: thin; /* untuk Firefox */
+  scrollbar-color: #555 transparent; /* untuk Firefox */
+}
+
+/* default: scrollbar disembunyikan */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px; /* lebar scrollbar */
+  width: 0px;
+}
+
+/* saat di-hover: scrollbar muncul */
+.custom-scrollbar:hover::-webkit-scrollbar {
+  width: 2px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent; /* warna track */
+  background: transparent;
   border-radius: 4px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: #555; /* warna thumb */
+  background: #555;
   border-radius: 4px;
 }

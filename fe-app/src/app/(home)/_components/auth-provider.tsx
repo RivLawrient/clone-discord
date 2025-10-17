@@ -8,6 +8,7 @@ import { apiCall, GetCookie } from "../_helper/api-client";
 import { socketAtom } from "../_state/socket-atom";
 import { serverAtom } from "../_state/server-atom";
 import { mediaAtom } from "../_state/media-atom";
+import { usePathname, useRouter } from "next/navigation";
 
 export default function AuthProvider() {
   const [loadingCount, setLoadingCount] = useState(3);
@@ -24,10 +25,6 @@ export default function AuthProvider() {
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
       method: "GET",
-      // headers: {
-      //   Authorization: `Bearer ${GetCookie("token")}`,
-      //   "Content-Type": "application/json",
-      // },
     })
       .then(async (resp) => {
         if (resp.ok) {
@@ -43,10 +40,6 @@ export default function AuthProvider() {
     if (loadingCount == 2) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
         method: "GET",
-        // headers: {
-        //   Authorization: `Bearer ${GetCookie("token")}`,
-        //   "Content-Type": "application/json",
-        // },
       })
         .then(async (resp) => {
           if (resp.ok) {
@@ -63,10 +56,6 @@ export default function AuthProvider() {
     if (loadingCount == 1) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
         method: "GET",
-        // headers: {
-        //   Authorization: `Bearer ${GetCookie("token")}`,
-        //   "Content-Type": "application/json",
-        // },
       })
         .then(async (resp) => {
           if (resp.ok) {
@@ -82,7 +71,7 @@ export default function AuthProvider() {
   useEffect(() => {
     const connect = () => {
       const ws = new WebSocket(
-        `${process.env.NEXT_PUBLIC_HOST_WS}?token=${GetCookie("token")}`,
+        `${process.env.NEXT_PUBLIC_HOST_WS}?token=${GetCookie("token")}`
       );
       socketRef.current = ws;
 
@@ -133,7 +122,7 @@ export default function AuthProvider() {
             all: v.all.map((vv) =>
               vv.user_id === data.friend.user_id
                 ? { ...vv, status_activity: data.friend.status_activity }
-                : vv,
+                : vv
             ),
           }));
         }

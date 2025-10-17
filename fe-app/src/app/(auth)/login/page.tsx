@@ -59,7 +59,7 @@ export default function Page() {
       <label className="text-sm text-white/60">
         Need an account?{" "}
         <span
-          onClick={() => hooklogin.router.push("/register")}
+          onClick={hooklogin.router_register}
           className="text-blue-discord cursor-pointer font-semibold opacity-100 hover:underline"
         >
           Register

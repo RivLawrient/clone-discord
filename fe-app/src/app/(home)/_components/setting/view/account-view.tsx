@@ -28,7 +28,7 @@ export function AccountView() {
           onClick={props.onClick}
           className={twMerge(
             "size-fit rounded-lg bg-[#242428] px-4 py-2 text-sm font-semibold hover:brightness-125",
-            props.onClick ? "cursor-pointer" : "cursor-not-allowed",
+            props.onClick ? "cursor-pointer" : "cursor-not-allowed"
           )}
         >
           Edit
@@ -41,7 +41,12 @@ export function AccountView() {
     <div>
       <h1 className="text-2xl font-semibold text-white">My Account</h1>
       <div className="mt-6 flex w-full flex-col overflow-hidden rounded-lg">
-        <div className="h-[100px] bg-white" />
+        <div
+          style={{
+            backgroundColor: user.banner_color,
+          }}
+          className="h-[100px] "
+        />
         <div className="grow bg-[#121214] p-4 pb-0">
           <div className="flex-rows flex">
             <div className="size-fit -translate-y-10 rounded-full bg-[#121214] p-1.5">
@@ -79,7 +84,10 @@ export function AccountView() {
                 onClick={() => {}}
               />
             </ChangeUsernameModal>
-            <Field title="Email" value={user.email} />
+            <Field
+              title="Email"
+              value={user.email}
+            />
           </div>
         </div>
       </div>
@@ -155,7 +163,10 @@ function ChangeUsernameModal(props: { children: React.ReactNode }) {
   };
 
   return (
-    <Dialog.Root open={open} onOpenChange={(e) => setOpen(e)}>
+    <Dialog.Root
+      open={open}
+      onOpenChange={(e) => setOpen(e)}
+    >
       <Dialog.Trigger asChild>{props.children}</Dialog.Trigger>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60" />
@@ -205,7 +216,10 @@ function ChangeUsernameModal(props: { children: React.ReactNode }) {
               className="cursor-pointer rounded-lg bg-[#5865f2] px-6 py-2 transition-all hover:bg-[#5865f2]/75"
             >
               {loading ? (
-                <Loader2Icon size={16} className="mx-2 animate-spin" />
+                <Loader2Icon
+                  size={16}
+                  className="mx-2 animate-spin"
+                />
               ) : (
                 "Done"
               )}

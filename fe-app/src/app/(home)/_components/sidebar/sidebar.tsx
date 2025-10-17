@@ -8,29 +8,8 @@ import { serverAtom, ServerList } from "../../_state/server-atom";
 import { apiCall, GetCookie } from "../../_helper/api-client";
 import AddServerBtn from "./add-server-btn";
 
-interface Server {
-  id: string;
-  name: string;
-  picture: string;
-  position: number;
-}
-
-// const server: Server[] = Array.from({ length: 28 }, (_, i) => ({
-//   id: crypto.randomUUID(),
-//   name: `Server ${i + 1}`,
-//   picture: `https://via.placeholder.com/40x40.png?text=${i + 1}`,
-//   position: i + 1,
-// }));
-const server: Server[] = Array.from({ length: 28 }, (_, i) => ({
-  id: `server-${i + 1}`,
-  name: `Server ${i + 1}`,
-  picture: `https://via.placeholder.com/40x40.png?text=${i + 1}`,
-  position: i + 1,
-}));
-
 export default function Sidebar() {
   const [list, setList] = useAtom(serverAtom);
-  // const [list, setList] = useState(server);
   const [drag, setDrag] = useState<number>(0);
   const [isdrag, setIsdrag] = useState(false);
 
@@ -71,21 +50,28 @@ function DMBtn() {
   const router = useRouter();
   return (
     <div className="relative flex">
-      <TooltipDesc text="Direct Messages" side={"right"}>
+      <TooltipDesc
+        text="Direct Messages"
+        side={"right"}
+      >
         <div
           onClick={() => router.push("/channels/me")}
           className={twMerge(
             "bg-server-btn-bg hover:bg-server-btn-hover peer mx-4 size-10 cursor-pointer rounded-xl p-2 font-semibold",
-            path === "me" && "bg-server-btn-hover",
+            path === "me" && "bg-server-btn-hover"
           )}
         >
-          <img src="/dc-logo.png" alt="" className="size-6 object-contain" />
+          <img
+            src="/dc-logo.png"
+            alt=""
+            className="size-6 object-contain"
+          />
         </div>
       </TooltipDesc>
       <div
         className={twMerge(
           "absolute top-0 bottom-0 left-0 my-auto w-1 rounded-r-lg bg-white transition-all",
-          path === "me" ? "h-10" : "h-0 peer-hover:h-5",
+          path === "me" ? "h-10" : "h-0 peer-hover:h-5"
         )}
       />
     </div>
@@ -105,9 +91,9 @@ function ServerBtn(props: {
   setIsdrag: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const router = useRouter();
+  const path_start = usePathname().split("/")[1];
   const path_channel = usePathname().split("/")[2];
-  const is_current_path = path_channel === props.id;
-  // const img = props.id === server[0].id && "/goku.jpg";
+  const is_current_path = path_start === "channels" && path_channel == props.id;
 
   return (
     <div className="relative">
@@ -119,7 +105,10 @@ function ServerBtn(props: {
           setList={props.setList}
         />
       )}
-      <TooltipDesc side="right" text={props.label}>
+      <TooltipDesc
+        side="right"
+        text={props.label}
+      >
         <div
           draggable
           onDragStart={() => {
@@ -130,7 +119,7 @@ function ServerBtn(props: {
           onClick={() => router.push("/channels/" + props.id)}
           className={twMerge(
             "peer bg-server-btn-bg hover:bg-server-btn-hover mx-4 flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-xl font-semibold",
-            is_current_path && "bg-server-btn-hover",
+            is_current_path && "bg-server-btn-hover"
           )}
         >
           {props.picture ? (
@@ -148,10 +137,10 @@ function ServerBtn(props: {
       <div
         className={twMerge(
           "absolute top-0 bottom-0 left-0 my-auto w-1 rounded-r-lg bg-white transition-all",
-          is_current_path ? "h-10" : "h-0 peer-hover:h-5",
+          is_current_path ? "h-10" : "h-0 peer-hover:h-5"
         )}
       />
-      {props.is_last && (
+      {props.is_last && props.isdrag && (
         <DragZone
           id={props.id}
           on_last={props.is_last}
@@ -209,8 +198,8 @@ function DragZone(props: {
                     ? { ...vv, position: vv.position + 1 }
                     : vv.position === props.drag
                       ? { ...vv, position: zone }
-                      : vv,
-                ),
+                      : vv
+                )
               );
 
             // drag ke bawah
@@ -221,8 +210,8 @@ function DragZone(props: {
                     ? { ...vv, position: vv.position - 1 }
                     : vv.position === props.drag
                       ? { ...vv, position: zone }
-                      : vv,
-                ),
+                      : vv
+                )
               );
 
             const data = list.find((v) => v.position === props.drag);
@@ -238,7 +227,7 @@ function DragZone(props: {
                   headers: {
                     Authorization: `Bearer ${GetCookie("token")}`,
                   },
-                },
+                }
               )
                 .then(async (resp) => {
                   if (resp.ok) {
@@ -260,14 +249,14 @@ function DragZone(props: {
         }}
         className={twMerge(
           "absolute z-10 h-5 w-full",
-          props.on_last ? "-bottom-3.5" : "-top-3.5",
+          props.on_last ? "-bottom-3.5" : "-top-3.5"
         )}
       />
       <div
         className={twMerge(
           "absolute h-2 w-full rounded-lg",
           enter && "bg-green-500",
-          props.on_last ? "-bottom-2" : "-top-2",
+          props.on_last ? "-bottom-2" : "-top-2"
         )}
       />
     </>

@@ -1,4 +1,4 @@
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 
 type RegisterField = {
@@ -30,6 +30,7 @@ export default function useRegister() {
   });
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const returnTo = useSearchParams().get("returnTo");
 
   const register_handle = () => {
     if (!input.birthdate || isNaN(Date.parse(input.birthdate))) {
@@ -62,7 +63,8 @@ export default function useRegister() {
           }));
           const data: ResponseSucces = res.data;
           document.cookie = `token=${data.token}; path=/`;
-          router.refresh();
+          // router.refresh();
+          router.push(returnTo || "/");
         }
 
         if (resp.status === 400) {
@@ -105,6 +107,14 @@ export default function useRegister() {
       });
   };
 
+   const router_login = () =>{
+    if(returnTo) {
+      router.push("/login?returnTo="+returnTo)
+    }else{
+      router.push("/login")
+    }
+  }
+
   return {
     register_handle,
     input,
@@ -112,5 +122,6 @@ export default function useRegister() {
     error,
     loading,
     router,
+    router_login
   };
 }
