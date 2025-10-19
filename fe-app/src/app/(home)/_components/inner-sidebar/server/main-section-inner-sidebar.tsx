@@ -44,6 +44,11 @@ const list = {
   category: categories,
 };
 
+interface Listes {
+  channel: ChannelList[];
+  category: CategoryChannel[];
+}
+
 export default function MainSectionInnerSidebar() {
   const [servers, setServers] = useAtom(serverAtom);
   const { server } = useParams();
@@ -51,7 +56,7 @@ export default function MainSectionInnerSidebar() {
   const [currentServer, setCurrentServer] = useState<ServerList | undefined>();
   const [isDrag, setIsdrag] = useState(false);
   const [whoDrag, setWhoDrag] = useState(0);
-  const [whoCategory, setWhoCategory] = useState("");
+  const [whoCategory, setWhoCategory] = useState(0);
 
   useEffect(() => {
     if (!loaded && servers.length > 0) {
@@ -71,23 +76,25 @@ export default function MainSectionInnerSidebar() {
   if (!currentServer) return <></>;
   return (
     <RightClickMenuMainSection>
-      <div className="custom-scrollbar font-semibold min-h-0 gap-0.5 min-w-0 flex flex-col overflow-y-scroll pt-3 pr-2 relative">
+      <div className="custom-scrollbar font-semibold min-h-0 gap-0.5 min-w-0 flex flex-col overflow-y-scroll pt-3 pr-3 relative">
         {currentServer.list.channel.map((v, i, a) => (
           <ChannelBtnList
             key={v.id}
             data={v}
-            isDrag={isDrag}
             position={i + 1}
+            isDrag={isDrag}
+            setIsDrag={setIsdrag}
             whoDrag={whoDrag}
             setWhoDrag={setWhoDrag}
-            setIsDrag={setIsdrag}
-            category=""
+            category={0}
             whoCategory={whoCategory}
             setWhoCategory={setWhoCategory}
-            // isLast={i === a.length - 1}
+            channelList={currentServer.list.channel}
+            categoryList={currentServer.list.category}
           />
         ))}
-        {currentServer.list.category.map((v, i) => (
+
+        {currentServer.list.category.map((v, i, a) => (
           <CategoryBtnSection
             key={v.id}
             data={v}
@@ -98,19 +105,36 @@ export default function MainSectionInnerSidebar() {
             setIsdrag={setIsdrag}
             whoCategory={whoCategory}
             setWhoCategory={setWhoCategory}
+            channelList={currentServer.list.channel}
+            categoryList={currentServer.list.category}
           />
         ))}
       </div>
     </RightClickMenuMainSection>
   );
 }
+
 function DragZone(props: {
   position: number;
-  dragPosition: number;
-  fromCategory: string;
-  toCategory: string;
+  category: number;
+  whoDrag: number;
+  isDrag: boolean;
+  whoCategory: number;
+  channelList: ChannelList[];
+  categoryList: CategoryChannel[];
 }) {
   const [enter, setEnter] = useState(false);
+
+  //kalau zone dibawah drag kebawah
+  const one =
+    props.position > props.whoDrag && props.category == props.whoCategory;
+  const two = props.category > props.whoCategory;
+
+  const three = props.position == 0 && props.category != 0;
+
+  const [servers, setServers] = useAtom(serverAtom);
+  const { server } = useParams();
+  const currentServer = servers.find((v) => v.id == server);
 
   return (
     <>
@@ -129,24 +153,51 @@ function DragZone(props: {
         }}
         onDrop={(e) => {
           e.preventDefault();
-          console.log({
-            from: props.dragPosition,
-            from_category: props.fromCategory,
-            to: props.position,
-            to_category: props.toCategory,
-          });
+          setEnter(false);
+          let ref = {
+            position: 0,
+            category: 0,
+          };
+          if (one || two) {
+            ref = {
+              position: props.position + 1,
+              category: props.category,
+            };
+            const hasil = {
+              position: props.position + 1,
+              category: props.category,
+            };
+          } else {
+            ref = {
+              position: three
+                ? props.category == 1
+                  ? props.channelList.length + 1
+                  : props.categoryList[props.category - 1].channel.length + 1
+                : props.position,
+              category: three ? props.category - 1 : props.category,
+            };
+            const hasil = {
+              position: three
+                ? props.category == 1
+                  ? props.channelList.length + 1
+                  : props.categoryList[props.category - 1].channel.length + 1
+                : props.position,
+              category: three ? props.category - 1 : props.category,
+            };
+          }
+          console.log("zone", ref);
         }}
-        className={cn("min-h-8 absolute w-full z-10")}
+        className={cn(
+          "h-full absolute  w-full bg-red-500/20 ",
+          props.isDrag && "z-10"
+        )}
       />
+
       <div
         className={cn(
-          "absolute w-full min-h-1.5 rounded-lg ",
-          enter && "bg-green-500",
-          props.toCategory == props.fromCategory
-            ? props.dragPosition < props.position
-              ? "-bottom-1"
-              : "-top-1"
-            : "-top-1"
+          "w-full min-h-1.5 absolute rounded-lg ",
+          enter && "bg-green-500/50",
+          one || two ? "-bottom-1" : "-top-1"
         )}
       />
     </>
@@ -156,48 +207,52 @@ function DragZone(props: {
 // perlu right klik
 function ChannelBtnList(props: {
   data: ChannelList;
-  isDrag: boolean;
   position: number;
-  whoDrag: number;
+  isDrag: boolean;
   setIsDrag: React.Dispatch<SetStateAction<boolean>>;
+  whoDrag: number;
   setWhoDrag: React.Dispatch<SetStateAction<number>>;
-  category: string;
-  whoCategory: string;
-  setWhoCategory: React.Dispatch<SetStateAction<string>>;
-  isLast?: boolean;
+  category: number;
+  whoCategory: number;
+  setWhoCategory: React.Dispatch<SetStateAction<number>>;
+  channelList: ChannelList[];
+  categoryList: CategoryChannel[];
 }) {
   const Icons = props.data.type === "text" ? HashIcon : Volume2Icon;
   return (
-    <div
-      draggable
-      onDragStart={() => {
-        props.setIsDrag(true);
-        props.setWhoDrag(props.data.position);
-        props.setWhoCategory(props.category);
-        console.log("start drag", {
-          from: props.data.position,
-          category: props.category,
-          props,
-        });
-      }}
-      onDragEnd={() => {
-        props.setIsDrag(false);
-      }}
-      className="relative flex ml-2 "
-    >
-      {props.isDrag && (
-        <DragZone
-          position={props.position}
-          dragPosition={props.whoDrag}
-          fromCategory={props.whoCategory}
-          toCategory={props.category}
-        />
-      )}
+    <div className="relative flex flex-col ml-2">
+      {/* perbaiki jika beda category */}
+      {props.isDrag &&
+        (props.position != props.whoDrag ||
+          props.category != props.whoCategory) && (
+          <DragZone
+            category={props.category}
+            position={props.position}
+            isDrag={props.isDrag}
+            whoDrag={props.whoDrag}
+            whoCategory={props.whoCategory}
+            channelList={props.channelList}
+            categoryList={props.categoryList}
+          />
+        )}
       <button
+        draggable
+        onDragStart={(e) => {
+          props.setIsDrag(true);
+          props.setWhoDrag(props.position);
+          props.setWhoCategory(props.category);
+          console.log("drag", {
+            position: props.position,
+            category: props.category,
+          });
+          e.dataTransfer.effectAllowed = "move";
+        }}
+        onDragEnd={() => {
+          props.setIsDrag(false);
+        }}
         onClick={() => console.log("channel")}
         className={cn(
-          "hover:bg-[#1c1c1f] cursor-pointer hover:text-white group outline-none gap-2 min-w-0 items-center transition-all rounded-lg flex flex-row py-1 px-2  grow ",
-          props.isDrag && props.position == props.whoDrag && "brightness-50"
+          "hover:bg-[#1c1c1f] cursor-pointer hover:text-white group outline-none gap-2 min-w-0 items-center transition-all rounded-lg flex flex-row py-1 px-2 w-full"
         )}
       >
         <div>
@@ -233,8 +288,10 @@ function CategoryBtnSection(props: {
   whoDrag: number;
   setIsdrag: React.Dispatch<SetStateAction<boolean>>;
   setWhodrag: React.Dispatch<SetStateAction<number>>;
-  whoCategory: string;
-  setWhoCategory: React.Dispatch<SetStateAction<string>>;
+  whoCategory: number;
+  setWhoCategory: React.Dispatch<SetStateAction<number>>;
+  channelList: ChannelList[];
+  categoryList: CategoryChannel[];
 }) {
   const [open, setOpen] = useState(true);
 
@@ -242,11 +299,11 @@ function CategoryBtnSection(props: {
     <>
       <div
         draggable
-        className=" group pl-4 pr-2 transition-all flex flex-row gap-1 items-center mt-4 bg-[#121214] z-10"
+        className="relative group ml-2 transition-all flex flex-row gap-1 items-center pr-2  z-10"
       >
         <button
           onClick={() => setOpen(!open)}
-          className="flex flex-row items-center grow gap-1 group-hover:brightness-100 brightness-60 cursor-pointer min-w-0 transition-all"
+          className="flex flex-row items-center pl-2 mt-4 grow gap-1 group-hover:brightness-100 brightness-60 cursor-pointer min-w-0 transition-all"
         >
           <span className="truncate min-w-0 text-sm">{props.data.name}</span>
           <div>
@@ -261,35 +318,44 @@ function CategoryBtnSection(props: {
           side="top"
           text="Create Channel"
         >
-          <button className="outline-none cursor-pointer">
+          <button className="outline-none cursor-pointer mt-4">
             <PlusIcon
-              size={16}
+              size={20}
               strokeWidth={3}
               className="not-hover:brightness-60"
             />
           </button>
         </TooltipDesc>
+        {props.isDrag && (
+          <DragZone
+            category={props.data.position}
+            isDrag={props.isDrag}
+            position={0}
+            whoCategory={props.whoCategory}
+            whoDrag={props.whoDrag}
+            channelList={props.channelList}
+            categoryList={props.categoryList}
+          />
+        )}
       </div>
 
-      {open && (
-        <div className="animate-[from-top_100ms] min-w-0 flex flex-col">
-          {props.data.channel.map((v, i, a) => (
-            <ChannelBtnList
-              key={v.id}
-              data={v}
-              isDrag={props.isDrag}
-              setIsDrag={props.setIsdrag}
-              position={i + 1}
-              setWhoDrag={props.setWhodrag}
-              whoDrag={props.whoDrag}
-              category={props.data.name}
-              whoCategory={props.whoCategory}
-              setWhoCategory={props.setWhoCategory}
-              isLast={i === a.length - 1}
-            />
-          ))}
-        </div>
-      )}
+      {open &&
+        props.data.channel.map((v, i, a) => (
+          <ChannelBtnList
+            key={v.id}
+            data={v}
+            isDrag={props.isDrag}
+            setIsDrag={props.setIsdrag}
+            position={i + 1}
+            setWhoDrag={props.setWhodrag}
+            whoDrag={props.whoDrag}
+            category={props.data.position}
+            whoCategory={props.whoCategory}
+            setWhoCategory={props.setWhoCategory}
+            channelList={props.channelList}
+            categoryList={props.categoryList}
+          />
+        ))}
     </>
   );
 }
