@@ -9,16 +9,16 @@ import {
 import { RightClickMenuMainSection } from "./right-click-menu-main-section";
 import { cn } from "@/app/(home)/_helper/cn";
 import TooltipDesc from "../../tooltip-desc";
-import { Fragment, SetStateAction, useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 
+import { serverAtom } from "@/app/(home)/_state/server-atom";
+import { useParams } from "next/navigation";
+import { useAtom } from "jotai";
 import {
   CategoryChannel,
   ChannelList,
-  serverAtom,
-  ServerList,
-} from "@/app/(home)/_state/server-atom";
-import { useParams } from "next/navigation";
-import { useAtom } from "jotai";
+  channelListAtom,
+} from "@/app/(home)/_state/channel-list-atom";
 
 const channels: ChannelList[] = Array.from({ length: 10 }, (_, i) => ({
   id: crypto.randomUUID(), // generate id unik
@@ -50,65 +50,97 @@ interface Listes {
 }
 
 export default function MainSectionInnerSidebar() {
-  const [servers, setServers] = useAtom(serverAtom);
-  const { server } = useParams();
-  const [loaded, setLoaded] = useState(false);
-  const [currentServer, setCurrentServer] = useState<ServerList | undefined>();
+  // const [servers, setServers] = useAtom(serverAtom);
+  // const { server } = useParams();
+  // const currentServer = servers.find((v) => v.id == server);
+
+  const [channel, setChannel] = useAtom(channelListAtom);
+
+  const [loading, setLoading] = useState(true);
+
   const [isDrag, setIsdrag] = useState(false);
   const [whoDrag, setWhoDrag] = useState(0);
   const [whoCategory, setWhoCategory] = useState(0);
 
   useEffect(() => {
-    if (!loaded && servers.length > 0) {
-      console.log("Servers loaded:", servers);
-      setServers((p) =>
-        p.map((v) => (v.id === server ? { ...v, list: list } : v))
-      );
-      setLoaded(true);
-    }
-  }, [servers]);
+    // setServers((p) =>
+    //   p.map((v) => (v.id === server ? { ...v, list: list } : v))
+    // );
 
-  useEffect(() => {
-    const found = servers.find((v) => v.id === server);
-    setCurrentServer(found);
-  }, [loaded]);
+    setChannel({
+      channel: list.channel,
+      category: list.category,
+    });
 
-  if (!currentServer) return <></>;
+    setLoading(false);
+  }, []);
+
+  if (loading) return <></>;
   return (
     <RightClickMenuMainSection>
       <div className="custom-scrollbar font-semibold min-h-0 gap-0.5 min-w-0 flex flex-col overflow-y-scroll pt-3 pr-3 relative">
-        {currentServer.list.channel.map((v, i, a) => (
-          <ChannelBtnList
-            key={v.id}
-            data={v}
-            position={i + 1}
-            isDrag={isDrag}
-            setIsDrag={setIsdrag}
-            whoDrag={whoDrag}
-            setWhoDrag={setWhoDrag}
-            category={0}
-            whoCategory={whoCategory}
-            setWhoCategory={setWhoCategory}
-            channelList={currentServer.list.channel}
-            categoryList={currentServer.list.category}
-          />
-        ))}
+        {channel.channel
+          .sort((a, b) => a.position - b.position)
+          .map((v, i, a) => (
+            <ChannelBtnList
+              key={v.id}
+              data={v}
+              position={v.position}
+              isDrag={isDrag}
+              setIsDrag={setIsdrag}
+              whoDrag={whoDrag}
+              setWhoDrag={setWhoDrag}
+              category={0}
+              whoCategory={whoCategory}
+              setWhoCategory={setWhoCategory}
+            />
+          ))}
 
-        {currentServer.list.category.map((v, i, a) => (
+        {channel.category
+          .sort((a, b) => a.position - b.position)
+          .map((v, i, a) => (
+            <CategoryBtnSection
+              key={v.id}
+              data={v}
+              isDrag={isDrag}
+              whoDrag={whoDrag}
+              position={v.position}
+              setWhodrag={setWhoDrag}
+              setIsdrag={setIsdrag}
+              whoCategory={whoCategory}
+              setWhoCategory={setWhoCategory}
+            />
+          ))}
+        {/* {currentServer?.list.channel
+          .sort((a, b) => a.position - b.position)
+          .map((v, i, a) => (
+            <ChannelBtnList
+              key={v.id}
+              data={v}
+              position={v.position}
+              isDrag={isDrag}
+              setIsDrag={setIsdrag}
+              whoDrag={whoDrag}
+              setWhoDrag={setWhoDrag}
+              category={0}
+              whoCategory={whoCategory}
+              setWhoCategory={setWhoCategory}
+            />
+          ))}
+
+        {currentServer?.list.category.map((v, i, a) => (
           <CategoryBtnSection
             key={v.id}
             data={v}
             isDrag={isDrag}
             whoDrag={whoDrag}
-            position={i + 1}
+            position={v.position}
             setWhodrag={setWhoDrag}
             setIsdrag={setIsdrag}
             whoCategory={whoCategory}
             setWhoCategory={setWhoCategory}
-            channelList={currentServer.list.channel}
-            categoryList={currentServer.list.category}
           />
-        ))}
+        ))} */}
       </div>
     </RightClickMenuMainSection>
   );
@@ -120,8 +152,7 @@ function DragZone(props: {
   whoDrag: number;
   isDrag: boolean;
   whoCategory: number;
-  channelList: ChannelList[];
-  categoryList: CategoryChannel[];
+  setIsDrag: React.Dispatch<SetStateAction<boolean>>;
 }) {
   const [enter, setEnter] = useState(false);
 
@@ -135,6 +166,10 @@ function DragZone(props: {
   const [servers, setServers] = useAtom(serverAtom);
   const { server } = useParams();
   const currentServer = servers.find((v) => v.id == server);
+  // const channelList = currentServer ? currentServer?.list.channel : [];
+  // const categoryList = currentServer ? currentServer.list.category : [];
+
+  const [channel, setChannel] = useAtom(channelListAtom);
 
   return (
     <>
@@ -153,39 +188,555 @@ function DragZone(props: {
         }}
         onDrop={(e) => {
           e.preventDefault();
-          setEnter(false);
+
           let ref = {
             position: 0,
             category: 0,
+            fromPosition: props.whoDrag,
+            fromCategory: props.whoCategory,
           };
           if (one || two) {
             ref = {
-              position: props.position + 1,
+              position: props.position,
               category: props.category,
-            };
-            const hasil = {
-              position: props.position + 1,
-              category: props.category,
+              fromPosition: props.whoDrag,
+              fromCategory: props.whoCategory,
             };
           } else {
             ref = {
               position: three
                 ? props.category == 1
-                  ? props.channelList.length + 1
-                  : props.categoryList[props.category - 1].channel.length + 1
+                  ? channel.channel.length + 1
+                  : channel.category[props.category - 2].channel.length + 1
                 : props.position,
               category: three ? props.category - 1 : props.category,
-            };
-            const hasil = {
-              position: three
-                ? props.category == 1
-                  ? props.channelList.length + 1
-                  : props.categoryList[props.category - 1].channel.length + 1
-                : props.position,
-              category: three ? props.category - 1 : props.category,
+              fromPosition: props.whoDrag,
+              fromCategory: props.whoCategory,
             };
           }
-          console.log("zone", ref);
+          console.log(ref);
+
+          // antar category 0
+          if (ref.category == 0 && ref.fromCategory == 0) {
+            console.log("antar category 0");
+            setChannel((p) => ({
+              ...p,
+              channel: p.channel.map((vv) => {
+                //keatas
+                if (ref.position < ref.fromPosition) {
+                  //cek antara drag dan zone keatas
+                  if (
+                    vv.position >= ref.position &&
+                    vv.position < ref.fromPosition
+                  ) {
+                    return { ...vv, position: vv.position + 1 };
+                  } else if (vv.position === ref.fromPosition) {
+                    return { ...vv, position: ref.position };
+                  }
+                }
+                //kebawah
+                if (ref.position > ref.fromPosition) {
+                  //cek antara drag dan zone kebawah
+                  if (
+                    vv.position <= ref.position &&
+                    vv.position > ref.fromPosition
+                  ) {
+                    return { ...vv, position: vv.position - 1 };
+                  } else if (vv.position === ref.fromPosition) {
+                    return { ...vv, position: ref.position };
+                  }
+                }
+
+                return vv;
+              }),
+            }));
+            // setServers(
+            //   servers.map((v) =>
+            //     v.id == server
+            //       ? {
+            //           ...v,
+            //           list: {
+            //             ...v.list,
+            //             channel: v.list.channel.map((vv) => {
+            //               //keatas
+            //               if (ref.position < ref.fromPosition) {
+            //                 //cek antara drag dan zone keatas
+            //                 if (
+            //                   vv.position >= ref.position &&
+            //                   vv.position < ref.fromPosition
+            //                 ) {
+            //                   return { ...vv, position: vv.position + 1 };
+            //                 } else if (vv.position === ref.fromPosition) {
+            //                   return { ...vv, position: ref.position };
+            //                 }
+            //               }
+            //               //kebawah
+            //               if (ref.position > ref.fromPosition) {
+            //                 //cek antara drag dan zone kebawah
+            //                 if (
+            //                   vv.position <= ref.position &&
+            //                   vv.position > ref.fromPosition
+            //                 ) {
+            //                   return { ...vv, position: vv.position - 1 };
+            //                 } else if (vv.position === ref.fromPosition) {
+            //                   return { ...vv, position: ref.position };
+            //                 }
+            //               }
+
+            //               return vv;
+            //             }),
+            //           },
+            //         }
+            //       : v
+            //   )
+            // );
+          }
+
+          // antar category bukan 0 yang sama
+          if (ref.category == ref.fromCategory && ref.category > 0) {
+            console.log(" antar category bukan 0 yang sama");
+
+            setChannel((p) => ({
+              ...p,
+              category: p.category.map((vv) =>
+                vv.position == ref.category
+                  ? {
+                      ...vv,
+                      channel: vv.channel.map((vvv) => {
+                        if (ref.position < ref.fromPosition) {
+                          if (
+                            vvv.position >= ref.position &&
+                            vvv.position < ref.fromPosition
+                          ) {
+                            return {
+                              ...vvv,
+                              position: vvv.position + 1,
+                            };
+                          } else if (vvv.position == ref.fromPosition) {
+                            return { ...vvv, position: ref.position };
+                          }
+                        }
+
+                        if (ref.position > ref.fromPosition) {
+                          if (
+                            vvv.position <= ref.position &&
+                            vvv.position > ref.fromPosition
+                          ) {
+                            return {
+                              ...vvv,
+                              position: vvv.position - 1,
+                            };
+                          } else if (vvv.position === ref.fromPosition) {
+                            return { ...vvv, position: ref.position };
+                          }
+                        }
+                        return vvv;
+                      }),
+                    }
+                  : vv
+              ),
+            }));
+
+            // setServers(
+            //   servers.map((v) =>
+            //     v.id == server
+            //       ? {
+            //           ...v,
+            //           list: {
+            //             ...v.list,
+            //             category: v.list.category.map((vv) =>
+            //               vv.position == ref.category
+            //                 ? {
+            //                     ...vv,
+            //                     channel: vv.channel.map((vvv) => {
+            //                       if (ref.position < ref.fromPosition) {
+            //                         if (
+            //                           vvv.position >= ref.position &&
+            //                           vvv.position < ref.fromPosition
+            //                         ) {
+            //                           return {
+            //                             ...vvv,
+            //                             position: vvv.position + 1,
+            //                           };
+            //                         } else if (
+            //                           vvv.position == ref.fromPosition
+            //                         ) {
+            //                           return { ...vvv, position: ref.position };
+            //                         }
+            //                       }
+
+            //                       if (ref.position > ref.fromPosition) {
+            //                         if (
+            //                           vvv.position <= ref.position &&
+            //                           vvv.position > ref.fromPosition
+            //                         ) {
+            //                           return {
+            //                             ...vvv,
+            //                             position: vvv.position - 1,
+            //                           };
+            //                         } else if (
+            //                           vvv.position === ref.fromPosition
+            //                         ) {
+            //                           return { ...vvv, position: ref.position };
+            //                         }
+            //                       }
+            //                       return vvv;
+            //                     }),
+            //                   }
+            //                 : vv
+            //             ),
+            //           },
+            //         }
+            //       : v
+            //   )
+            // );
+          }
+
+          // antar category bukan 0 yang beda
+          if (
+            ref.category != ref.fromCategory &&
+            ref.category > 0 &&
+            ref.fromCategory > 0
+          ) {
+            console.log("antar category bukan 0 yang beda");
+            setChannel((p) => {
+              const fromCat = p.category.find(
+                (c) => c.position === ref.fromCategory
+              );
+              const newData = fromCat?.channel.find(
+                (f) => f.position === ref.fromPosition
+              );
+
+              if (!newData) return p;
+
+              return {
+                ...p,
+                category: p.category.map((vv) => {
+                  if (vv.position === ref.fromCategory) {
+                    return {
+                      ...vv,
+                      channel: vv.channel
+                        .filter((f) => f.position !== ref.fromPosition)
+                        .sort((a, b) => a.position - b.position)
+                        .map((ch, i) => ({
+                          ...ch,
+                          position: i + 1,
+                        })),
+                    };
+                  }
+
+                  if (vv.position === ref.category) {
+                    if (ref.fromCategory > ref.category) {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position >= ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
+
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position,
+                          },
+                        ],
+                      };
+                    } else {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position > ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
+
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position + 1,
+                          },
+                        ],
+                      };
+                    }
+                  }
+                  return vv;
+                }),
+              };
+            });
+
+            // setServers((serv) =>
+            //   serv.map((v) => {
+            //     if (v.id !== server) return v;
+
+            //     const fromCat = v.list.category.find(
+            //       (c) => c.position === ref.fromCategory
+            //     );
+            //     const newData = fromCat?.channel.find(
+            //       (f) => f.position === ref.fromPosition
+            //     );
+
+            //     if (!newData) return v;
+
+            //     return {
+            //       ...v,
+            //       list: {
+            //         ...v.list,
+            //         category: v.list.category.map((vv) => {
+            //           if (vv.position === ref.fromCategory) {
+            //             return {
+            //               ...vv,
+            //               channel: vv.channel
+            //                 .filter((f) => f.position !== ref.fromPosition)
+            //                 .sort((a, b) => a.position - b.position)
+            //                 .map((ch, i) => ({
+            //                   ...ch,
+            //                   position: i + 1,
+            //                 })),
+            //             };
+            //           }
+
+            //           if (vv.position === ref.category) {
+            //             if (ref.fromCategory > ref.category) {
+            //               return {
+            //                 ...vv,
+            //                 channel: [
+            //                   ...vv.channel.map((vvv) => {
+            //                     if (vvv.position >= ref.position) {
+            //                       return {
+            //                         ...vvv,
+            //                         position: vvv.position + 1,
+            //                       };
+            //                     }
+
+            //                     return vvv;
+            //                   }),
+            //                   {
+            //                     ...newData,
+            //                     position: ref.position,
+            //                   },
+            //                 ],
+            //               };
+            //             } else {
+            //               return {
+            //                 ...vv,
+            //                 channel: [
+            //                   ...vv.channel.map((vvv) => {
+            //                     if (vvv.position > ref.position) {
+            //                       return {
+            //                         ...vvv,
+            //                         position: vvv.position + 1,
+            //                       };
+            //                     }
+
+            //                     return vvv;
+            //                   }),
+            //                   {
+            //                     ...newData,
+            //                     position: ref.position + 1,
+            //                   },
+            //                 ],
+            //               };
+            //             }
+            //           }
+            //           return vv;
+            //         }),
+            //       },
+            //     };
+            //   })
+            // );
+          }
+
+          //antar category 0 dan 1
+          if (
+            ref.category != ref.fromCategory &&
+            ((ref.category == 0 && ref.fromCategory != 0) ||
+              (ref.category != 0 && ref.fromCategory == 0))
+          ) {
+            console.log("antar category 0 dan 1");
+
+            setChannel((p) => {
+              let newData: ChannelList | undefined;
+
+              if (ref.fromCategory === 0) {
+                newData = p.channel.find(
+                  (f) => f.position === ref.fromPosition
+                );
+              } else {
+                newData = p.category
+                  .find((f) => f.position === ref.fromCategory)
+                  ?.channel.find((f) => f.position === ref.fromPosition);
+              }
+
+              if (!newData) return p;
+
+              return {
+                ...p,
+                channel:
+                  ref.fromCategory === 0
+                    ? p.channel
+                        .filter((f) => f.position !== ref.fromPosition)
+                        .sort((a, b) => a.position - b.position)
+                        .map((ch, i) => ({
+                          ...ch,
+                          position: i + 1,
+                        }))
+                    : [
+                        ...p.channel.map((vv) => {
+                          if (vv.position >= ref.position) {
+                            return {
+                              ...vv,
+                              position: vv.position + 1,
+                            };
+                          }
+                          return vv;
+                        }),
+                        { ...newData, position: ref.position },
+                      ],
+                category: p.category.map((vv) => {
+                  // tambah
+                  if (ref.fromCategory === 0) {
+                    if (ref.category === vv.position) {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position > ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
+
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position + 1,
+                          },
+                        ],
+                      };
+                    }
+                  }
+                  // hapus
+                  if (ref.fromCategory !== 0) {
+                    if (ref.fromCategory == vv.position) {
+                      return {
+                        ...vv,
+                        channel: vv.channel
+                          .filter((f) => f.position !== ref.fromPosition)
+                          .sort((a, b) => a.position - b.position)
+                          .map((ch, i) => ({
+                            ...ch,
+                            position: i + 1,
+                          })),
+                      };
+                    }
+                  }
+                  return vv;
+                }),
+              };
+            });
+
+            // setServers((serv) =>
+            //   serv.map((v) => {
+            //     if (v.id !== server) return v;
+            //     let newData: ChannelList | undefined;
+
+            //     if (ref.fromCategory === 0) {
+            //       newData = v.list.channel.find(
+            //         (f) => f.position === ref.fromPosition
+            //       );
+            //     } else {
+            //       newData = v.list.category
+            //         .find((f) => f.position === ref.fromCategory)
+            //         ?.channel.find((f) => f.position === ref.fromPosition);
+            //     }
+
+            //     if (!newData) return v;
+
+            //     return {
+            //       ...v,
+            //       list: {
+            //         ...v.list,
+            //         channel:
+            //           ref.fromCategory === 0
+            //             ? v.list.channel
+            //                 .filter((f) => f.position !== ref.fromPosition)
+            //                 .sort((a, b) => a.position - b.position)
+            //                 .map((ch, i) => ({
+            //                   ...ch,
+            //                   position: i + 1,
+            //                 }))
+            //             : [
+            //                 ...v.list.channel.map((vv) => {
+            //                   if (vv.position >= ref.position) {
+            //                     return {
+            //                       ...vv,
+            //                       position: vv.position + 1,
+            //                     };
+            //                   }
+            //                   return vv;
+            //                 }),
+            //                 { ...newData, position: ref.position },
+            //               ],
+            //         category: v.list.category.map((vv) => {
+            //           // tambah
+            //           if (ref.fromCategory === 0) {
+            //             if (ref.category === vv.position) {
+            //               return {
+            //                 ...vv,
+            //                 channel: [
+            //                   ...vv.channel.map((vvv) => {
+            //                     if (vvv.position > ref.position) {
+            //                       return {
+            //                         ...vvv,
+            //                         position: vvv.position + 1,
+            //                       };
+            //                     }
+
+            //                     return vvv;
+            //                   }),
+            //                   {
+            //                     ...newData,
+            //                     position: ref.position + 1,
+            //                   },
+            //                 ],
+            //               };
+            //             }
+            //           }
+            //           // hapus
+            //           if (ref.fromCategory !== 0) {
+            //             if (ref.fromCategory == vv.position) {
+            //               return {
+            //                 ...vv,
+            //                 channel: vv.channel
+            //                   .filter((f) => f.position !== ref.fromPosition)
+            //                   .sort((a, b) => a.position - b.position)
+            //                   .map((ch, i) => ({
+            //                     ...ch,
+            //                     position: i + 1,
+            //                   })),
+            //               };
+            //             }
+            //           }
+            //           return vv;
+            //         }),
+            //       },
+            //     };
+            //   })
+            // );
+          }
+          setEnter(false);
+          props.setIsDrag(false);
         }}
         className={cn(
           "h-full absolute  w-full bg-red-500/20 ",
@@ -215,8 +766,6 @@ function ChannelBtnList(props: {
   category: number;
   whoCategory: number;
   setWhoCategory: React.Dispatch<SetStateAction<number>>;
-  channelList: ChannelList[];
-  categoryList: CategoryChannel[];
 }) {
   const Icons = props.data.type === "text" ? HashIcon : Volume2Icon;
   return (
@@ -231,8 +780,7 @@ function ChannelBtnList(props: {
             isDrag={props.isDrag}
             whoDrag={props.whoDrag}
             whoCategory={props.whoCategory}
-            channelList={props.channelList}
-            categoryList={props.categoryList}
+            setIsDrag={props.setIsDrag}
           />
         )}
       <button
@@ -262,7 +810,7 @@ function ChannelBtnList(props: {
           />
         </div>
         <span className="grow text-start min-w-0 truncate group-hover:brightness-100 brightness-60">
-          {props.data.name}
+          {props.data.name} + {props.data.position}
         </span>
 
         <TooltipDesc
@@ -290,8 +838,6 @@ function CategoryBtnSection(props: {
   setWhodrag: React.Dispatch<SetStateAction<number>>;
   whoCategory: number;
   setWhoCategory: React.Dispatch<SetStateAction<number>>;
-  channelList: ChannelList[];
-  categoryList: CategoryChannel[];
 }) {
   const [open, setOpen] = useState(true);
 
@@ -333,29 +879,28 @@ function CategoryBtnSection(props: {
             position={0}
             whoCategory={props.whoCategory}
             whoDrag={props.whoDrag}
-            channelList={props.channelList}
-            categoryList={props.categoryList}
+            setIsDrag={props.setIsdrag}
           />
         )}
       </div>
 
       {open &&
-        props.data.channel.map((v, i, a) => (
-          <ChannelBtnList
-            key={v.id}
-            data={v}
-            isDrag={props.isDrag}
-            setIsDrag={props.setIsdrag}
-            position={i + 1}
-            setWhoDrag={props.setWhodrag}
-            whoDrag={props.whoDrag}
-            category={props.data.position}
-            whoCategory={props.whoCategory}
-            setWhoCategory={props.setWhoCategory}
-            channelList={props.channelList}
-            categoryList={props.categoryList}
-          />
-        ))}
+        props.data.channel
+          .sort((a, b) => a.position - b.position)
+          .map((v, i, a) => (
+            <ChannelBtnList
+              key={v.id}
+              data={v}
+              isDrag={props.isDrag}
+              setIsDrag={props.setIsdrag}
+              position={v.position}
+              setWhoDrag={props.setWhodrag}
+              whoDrag={props.whoDrag}
+              category={props.data.position}
+              whoCategory={props.whoCategory}
+              setWhoCategory={props.setWhoCategory}
+            />
+          ))}
     </>
   );
 }

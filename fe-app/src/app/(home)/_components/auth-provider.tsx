@@ -10,7 +10,7 @@ import { serverAtom } from "../_state/server-atom";
 import { mediaAtom } from "../_state/media-atom";
 import { usePathname, useRouter } from "next/navigation";
 
-export default function AuthProvider() {
+export default function AuthProvider(props: { children: React.ReactNode }) {
   const [loadingCount, setLoadingCount] = useState(3);
   const [user, setUser] = useAtom(userAtom);
   const [friend, setFriend] = useAtom(friendAtom);
@@ -203,5 +203,5 @@ export default function AuthProvider() {
     return <div className="h-screen w-screen">Loading ...</div>;
   }
 
-  return null;
+  return props.children;
 }
