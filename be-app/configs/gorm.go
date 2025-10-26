@@ -50,6 +50,8 @@ func NewDB() *gorm.DB {
 	// 	&textchatuser.TextChatUser{},
 	// 	&server.Server{},
 	// 	&joinserver.JoinServer{},
+	// 	&categorychannel.CategoryChannel{},
+	// 	&channel.Channel{},
 	// )
 
 	// db.AutoMigrate(
@@ -60,6 +62,8 @@ func NewDB() *gorm.DB {
 	// 	&textchatuser.TextChatUser{},
 	// 	&server.Server{},
 	// 	&joinserver.JoinServer{},
+	// 	&categorychannel.CategoryChannel{},
+	// 	&channel.Channel{},
 	// )
 
 	return db

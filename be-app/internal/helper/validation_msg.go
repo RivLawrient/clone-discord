@@ -29,6 +29,8 @@ func ValidationMsg(err error) map[string]string {
 				errors[field] = fmt.Sprintf("%s must be numeric", field)
 			case "unique_username":
 				errors[field] = fmt.Sprintf("%s already taken", field)
+			case "uuid":
+				errors[field] = fmt.Sprintf("%s must be a uuid", field)
 			default:
 				errors[field] = fmt.Sprintf("%s is invalid", field)
 			}

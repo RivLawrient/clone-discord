@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 export default async function Layout(props: { children: React.ReactNode }) {
   const cookie = await cookies();
 
-  console.log(cookie.get("token"));
   if (cookie.get("token")) redirect("/");
   return (
     <div

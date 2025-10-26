@@ -1,81 +1,36 @@
 package grouping
 
 import (
+	categorychannel "be-app/internal/app/domain/category_channel"
+	"be-app/internal/app/domain/channel"
 	joinserver "be-app/internal/app/domain/join_server"
 	"be-app/internal/app/domain/server"
 	"be-app/internal/dto"
+	"be-app/internal/errs"
+	"be-app/internal/helper"
 	"fmt"
-	"time"
+	"log"
 
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
 type Controller struct {
-	DB             *gorm.DB
-	ServerRepo     server.Repo
-	JoinServerRepo joinserver.Repo
+	DB                  *gorm.DB
+	ServerRepo          server.Repo
+	JoinServerRepo      joinserver.Repo
+	CategoryChannelRepo categorychannel.Repo
+	ChannelRepo         channel.Repo
 }
 
-func NewController(db *gorm.DB, serverRepo server.Repo, joinServerRepo joinserver.Repo) Controller {
+func NewController(db *gorm.DB, serverRepo server.Repo, joinServerRepo joinserver.Repo, categoryChannelRepo categorychannel.Repo, channelRepo channel.Repo) Controller {
 	return Controller{
-		DB:             db,
-		ServerRepo:     serverRepo,
-		JoinServerRepo: joinServerRepo,
+		DB:                  db,
+		ServerRepo:          serverRepo,
+		JoinServerRepo:      joinServerRepo,
+		CategoryChannelRepo: categoryChannelRepo,
+		ChannelRepo:         channelRepo,
 	}
-}
-
-func (c Controller) GenerateFiveServer(userid string) error {
-	tx := c.DB.Begin()
-	defer tx.Rollback()
-
-	data := []*server.Server{
-		{
-			ID:   uuid.New().String(),
-			Name: "AServer Alpha",
-		},
-		{
-			ID:   uuid.New().String(),
-			Name: "BServer Beta",
-		},
-		{
-			ID:   uuid.New().String(),
-			Name: "GServer Gamma",
-		},
-		{
-			ID:   uuid.New().String(),
-			Name: "DServer Delta",
-		},
-		{
-			ID:   uuid.New().String(),
-			Name: "OServer Omega",
-		},
-	}
-
-	if err := c.ServerRepo.NewBatchServer(tx, data); err != nil {
-		return err
-	}
-
-	var joins []*joinserver.JoinServer
-	for _, s := range data {
-		joins = append(joins, &joinserver.JoinServer{
-			ID:       uuid.New().String(),
-			UserId:   userid,
-			ServerId: s.ID,
-			// Position:  i, // misalnya urut 1-5
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
-		})
-	}
-
-	if err := c.JoinServerRepo.JoinBatchNewServer(tx, joins); err != nil {
-		return err
-	}
-
-	if err := tx.Commit().Error; err != nil {
-		return err
-	}
-	return nil
 }
 
 // make new server & save to your join_server
@@ -83,21 +38,30 @@ func (c Controller) CreateServer(userId string, nameServer string, imageId strin
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
+	code, _ := helper.GenerateRandomString(8)
+
 	data := server.Server{
 		ID:           uuid.NewString(),
 		Name:         nameServer,
 		ProfileImage: imageId,
+		InviteCode:   code,
 	}
 
 	if err := c.ServerRepo.NewServer(tx, &data); err != nil {
 		return nil, err
 	}
 
+	pos, errs := c.JoinServerRepo.GetLastPositionByUserID(tx, userId)
+	if errs != nil {
+		return nil, errs
+	}
+
 	dataJoin := joinserver.JoinServer{
 		ID:       uuid.NewString(),
 		UserId:   userId,
 		ServerId: data.ID,
-		// Position: ,
+		Position: pos + 1,
+		IsOwner:  true,
 	}
 	if err := c.JoinServerRepo.JoinNewServer(tx, &dataJoin); err != nil {
 		return nil, err
@@ -111,7 +75,9 @@ func (c Controller) CreateServer(userId string, nameServer string, imageId strin
 		ID:           data.ID,
 		Name:         data.Name,
 		ProfileImage: data.ProfileImage,
+		InviteCode:   data.InviteCode,
 		Position:     dataJoin.Position,
+		IsOwner:      dataJoin.IsOwner,
 	}, nil
 }
 
@@ -219,4 +185,358 @@ func (c Controller) UpdateJoinServerPosition(userId, joinServerId string, newPos
 	}
 
 	return data, nil
+}
+
+func (c Controller) GetServerByCode(user_id string, code string) (*dto.ServerInvite, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	data := dto.ServerInvite{}
+
+	if err := c.ServerRepo.ServerInviteByCode(tx, code, &data); err != nil {
+		return nil, err
+	}
+
+	status, err := c.JoinServerRepo.GetAlreadyJoin(tx, user_id, data.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	if status {
+		return &data, errs.ErrAlreadyJoinServer
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &data, nil
+}
+
+func (c Controller) JoinServer(user_id string, server_id string) (*dto.ServerList, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	data := server.Server{}
+	if err := c.ServerRepo.GetById(tx, server_id, &data); err != nil {
+		return nil, err
+	}
+
+	status, err := c.JoinServerRepo.GetAlreadyJoin(tx, user_id, server_id)
+	if err != nil {
+		return nil, err
+	}
+
+	if status {
+		return nil, errs.ErrAlreadyJoinServer
+	}
+
+	pos, errs := c.JoinServerRepo.GetLastPositionByUserID(tx, user_id)
+	if errs != nil {
+		return nil, errs
+	}
+
+	dataJoin := joinserver.JoinServer{
+		ID:       uuid.NewString(),
+		UserId:   user_id,
+		ServerId: server_id,
+		Position: pos + 1,
+	}
+
+	if err := c.JoinServerRepo.JoinNewServer(tx, &dataJoin); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &dto.ServerList{
+		ID:           data.ID,
+		Name:         data.Name,
+		ProfileImage: data.ProfileImage,
+		InviteCode:   data.InviteCode,
+		Position:     dataJoin.Position,
+	}, nil
+}
+
+func (c Controller) CreateCategoryChannel(userId string, serverId string, name string) (*categorychannel.CategoryChannel, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	joinServer := new(joinserver.JoinServer)
+	if err := c.JoinServerRepo.GetById(tx, serverId, userId, joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	lastPos, err := c.CategoryChannelRepo.GetLastPostitionByServerId(tx, joinServer.ServerId)
+	if err != nil {
+		return nil, err
+	}
+
+	newCategory := categorychannel.CategoryChannel{
+		ID:       uuid.NewString(),
+		ServerId: joinServer.ServerId,
+		Name:     name,
+		Position: lastPos + 1,
+	}
+
+	if err := c.CategoryChannelRepo.NewCategory(tx, &newCategory); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &categorychannel.CategoryChannel{
+		ID:        newCategory.ID,
+		ServerId:  newCategory.ServerId,
+		Name:      newCategory.Name,
+		Position:  newCategory.Position,
+		CreatedAt: newCategory.CreatedAt,
+		UpdatedAt: newCategory.UpdatedAt,
+	}, nil
+}
+
+// harus hitung ulang position
+func (c Controller) DeleteCategoryChannel(userId string, categoryId string) (*categorychannel.CategoryChannel, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	categoryChannel := new(categorychannel.CategoryChannel)
+	if err := c.CategoryChannelRepo.GetById(tx, categoryId, categoryChannel); err != nil {
+		return nil, err
+	}
+
+	joinServer := new(joinserver.JoinServer)
+	if err := c.JoinServerRepo.GetById(tx, categoryChannel.ServerId, userId, joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	if err := c.CategoryChannelRepo.RemoveById(tx, categoryId); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return categoryChannel, nil
+}
+
+func (c Controller) CreateChannel(userId string, serverId string, name string, isVoice bool, categoryId *string) (*channel.Channel, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	joinServer := new(joinserver.JoinServer)
+	if err := c.JoinServerRepo.GetById(tx, serverId, userId, joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	lastPost, err := c.ChannelRepo.GetLastPostitionByServerId(tx, serverId, categoryId)
+	if err != nil {
+		return nil, err
+	}
+
+	newChannel := channel.Channel{
+		ID:                uuid.NewString(),
+		ServerId:          serverId,
+		CategoryChannelId: categoryId,
+		Name:              name,
+		Position:          lastPost + 1,
+		IsVoice:           isVoice,
+	}
+
+	if err := c.ChannelRepo.NewServer(tx, &newChannel); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &newChannel, nil
+}
+
+// harus hitung ulang position
+func (c Controller) DeleteChannel(userId string, channelId string) (*channel.Channel, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	channel := new(channel.Channel)
+	if err := c.ChannelRepo.GetById(tx, channelId, channel); err != nil {
+		return nil, err
+	}
+
+	joinServer := new(joinserver.JoinServer)
+	if err := c.JoinServerRepo.GetById(tx, channel.ServerId, userId, joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	if err := c.ChannelRepo.RemoveById(tx, channelId); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return channel, nil
+
+}
+
+func (c Controller) GetChannelAndCategory(serverId string) (*dto.ChannelCategory, error) {
+	tx := c.DB.Begin()
+	defer func() {
+		if r := recover(); r != nil {
+			tx.Rollback()
+		}
+	}()
+	defer tx.Rollback()
+
+	// Ambil semua channel
+	var channels []channel.Channel
+	if err := c.ChannelRepo.GetListByServerId(tx, serverId, &channels); err != nil {
+		return nil, err
+	}
+
+	// Ambil semua category
+	var categories []categorychannel.CategoryChannel
+	if err := c.CategoryChannelRepo.GetListByServerId(tx, serverId, &categories); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	// Siapkan hasil
+	result := dto.ChannelCategory{
+		Channel:  []dto.ChannelList{},
+		Category: []dto.CategoryChannel{},
+	}
+
+	// 1️⃣ Map category ke DTO
+	for _, cat := range categories {
+		catDTO := dto.CategoryChannel{
+			ID:       cat.ID,
+			Name:     cat.Name,
+			Position: cat.Position,
+			Channel:  []dto.ChannelList{},
+		}
+
+		// ambil semua channel yang punya CategoryChannelId == cat.ID
+		for _, ch := range channels {
+			if ch.CategoryChannelId != nil && *ch.CategoryChannelId == cat.ID {
+				catDTO.Channel = append(catDTO.Channel, dto.ChannelList{
+					ID:       ch.ID,
+					Name:     ch.Name,
+					IsVoice:  ch.IsVoice, // typo kamu ya, sebaiknya "IsVoice"
+					Position: ch.Position,
+				})
+			}
+		}
+
+		result.Category = append(result.Category, catDTO)
+	}
+
+	// 2️⃣ Channel yang tidak punya kategori (CategoryChannelId == nil)
+	for _, ch := range channels {
+		if ch.CategoryChannelId == nil {
+			result.Channel = append(result.Channel, dto.ChannelList{
+				ID:       ch.ID,
+				Name:     ch.Name,
+				IsVoice:  ch.IsVoice,
+				Position: ch.Position,
+			})
+		}
+	}
+
+	return &result, nil
+}
+
+func (c Controller) ReorderChannel(userId string, serverId string, req dto.ReorderChannelRequest) (error, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	joinServer := new(joinserver.JoinServer)
+	if err := c.JoinServerRepo.GetById(tx, serverId, userId, joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	if req.ToCategory == 0 && req.FromCategory == 0 {
+		log.Println("// antar category 0")
+		channelList := new([]channel.Channel)
+		c.ChannelRepo.GetListByServerIdWithoutCategory(tx, serverId, channelList)
+
+		newList := []channel.Channel{}
+		for _, v := range *channelList {
+			if req.ToPosition < req.FromPosition {
+				if v.Position >= req.ToPosition && v.Position < req.FromPosition {
+					v.Position = v.Position + 1
+					newList = append(newList, v)
+					continue
+				} else if v.Position == req.FromPosition {
+					v.Position = req.ToPosition
+					newList = append(newList, v)
+					continue
+				}
+			}
+
+			if req.ToPosition > req.FromPosition {
+				if v.Position <= req.ToPosition && v.Position > req.FromPosition {
+					v.Position = v.Position - 1
+					newList = append(newList, v)
+					continue
+				} else if v.Position == req.FromPosition {
+					v.Position = req.ToPosition
+					newList = append(newList, v)
+					continue
+				}
+			}
+
+			newList = append(newList, v)
+		}
+
+		
+	}
+
+	if req.ToCategory == req.FromCategory && req.ToCategory > 0 {
+		log.Println("// antar category bukan 0 yang sama")
+	}
+
+	if req.ToCategory != req.FromCategory && req.ToCategory > 0 && req.FromCategory > 0 {
+		log.Println("// antar category bukan 0 yang beda")
+	}
+
+	if req.ToCategory != req.FromCategory && ((req.ToCategory == 0 && req.FromCategory != 0) || (req.ToCategory != 0 && req.FromCategory == 0)) {
+		log.Println("//antar category 0 dan 1")
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }

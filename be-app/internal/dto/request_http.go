@@ -39,3 +39,22 @@ type NewServerRequest struct {
 	Name         string                `form:"name" validate:"required"`
 	ProfileImage *multipart.FileHeader `form:"profile_image"`
 }
+
+type CreateCategoryChannelRequest struct {
+	ServerId string `json:"server_id" validate:"required,uuid"`
+	Name     string `json:"name" validate:"required"`
+}
+
+type CreateChannelRequest struct {
+	ServerId   string  `json:"server_id" validate:"required,uuid"`
+	Name       string  `json:"name" validate:"required"`
+	IsVoice    bool    `json:"is_voice"`
+	CategoryId *string `json:"category_id"`
+}
+
+type ReorderChannelRequest struct {
+	FromCategory int `json:"from_category" validate:"required,min=0"`
+	FromPosition int `json:"from_position" validate:"required,min=1"`
+	ToCategory   int `json:"to_category" validate:"required,min=0"`
+	ToPosition   int `json:"to_position" validate:"required,min=1"`
+}

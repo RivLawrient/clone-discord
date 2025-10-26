@@ -16,7 +16,7 @@ import { ModalInviteFriend } from "./modal-invite-friend";
 export function DropdownServerInnerSidebar() {
   const [servers] = useAtom(serverAtom);
   const { server } = useParams();
-  const currentServer = servers && servers.find((v) => v.id === server);
+  const currentServer = servers.find((v) => v.id === server);
   const [open, setOpen] = useState(false);
   const Icon = open ? XIcon : ChevronDownIcon;
   const [openInvite, setOpenInvite] = useState(false);

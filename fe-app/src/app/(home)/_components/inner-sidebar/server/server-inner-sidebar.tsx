@@ -1,6 +1,6 @@
 import { DropdownServerInnerSidebar } from "./dropdown-server-inner-sidebar";
 import MainSectionInnerSidebar from "./main-section-inner-sidebar";
-import { RightClickMenuMainSection } from "./right-click-menu-main-section";
+import { RightClickMenuMainSection } from "./right-click-menu";
 
 export default function ServerInnerSidebar() {
   return (

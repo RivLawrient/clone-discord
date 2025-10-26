@@ -52,7 +52,6 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 	if err != nil {
 		return nil, err
 	}
-
 	users := user.User{
 		ID:       uuid.NewString(),
 		Email:    request.Email,

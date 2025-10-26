@@ -61,5 +61,34 @@ type ServerList struct {
 	ID           string `json:"id"`
 	Name         string `json:"name"`
 	ProfileImage string `json:"profile_image"`
+	InviteCode   string `json:"invite_code"`
 	Position     int    `json:"position"`
+	IsOwner      bool   `json:"is_owner"`
+}
+
+type ServerInvite struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	ProfileImage string `json:"profile_image"`
+	TotalOnline  int    `json:"total_online"`
+	TotalMember  int    `json:"total_member"`
+}
+
+type ChannelList struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	IsVoice  bool   `json:"is_voice"`
+	Position int    `json:"position"`
+}
+
+type CategoryChannel struct {
+	ID       string        `json:"id"`
+	Name     string        `json:"name"`
+	Position int           `json:"position"`
+	Channel  []ChannelList `json:"channel"`
+}
+
+type ChannelCategory struct {
+	Channel  []ChannelList     `json:"channel"`
+	Category []CategoryChannel `json:"category"`
 }

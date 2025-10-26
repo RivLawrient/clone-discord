@@ -2,7 +2,7 @@ import { atom } from "jotai";
 
 export type ChannelList = {
   id: string;
-  type: "text" | "voice";
+  is_voice: boolean;
   name: string;
   position: number;
 };

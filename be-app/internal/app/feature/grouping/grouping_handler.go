@@ -2,7 +2,9 @@ package grouping
 
 import (
 	"be-app/internal/dto"
+	"be-app/internal/errs"
 	"be-app/internal/helper"
+	"errors"
 	"log"
 	"os"
 	"path/filepath"
@@ -36,10 +38,9 @@ func (h Handler) CreateServerHandler(c *fiber.Ctx) error {
 		})
 	}
 	file, _ := c.FormFile("profile_image")
-	log.Println(file)
-
 	request.ProfileImage = file
 	var image_id = ""
+
 	// kalau ada image langsung simpan
 	log.Println(request.ProfileImage)
 	if request.ProfileImage != nil {
@@ -73,21 +74,6 @@ func (h Handler) CreateServerHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ServerList]{
 		Message: "success create server",
 		Data:    *result,
-	})
-}
-
-func (h Handler) GenerateFiveServerHandler(c *fiber.Ctx) error {
-	user_id := c.Locals("user_id").(string)
-
-	if err := h.Controller.GenerateFiveServer(user_id); err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
-			Message: err.Error(),
-		})
-	}
-
-	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
-		Message: "success send text chat",
-		Data:    "success",
 	})
 }
 
@@ -129,5 +115,201 @@ func (h Handler) UpdatePositionServerHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
 		Message: "success send text chat",
 		Data:    data,
+	})
+}
+
+func (h Handler) GetServerByCodeHandler(c *fiber.Ctx) error {
+	user_id := c.Locals("user_id").(string)
+	code := c.Params("code")
+
+	data, err := h.Controller.GetServerByCode(user_id, code)
+	if err != nil {
+		if errors.Is(err, errs.ErrServerNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrAlreadyJoinServer) {
+			// c.Redirect("/channels/" + data.ID)
+			return c.Status(fiber.StatusConflict).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+				Data: fiber.Map{
+					"redirect": "/channels/" + data.ID,
+				},
+			})
+		}
+
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "success get server",
+		Data:    data,
+	})
+}
+
+func (h Handler) JoinServerHandler(c *fiber.Ctx) error {
+	user_id := c.Locals("user_id").(string)
+	server_id := c.Params("server_id")
+
+	data, err := h.Controller.JoinServer(user_id, server_id)
+	if err != nil {
+		if errors.Is(err, errs.ErrAlreadyJoinServer) {
+			return c.Status(fiber.StatusConflict).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+				Data: fiber.Map{
+					"redirect": "/channels/" + data.ID,
+				},
+			})
+		}
+
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "success join server",
+		Data:    data,
+	})
+}
+
+func (h Handler) CreateCategoryChannelHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	request := new(dto.CreateCategoryChannelRequest)
+	c.BodyParser(request)
+
+	if err := h.Validate.Struct(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	data, err := h.Controller.CreateCategoryChannel(userId, request.ServerId, request.Name)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.CategoryChannel]{
+		Message: "success create category channel",
+		Data: dto.CategoryChannel{
+			ID:       data.ID,
+			Name:     data.Name,
+			Position: data.Position,
+			Channel:  []dto.ChannelList{},
+		},
+	})
+}
+
+func (h Handler) DeleteCategoryChannelHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	cateogryId := c.Params("category_id")
+
+	data, err := h.Controller.DeleteCategoryChannel(userId, cateogryId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.CategoryChannel]{
+		Message: "success delete category channel",
+		Data: dto.CategoryChannel{
+			ID:       data.ID,
+			Name:     data.Name,
+			Position: data.Position,
+			Channel:  []dto.ChannelList{},
+		},
+	})
+}
+
+func (h Handler) CreateChannelHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	request := new(dto.CreateChannelRequest)
+	c.BodyParser(request)
+
+	if err := h.Validate.Struct(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	data, err := h.Controller.CreateChannel(userId, request.ServerId, request.Name, request.IsVoice, request.CategoryId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelList]{
+		Message: "success create channel",
+		Data: dto.ChannelList{
+			ID:       data.ID,
+			Name:     data.Name,
+			IsVoice:  data.IsVoice,
+			Position: data.Position,
+		},
+	})
+}
+
+func (h Handler) DeleteChannelHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	channel_id := c.Params("channel_id")
+
+	data, err := h.Controller.DeleteChannel(userId, channel_id)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelList]{
+		Message: "success delete channel",
+		Data: dto.ChannelList{
+			ID:       data.ID,
+			Name:     data.Name,
+			IsVoice:  data.IsVoice,
+			Position: data.Position,
+		},
+	})
+}
+
+func (h Handler) GetChannelAndCategoryHandler(c *fiber.Ctx) error {
+	serverId := c.Params("server_id")
+
+	data, err := h.Controller.GetChannelAndCategory(serverId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelCategory]{
+		Message: "success delete category channel",
+		Data:    *data,
+	})
+}
+
+func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+	serverId := c.Params("server_id")
+	request := new(dto.ReorderChannelRequest)
+	c.BodyParser(request)
+
+	if _, err := h.Controller.ReorderChannel(userId, serverId, *request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelCategory]{
+		Message: "success delete category channel",
 	})
 }
