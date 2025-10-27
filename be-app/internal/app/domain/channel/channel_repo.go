@@ -48,7 +48,7 @@ func (r Repo) RemoveById(db *gorm.DB, id string) error {
 }
 
 func (r Repo) GetListByServerId(db *gorm.DB, serverId string, channel *[]Channel) error {
-	return db.Where("server_id = ?", serverId).Find(channel).Error
+	return db.Where("server_id = ?", serverId).Find(channel).Order("position").Error
 }
 
 func (r Repo) GetListByServerIdWithoutCategory(db *gorm.DB, serverId string, channel *[]Channel) error {
@@ -60,7 +60,7 @@ func (r Repo) ReorderPositionBatch(db *gorm.DB, serverId string, channel *[]Chan
 		return nil
 	}
 
-	query := "UPDATE join_servers SET position = CASE"
+	query := "UPDATE channel SET position = CASE"
 	ids := make([]string, 0, len(*channel))
 
 	for _, j := range *channel {
@@ -70,5 +70,11 @@ func (r Repo) ReorderPositionBatch(db *gorm.DB, serverId string, channel *[]Chan
 
 	query += fmt.Sprintf(" END WHERE id IN (%s)", strings.Join(ids, ","))
 
+	fmt.Println(query)
 	return db.Exec(query).Error
+	// return nil
+}
+
+func (r Repo) GetByPositionAndServerIdOnCategory(db *gorm.DB, serverId string, categoryId string, position int, channel *Channel) error {
+	return db.Where("server_id = ? AND category_channel_id = ? AND position = ?", serverId, categoryId, position).First(channel).Error
 }

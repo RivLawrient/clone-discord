@@ -303,7 +303,8 @@ func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 	request := new(dto.ReorderChannelRequest)
 	c.BodyParser(request)
 
-	if _, err := h.Controller.ReorderChannel(userId, serverId, *request); err != nil {
+	_, err := h.Controller.ReorderChannel(userId, serverId, *request)
+	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 			Message: err.Error(),
 		})
@@ -311,5 +312,6 @@ func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelCategory]{
 		Message: "success delete category channel",
+		// Data:    *data,
 	})
 }

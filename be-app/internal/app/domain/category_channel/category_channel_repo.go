@@ -40,3 +40,18 @@ func (r Repo) RemoveById(db *gorm.DB, id string) error {
 func (r Repo) GetListByServerId(db *gorm.DB, serverId string, categoryChannel *[]CategoryChannel) error {
 	return db.Where("server_id = ?", serverId).Find(categoryChannel).Error
 }
+
+func (r Repo) GetIdByPositionAndServerId(db *gorm.DB, serverId string, position int) (string, error) {
+	var id string
+	err := db.
+		Model(&CategoryChannel{}).
+		Select("id").
+		Where("server_id = ? AND position = ?", serverId, position).
+		Scan(&id).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}
