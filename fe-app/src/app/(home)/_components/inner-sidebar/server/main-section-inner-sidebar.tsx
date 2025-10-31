@@ -133,263 +133,263 @@ function DragZone(props: {
               fromCategory: props.whoCategory,
             };
           }
-          console.log(ref);
+          // console.log(ref);
 
           // antar category 0
-          // if (ref.category == 0 && ref.fromCategory == 0) {
-          //   console.log("antar category 0");
-          //   setChannel((p) => ({
-          //     ...p,
-          //     channel: p.channel.map((vv) => {
-          //       //keatas
-          //       if (ref.position < ref.fromPosition) {
-          //         //cek antara drag dan zone keatas
-          //         if (
-          //           vv.position >= ref.position &&
-          //           vv.position < ref.fromPosition
-          //         ) {
-          //           return { ...vv, position: vv.position + 1 };
-          //         } else if (vv.position === ref.fromPosition) {
-          //           return { ...vv, position: ref.position };
-          //         }
-          //       }
-          //       //kebawah
-          //       if (ref.position > ref.fromPosition) {
-          //         //cek antara drag dan zone kebawah
-          //         if (
-          //           vv.position <= ref.position &&
-          //           vv.position > ref.fromPosition
-          //         ) {
-          //           return { ...vv, position: vv.position - 1 };
-          //         } else if (vv.position === ref.fromPosition) {
-          //           return { ...vv, position: ref.position };
-          //         }
-          //       }
+          if (ref.category == 0 && ref.fromCategory == 0) {
+            console.log("antar category 0");
+            setChannel((p) => ({
+              ...p,
+              channel: p.channel.map((vv) => {
+                //keatas
+                if (ref.position < ref.fromPosition) {
+                  //cek antara drag dan zone keatas
+                  if (
+                    vv.position >= ref.position &&
+                    vv.position < ref.fromPosition
+                  ) {
+                    return { ...vv, position: vv.position + 1 };
+                  } else if (vv.position === ref.fromPosition) {
+                    return { ...vv, position: ref.position };
+                  }
+                }
+                //kebawah
+                if (ref.position > ref.fromPosition) {
+                  //cek antara drag dan zone kebawah
+                  if (
+                    vv.position <= ref.position &&
+                    vv.position > ref.fromPosition
+                  ) {
+                    return { ...vv, position: vv.position - 1 };
+                  } else if (vv.position === ref.fromPosition) {
+                    return { ...vv, position: ref.position };
+                  }
+                }
 
-          //       return vv;
-          //     }),
-          //   }));
-          // }
+                return vv;
+              }),
+            }));
+          }
 
-          // // antar category bukan 0 yang sama
-          // if (ref.category == ref.fromCategory && ref.category > 0) {
-          //   console.log(" antar category bukan 0 yang sama");
+          // antar category bukan 0 yang sama
+          if (ref.category == ref.fromCategory && ref.category > 0) {
+            console.log(" antar category bukan 0 yang sama");
 
-          //   setChannel((p) => ({
-          //     ...p,
-          //     category: p.category.map((vv) =>
-          //       vv.position == ref.category
-          //         ? {
-          //             ...vv,
-          //             channel: vv.channel.map((vvv) => {
-          //               if (ref.position < ref.fromPosition) {
-          //                 if (
-          //                   vvv.position >= ref.position &&
-          //                   vvv.position < ref.fromPosition
-          //                 ) {
-          //                   return {
-          //                     ...vvv,
-          //                     position: vvv.position + 1,
-          //                   };
-          //                 } else if (vvv.position == ref.fromPosition) {
-          //                   return { ...vvv, position: ref.position };
-          //                 }
-          //               }
+            setChannel((p) => ({
+              ...p,
+              category: p.category.map((vv) =>
+                vv.position == ref.category
+                  ? {
+                      ...vv,
+                      channel: vv.channel.map((vvv) => {
+                        if (ref.position < ref.fromPosition) {
+                          if (
+                            vvv.position >= ref.position &&
+                            vvv.position < ref.fromPosition
+                          ) {
+                            return {
+                              ...vvv,
+                              position: vvv.position + 1,
+                            };
+                          } else if (vvv.position == ref.fromPosition) {
+                            return { ...vvv, position: ref.position };
+                          }
+                        }
 
-          //               if (ref.position > ref.fromPosition) {
-          //                 if (
-          //                   vvv.position <= ref.position &&
-          //                   vvv.position > ref.fromPosition
-          //                 ) {
-          //                   return {
-          //                     ...vvv,
-          //                     position: vvv.position - 1,
-          //                   };
-          //                 } else if (vvv.position === ref.fromPosition) {
-          //                   return { ...vvv, position: ref.position };
-          //                 }
-          //               }
-          //               return vvv;
-          //             }),
-          //           }
-          //         : vv
-          //     ),
-          //   }));
-          // }
+                        if (ref.position > ref.fromPosition) {
+                          if (
+                            vvv.position <= ref.position &&
+                            vvv.position > ref.fromPosition
+                          ) {
+                            return {
+                              ...vvv,
+                              position: vvv.position - 1,
+                            };
+                          } else if (vvv.position === ref.fromPosition) {
+                            return { ...vvv, position: ref.position };
+                          }
+                        }
+                        return vvv;
+                      }),
+                    }
+                  : vv
+              ),
+            }));
+          }
 
-          // // antar category bukan 0 yang beda
-          // if (
-          //   ref.category != ref.fromCategory &&
-          //   ref.category > 0 &&
-          //   ref.fromCategory > 0
-          // ) {
-          //   console.log("antar category bukan 0 yang beda");
-          //   setChannel((p) => {
-          //     const fromCat = p.category.find(
-          //       (c) => c.position === ref.fromCategory
-          //     );
-          //     const newData = fromCat?.channel.find(
-          //       (f) => f.position === ref.fromPosition
-          //     );
+          // antar category bukan 0 yang beda
+          if (
+            ref.category != ref.fromCategory &&
+            ref.category > 0 &&
+            ref.fromCategory > 0
+          ) {
+            console.log("antar category bukan 0 yang beda");
+            setChannel((p) => {
+              const fromCat = p.category.find(
+                (c) => c.position === ref.fromCategory
+              );
+              const newData = fromCat?.channel.find(
+                (f) => f.position === ref.fromPosition
+              );
 
-          //     if (!newData) return p;
+              if (!newData) return p;
 
-          //     return {
-          //       ...p,
-          //       category: p.category.map((vv) => {
-          //         if (vv.position === ref.fromCategory) {
-          //           return {
-          //             ...vv,
-          //             channel: vv.channel
-          //               .filter((f) => f.position !== ref.fromPosition)
-          //               .sort((a, b) => a.position - b.position)
-          //               .map((ch, i) => ({
-          //                 ...ch,
-          //                 position: i + 1,
-          //               })),
-          //           };
-          //         }
+              return {
+                ...p,
+                category: p.category.map((vv) => {
+                  if (vv.position === ref.fromCategory) {
+                    return {
+                      ...vv,
+                      channel: vv.channel
+                        .filter((f) => f.position !== ref.fromPosition)
+                        .sort((a, b) => a.position - b.position)
+                        .map((ch, i) => ({
+                          ...ch,
+                          position: i + 1,
+                        })),
+                    };
+                  }
 
-          //         if (vv.position === ref.category) {
-          //           if (ref.fromCategory > ref.category) {
-          //             return {
-          //               ...vv,
-          //               channel: [
-          //                 ...vv.channel.map((vvv) => {
-          //                   if (vvv.position >= ref.position) {
-          //                     return {
-          //                       ...vvv,
-          //                       position: vvv.position + 1,
-          //                     };
-          //                   }
+                  if (vv.position === ref.category) {
+                    if (ref.fromCategory > ref.category) {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position >= ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
 
-          //                   return vvv;
-          //                 }),
-          //                 {
-          //                   ...newData,
-          //                   position: ref.position,
-          //                 },
-          //               ],
-          //             };
-          //           } else {
-          //             return {
-          //               ...vv,
-          //               channel: [
-          //                 ...vv.channel.map((vvv) => {
-          //                   if (vvv.position > ref.position) {
-          //                     return {
-          //                       ...vvv,
-          //                       position: vvv.position + 1,
-          //                     };
-          //                   }
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position,
+                          },
+                        ],
+                      };
+                    } else {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position > ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
 
-          //                   return vvv;
-          //                 }),
-          //                 {
-          //                   ...newData,
-          //                   position: ref.position + 1,
-          //                 },
-          //               ],
-          //             };
-          //           }
-          //         }
-          //         return vv;
-          //       }),
-          //     };
-          //   });
-          // }
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position + 1,
+                          },
+                        ],
+                      };
+                    }
+                  }
+                  return vv;
+                }),
+              };
+            });
+          }
 
-          // //antar category 0 dan 1
-          // if (
-          //   ref.category != ref.fromCategory &&
-          //   ((ref.category == 0 && ref.fromCategory != 0) ||
-          //     (ref.category != 0 && ref.fromCategory == 0))
-          // ) {
-          //   console.log("antar category 0 dan 1");
+          //antar category 0 dan 1
+          if (
+            ref.category != ref.fromCategory &&
+            ((ref.category == 0 && ref.fromCategory != 0) ||
+              (ref.category != 0 && ref.fromCategory == 0))
+          ) {
+            console.log("antar category 0 dan 1");
 
-          //   setChannel((p) => {
-          //     let newData: ChannelList | undefined;
+            setChannel((p) => {
+              let newData: ChannelList | undefined;
 
-          //     if (ref.fromCategory === 0) {
-          //       newData = p.channel.find(
-          //         (f) => f.position === ref.fromPosition
-          //       );
-          //     } else {
-          //       newData = p.category
-          //         .find((f) => f.position === ref.fromCategory)
-          //         ?.channel.find((f) => f.position === ref.fromPosition);
-          //     }
+              if (ref.fromCategory === 0) {
+                newData = p.channel.find(
+                  (f) => f.position === ref.fromPosition
+                );
+              } else {
+                newData = p.category
+                  .find((f) => f.position === ref.fromCategory)
+                  ?.channel.find((f) => f.position === ref.fromPosition);
+              }
 
-          //     if (!newData) return p;
+              if (!newData) return p;
 
-          //     return {
-          //       ...p,
-          //       channel:
-          //         ref.fromCategory === 0
-          //           ? p.channel
-          //               .filter((f) => f.position !== ref.fromPosition)
-          //               .sort((a, b) => a.position - b.position)
-          //               .map((ch, i) => ({
-          //                 ...ch,
-          //                 position: i + 1,
-          //               }))
-          //           : [
-          //               ...p.channel.map((vv) => {
-          //                 if (vv.position >= ref.position) {
-          //                   return {
-          //                     ...vv,
-          //                     position: vv.position + 1,
-          //                   };
-          //                 }
-          //                 return vv;
-          //               }),
-          //               { ...newData, position: ref.position },
-          //             ],
-          //       category: p.category.map((vv) => {
-          //         // tambah
-          //         if (ref.fromCategory === 0) {
-          //           if (ref.category === vv.position) {
-          //             return {
-          //               ...vv,
-          //               channel: [
-          //                 ...vv.channel.map((vvv) => {
-          //                   if (vvv.position > ref.position) {
-          //                     return {
-          //                       ...vvv,
-          //                       position: vvv.position + 1,
-          //                     };
-          //                   }
+              return {
+                ...p,
+                channel:
+                  ref.fromCategory === 0
+                    ? p.channel
+                        .filter((f) => f.position !== ref.fromPosition)
+                        .sort((a, b) => a.position - b.position)
+                        .map((ch, i) => ({
+                          ...ch,
+                          position: i + 1,
+                        }))
+                    : [
+                        ...p.channel.map((vv) => {
+                          if (vv.position >= ref.position) {
+                            return {
+                              ...vv,
+                              position: vv.position + 1,
+                            };
+                          }
+                          return vv;
+                        }),
+                        { ...newData, position: ref.position },
+                      ],
+                category: p.category.map((vv) => {
+                  // tambah
+                  if (ref.fromCategory === 0) {
+                    if (ref.category === vv.position) {
+                      return {
+                        ...vv,
+                        channel: [
+                          ...vv.channel.map((vvv) => {
+                            if (vvv.position > ref.position) {
+                              return {
+                                ...vvv,
+                                position: vvv.position + 1,
+                              };
+                            }
 
-          //                   return vvv;
-          //                 }),
-          //                 {
-          //                   ...newData,
-          //                   position: ref.position + 1,
-          //                 },
-          //               ],
-          //             };
-          //           }
-          //         }
-          //         // hapus
-          //         if (ref.fromCategory !== 0) {
-          //           if (ref.fromCategory == vv.position) {
-          //             return {
-          //               ...vv,
-          //               channel: vv.channel
-          //                 .filter((f) => f.position !== ref.fromPosition)
-          //                 .sort((a, b) => a.position - b.position)
-          //                 .map((ch, i) => ({
-          //                   ...ch,
-          //                   position: i + 1,
-          //                 })),
-          //             };
-          //           }
-          //         }
-          //         return vv;
-          //       }),
-          //     };
-          //   });
-          // }
+                            return vvv;
+                          }),
+                          {
+                            ...newData,
+                            position: ref.position + 1,
+                          },
+                        ],
+                      };
+                    }
+                  }
+                  // hapus
+                  if (ref.fromCategory !== 0) {
+                    if (ref.fromCategory == vv.position) {
+                      return {
+                        ...vv,
+                        channel: vv.channel
+                          .filter((f) => f.position !== ref.fromPosition)
+                          .sort((a, b) => a.position - b.position)
+                          .map((ch, i) => ({
+                            ...ch,
+                            position: i + 1,
+                          })),
+                      };
+                    }
+                  }
+                  return vv;
+                }),
+              };
+            });
+          }
 
           apiCall(
             `${process.env.NEXT_PUBLIC_HOST_API}channel/reorder/` + server,

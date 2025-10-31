@@ -58,3 +58,7 @@ type ReorderChannelRequest struct {
 	ToCategory   int `json:"to_category" validate:"required,min=0"`
 	ToPosition   int `json:"to_position" validate:"required,min=1"`
 }
+
+type DeleteChannelRequest struct {
+	CategoryId *string `json:"category_id"`
+}

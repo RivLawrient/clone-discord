@@ -178,6 +178,9 @@ export function useRightClickMenuChannel() {
     setLoading(true);
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel/` + id, {
       method: "DELETE",
+      body: JSON.stringify({
+        category_id: categoryId,
+      }),
     })
       .then(async (resp) => {
         const res = await resp.json();

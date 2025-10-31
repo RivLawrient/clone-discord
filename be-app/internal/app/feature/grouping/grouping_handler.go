@@ -262,8 +262,10 @@ func (h Handler) CreateChannelHandler(c *fiber.Ctx) error {
 func (h Handler) DeleteChannelHandler(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)
 	channel_id := c.Params("channel_id")
+	request := new(dto.DeleteChannelRequest)
+	c.BodyParser(request)
 
-	data, err := h.Controller.DeleteChannel(userId, channel_id)
+	data, err := h.Controller.DeleteChannel(userId, channel_id, request.CategoryId)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 			Message: err.Error(),
@@ -303,7 +305,7 @@ func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 	request := new(dto.ReorderChannelRequest)
 	c.BodyParser(request)
 
-	_, err := h.Controller.ReorderChannel(userId, serverId, *request)
+	data, err := h.Controller.ReorderChannel(userId, serverId, *request)
 	if err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 			Message: err.Error(),
@@ -312,6 +314,6 @@ func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelCategory]{
 		Message: "success delete category channel",
-		// Data:    *data,
+		Data:    *data,
 	})
 }

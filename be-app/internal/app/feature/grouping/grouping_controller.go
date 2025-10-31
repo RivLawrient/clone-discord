@@ -372,22 +372,49 @@ func (c Controller) CreateChannel(userId string, serverId string, name string, i
 }
 
 // harus hitung ulang position
-func (c Controller) DeleteChannel(userId string, channelId string) (*channel.Channel, error) {
+func (c Controller) DeleteChannel(userId string, channelId string, categoryId *string) (*channel.Channel, error) {
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
-	channel := new(channel.Channel)
-	if err := c.ChannelRepo.GetById(tx, channelId, channel); err != nil {
+	ch := new(channel.Channel)
+	if err := c.ChannelRepo.GetById(tx, channelId, ch); err != nil {
 		return nil, err
 	}
 
 	joinServer := new(joinserver.JoinServer)
-	if err := c.JoinServerRepo.GetById(tx, channel.ServerId, userId, joinServer); err != nil {
+	if err := c.JoinServerRepo.GetById(tx, ch.ServerId, userId, joinServer); err != nil {
 		return nil, err
 	}
 
 	if !joinServer.IsOwner {
 		return nil, errs.ErrNotOwnerServer
+	}
+
+	channels := new([]channel.Channel)
+	if categoryId != nil {
+		if err := c.ChannelRepo.GetListByServerIdWithCategory(tx, ch.ServerId, *ch.CategoryChannelId, channels); err != nil {
+			return nil, err
+		}
+	} else {
+		if err := c.ChannelRepo.GetListByServerIdWithoutCategory(tx, ch.ServerId, channels); err != nil {
+			return nil, err
+		}
+	}
+
+	newChannels := []channel.Channel{}
+	for _, c := range *channels {
+		if c.Position > ch.Position {
+			c.Position = c.Position - 1
+		}
+		newChannels = append(newChannels, c)
+	}
+
+	for _, c := range newChannels {
+		log.Println(c)
+	}
+
+	if err := c.ChannelRepo.UpdateBatch(tx, newChannels); err != nil {
+		return nil, err
 	}
 
 	if err := c.ChannelRepo.RemoveById(tx, channelId); err != nil {
@@ -398,7 +425,7 @@ func (c Controller) DeleteChannel(userId string, channelId string) (*channel.Cha
 		return nil, err
 	}
 
-	return channel, nil
+	return ch, nil
 
 }
 
@@ -499,7 +526,7 @@ func (c Controller) ReorderChannel(userId string, serverId string, req dto.Reord
 
 	newChannels := []channel.Channel{}
 	if req.ToCategory == 0 && req.FromCategory == 0 {
-		log.Println("// antar category 0")
+		// log.Println("// antar category 0")
 
 		for _, v := range channels {
 			if v.CategoryChannelId == nil {
@@ -530,11 +557,13 @@ func (c Controller) ReorderChannel(userId string, serverId string, req dto.Reord
 
 			newChannels = append(newChannels, v)
 		}
-
+		if err := c.ChannelRepo.ReorderPositionBatch(tx, serverId, &newChannels); err != nil {
+			return nil, err
+		}
 	}
 
 	if req.ToCategory == req.FromCategory && req.ToCategory > 0 {
-		log.Println("// antar category bukan 0 yang sama")
+		// log.Println("// antar category bukan 0 yang sama")
 
 		for _, c := range categories {
 			if c.Position == req.FromCategory {
@@ -569,98 +598,233 @@ func (c Controller) ReorderChannel(userId string, serverId string, req dto.Reord
 				}
 			}
 		}
-
+		if err := c.ChannelRepo.ReorderPositionBatch(tx, serverId, &newChannels); err != nil {
+			return nil, err
+		}
 	}
 
 	if req.ToCategory != req.FromCategory && req.ToCategory > 0 && req.FromCategory > 0 {
-		log.Println("// antar category bukan 0 yang beda")
+		// log.Println("// antar category bukan 0 yang beda")
 
 		idCategory, err := c.CategoryChannelRepo.GetIdByPositionAndServerId(tx, serverId, req.FromCategory)
 		if err != nil {
 			return nil, err
 		}
 
+		//yang akan ditambahkan
 		catchChannel := channel.Channel{}
 		if err := c.ChannelRepo.GetByPositionAndServerIdOnCategory(tx, serverId, idCategory, req.FromPosition, &catchChannel); err != nil {
 			return nil, err
 		}
 
 		for _, v := range channels {
-			for _, c := range categories {
-				if v.CategoryChannelId != nil && *v.CategoryChannelId == c.ID {
+			if v.CategoryChannelId != nil {
+				for _, c := range categories {
+					if *v.CategoryChannelId == c.ID {
 
-					//hapus dan hitung ulang position
-					if c.Position == req.FromCategory {
+						//hapus dan hitung ulang position
+						if c.Position == req.FromCategory {
+							if v.Position != req.FromPosition {
+								if v.Position > req.FromPosition {
+									v.Position = v.Position - 1
+								}
 
-					}
+								newChannels = append(newChannels, v)
+								continue
+							}
+						}
 
-					//tambah di sini
-					if c.Position == req.ToCategory {
-
+						//re-posisi beri ruang untuk yg baru
+						if c.Position == req.ToCategory {
+							if req.FromCategory > req.ToCategory {
+								if v.Position >= req.ToPosition {
+									v.Position = v.Position + 1
+								}
+							} else {
+								if v.Position > req.ToPosition {
+									v.Position = v.Position + 1
+								}
+							}
+							newChannels = append(newChannels, v)
+							continue
+						}
 					}
 				}
+			} else {
+				newChannels = append(newChannels, v)
 			}
 
 		}
 
-		for _, v := range newChannels {
-			fmt.Println(v)
+		//tambah baru
+		for _, c := range categories {
+			if c.Position == req.ToCategory {
+				catchChannel.CategoryChannelId = &c.ID
+				if req.FromCategory > req.ToCategory {
+					catchChannel.Position = req.ToPosition
+				} else {
+
+					catchChannel.Position = req.ToPosition + 1
+				}
+				newChannels = append(newChannels, catchChannel)
+			}
 		}
+
+		//query
+		if err := c.ChannelRepo.UpdateBatch(tx, newChannels); err != nil {
+			return nil, err
+		}
+
 	}
 
 	if req.ToCategory != req.FromCategory && ((req.ToCategory == 0 && req.FromCategory != 0) || (req.ToCategory != 0 && req.FromCategory == 0)) {
-		log.Println("//antar category 0 dan 1")
+		// log.Println("//antar category 0 dan 1")
+
+		var catchChannel channel.Channel
+		if req.FromCategory == 0 {
+			if err := c.ChannelRepo.GetByPositionAndServerId(tx, serverId, req.FromPosition, &catchChannel); err != nil {
+				return nil, err
+			}
+
+		} else {
+			idCategory, err := c.CategoryChannelRepo.GetIdByPositionAndServerId(tx, serverId, req.FromCategory)
+			if err != nil {
+				return nil, err
+			}
+
+			//yang akan ditambahkan
+			if err := c.ChannelRepo.GetByPositionAndServerIdOnCategory(tx, serverId, idCategory, req.FromPosition, &catchChannel); err != nil {
+				return nil, err
+			}
+		}
+
+		//rule: kalau fromPos == 0 hapus dulu jika tidak, tambah dulu
+		for _, v := range channels {
+			if v.CategoryChannelId == nil {
+				if req.FromCategory == 0 {
+					//hapus
+					if v.Position != req.FromPosition {
+						if v.Position > req.FromPosition {
+							v.Position = v.Position - 1
+						}
+						newChannels = append(newChannels, v)
+						continue
+					}
+				} else {
+					//beri ruang
+					if v.Position >= req.ToPosition {
+						v.Position = v.Position + 1
+					}
+					newChannels = append(newChannels, v)
+					continue
+				}
+			} else {
+				for _, c := range categories {
+					if *v.CategoryChannelId == c.ID {
+						if req.FromCategory == 0 {
+							//beri ruang
+							if c.Position == req.ToCategory {
+								if v.Position > req.ToPosition {
+									v.Position = v.Position + 1
+								}
+								newChannels = append(newChannels, v)
+								continue
+							} else {
+								newChannels = append(newChannels, v)
+							}
+
+						}
+						if req.FromCategory != 0 {
+							//hapus
+							if req.FromCategory == c.Position {
+								if v.Position != req.FromPosition {
+									if v.Position > req.FromPosition {
+										v.Position = v.Position - 1
+									}
+
+									newChannels = append(newChannels, v)
+									continue
+								}
+							} else {
+
+								newChannels = append(newChannels, v)
+							}
+
+						}
+					}
+
+				}
+			}
+		}
+		//sesi memindahkan
+
+		if req.ToCategory == 0 {
+			catchChannel.CategoryChannelId = nil
+			catchChannel.Position = req.ToPosition
+			newChannels = append(newChannels, catchChannel)
+		}
+		if req.ToCategory != 0 {
+			for _, c := range categories {
+				if req.ToCategory == c.Position {
+					catchChannel.CategoryChannelId = &c.ID
+					catchChannel.Position = req.ToPosition + 1
+					newChannels = append(newChannels, catchChannel)
+				}
+			}
+		}
+
+		//query
+		if err := c.ChannelRepo.UpdateBatch(tx, newChannels); err != nil {
+			return nil, err
+		}
 	}
 
 	//query
-	// if err := c.ChannelRepo.ReorderPositionBatch(tx, serverId, &newChannels); err != nil {
-	// 	return nil, err
-	// }
 
-	// result := dto.ChannelCategory{
-	// 	Channel:  []dto.ChannelList{},
-	// 	Category: []dto.CategoryChannel{},
-	// }
+	result := dto.ChannelCategory{
+		Channel:  []dto.ChannelList{},
+		Category: []dto.CategoryChannel{},
+	}
 
-	// // 1️⃣ Map category ke DTO
-	// for _, cat := range categories {
-	// 	catDTO := dto.CategoryChannel{
-	// 		ID:       cat.ID,
-	// 		Name:     cat.Name,
-	// 		Position: cat.Position,
-	// 		Channel:  []dto.ChannelList{},
-	// 	}
+	// 1️⃣ Map category ke DTO
+	for _, cat := range categories {
+		catDTO := dto.CategoryChannel{
+			ID:       cat.ID,
+			Name:     cat.Name,
+			Position: cat.Position,
+			Channel:  []dto.ChannelList{},
+		}
 
-	// 	// ambil semua channel yang punya CategoryChannelId == cat.ID
-	// 	for _, ch := range newChannels {
-	// 		if ch.CategoryChannelId != nil && *ch.CategoryChannelId == cat.ID {
-	// 			catDTO.Channel = append(catDTO.Channel, dto.ChannelList{
-	// 				ID:       ch.ID,
-	// 				Name:     ch.Name,
-	// 				IsVoice:  ch.IsVoice, // typo kamu ya, sebaiknya "IsVoice"
-	// 				Position: ch.Position,
-	// 			})
-	// 		}
-	// 	}
+		// ambil semua channel yang punya CategoryChannelId == cat.ID
+		for _, ch := range newChannels {
+			if ch.CategoryChannelId != nil && *ch.CategoryChannelId == cat.ID {
+				catDTO.Channel = append(catDTO.Channel, dto.ChannelList{
+					ID:       ch.ID,
+					Name:     ch.Name,
+					IsVoice:  ch.IsVoice, // typo kamu ya, sebaiknya "IsVoice"
+					Position: ch.Position,
+				})
+			}
+		}
 
-	// 	result.Category = append(result.Category, catDTO)
-	// }
+		result.Category = append(result.Category, catDTO)
+	}
 
-	// // 2️⃣ Channel yang tidak punya kategori (CategoryChannelId == nil)
-	// for _, ch := range newChannels {
-	// 	if ch.CategoryChannelId == nil {
-	// 		result.Channel = append(result.Channel, dto.ChannelList{
-	// 			ID:       ch.ID,
-	// 			Name:     ch.Name,
-	// 			IsVoice:  ch.IsVoice,
-	// 			Position: ch.Position,
-	// 		})
-	// 	}
-	// }
+	// 2️⃣ Channel yang tidak punya kategori (CategoryChannelId == nil)
+	for _, ch := range newChannels {
+		if ch.CategoryChannelId == nil {
+			result.Channel = append(result.Channel, dto.ChannelList{
+				ID:       ch.ID,
+				Name:     ch.Name,
+				IsVoice:  ch.IsVoice,
+				Position: ch.Position,
+			})
+		}
+	}
 
 	if err := tx.Commit().Error; err != nil {
 		return nil, err
 	}
-	// return &result, nil
-	return nil, nil
+	return &result, nil
+	// return nil, nil
 }
