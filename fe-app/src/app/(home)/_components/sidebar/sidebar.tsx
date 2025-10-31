@@ -7,6 +7,11 @@ import { useAtom } from "jotai";
 import { serverAtom, ServerList } from "../../_state/server-atom";
 import { apiCall, GetCookie } from "../../_helper/api-client";
 import AddServerBtn from "./add-server-btn";
+import {
+  CategoryChannel,
+  ChannelList,
+  channelListAtom,
+} from "../../_state/channel-list-atom";
 
 export default function Sidebar() {
   const [list, setList] = useAtom(serverAtom);
@@ -55,7 +60,7 @@ function DMBtn() {
         side={"right"}
       >
         <div
-          onClick={() => router.push("/channels/me")}
+          onClick={() => router.replace("/channels/me")}
           className={twMerge(
             "bg-server-btn-bg hover:bg-server-btn-hover peer mx-4 size-10 cursor-pointer rounded-xl p-2 font-semibold",
             path === "me" && "bg-server-btn-hover"
@@ -94,7 +99,7 @@ function ServerBtn(props: {
   const path_start = usePathname().split("/")[1];
   const path_channel = usePathname().split("/")[2];
   const is_current_path = path_start === "channels" && path_channel == props.id;
-
+  const [channels, setChannels] = useAtom(channelListAtom);
   return (
     <div className="relative">
       {props.isdrag && (
@@ -116,7 +121,10 @@ function ServerBtn(props: {
             props.setIsdrag(true);
           }}
           onDragEnd={() => props.setIsdrag(false)}
-          onClick={() => router.push("/channels/" + props.id)}
+          onClick={() => {
+            setChannels({ category: [], channel: [] });
+            router.replace("/channels/" + props.id);
+          }}
           className={twMerge(
             "peer bg-server-btn-bg hover:bg-server-btn-hover mx-4 flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-xl font-semibold",
             is_current_path && "bg-server-btn-hover"

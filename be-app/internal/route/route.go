@@ -21,6 +21,7 @@ type Routes struct {
 	HubHandler       hub.Handler
 	ChattingHandler  chatting.Handler
 	GroupingHandler  grouping.Handler
+	HubServerHandler hub.Handler
 }
 
 func (r Routes) SetupRoutes() {

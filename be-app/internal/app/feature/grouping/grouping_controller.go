@@ -429,6 +429,23 @@ func (c Controller) DeleteChannel(userId string, channelId string, categoryId *s
 
 }
 
+func (c Controller) ListUserOnServer(serverId string) (*[]string, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	var listId []string
+	if err := c.JoinServerRepo.GetListUserIdByServerId(tx, serverId, &listId); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &listId, nil
+
+}
+
 func (c Controller) GetChannelAndCategory(serverId string) (*dto.ChannelCategory, error) {
 	tx := c.DB.Begin()
 	defer func() {
@@ -773,6 +790,9 @@ func (c Controller) ReorderChannel(userId string, serverId string, req dto.Reord
 			}
 		}
 
+		for _, v := range newChannels {
+			log.Println(v)
+		}
 		//query
 		if err := c.ChannelRepo.UpdateBatch(tx, newChannels); err != nil {
 			return nil, err

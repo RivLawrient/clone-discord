@@ -61,3 +61,7 @@ func (r Repo) GetLastPositionByUserID(db *gorm.DB, userID string) (int, error) {
 func (r Repo) GetById(db *gorm.DB, serverId string, userId string, joinServer *JoinServer) error {
 	return db.Where("server_id =  ? AND user_id = ?", serverId, userId).First(joinServer).Error
 }
+
+func (r Repo) GetListUserIdByServerId(db *gorm.DB, serverId string, id *[]string) error {
+	return db.Model(&JoinServer{}).Where("server_id = ?", serverId).Select("user_id").Find(id).Error
+}

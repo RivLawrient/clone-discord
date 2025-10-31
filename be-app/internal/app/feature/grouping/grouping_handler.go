@@ -1,9 +1,11 @@
 package grouping
 
 import (
+	"be-app/internal/app/feature/hub"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
 	"be-app/internal/helper"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
@@ -16,14 +18,16 @@ import (
 )
 
 type Handler struct {
-	Controller Controller
-	Validate   validator.Validate
+	Controller    Controller
+	Validate      validator.Validate
+	HubController *hub.Controller
 }
 
-func NewHandler(controller Controller, validate validator.Validate) Handler {
+func NewHandler(controller Controller, validate validator.Validate, hub *hub.Controller) Handler {
 	return Handler{
-		Controller: controller,
-		Validate:   validate,
+		Controller:    controller,
+		Validate:      validate,
+		HubController: hub,
 	}
 }
 
@@ -196,6 +200,23 @@ func (h Handler) CreateCategoryChannelHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	id, err := h.Controller.ListUserOnServer(data.ServerId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	msg, _ := h.Controller.GetChannelAndCategory(data.ServerId)
+	msg_json, _ := json.Marshal(dto.ChannelCategorySocket{
+		ServerId: data.ServerId,
+		List:     *msg,
+	})
+
+	for _, v := range *id {
+		h.HubController.SendToUser(v, msg_json)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.CategoryChannel]{
 		Message: "success create category channel",
 		Data: dto.CategoryChannel{
@@ -216,6 +237,23 @@ func (h Handler) DeleteCategoryChannelHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 			Message: err.Error(),
 		})
+	}
+
+	id, err := h.Controller.ListUserOnServer(data.ServerId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	msg, _ := h.Controller.GetChannelAndCategory(data.ServerId)
+	msg_json, _ := json.Marshal(dto.ChannelCategorySocket{
+		ServerId: data.ServerId,
+		List:     *msg,
+	})
+
+	for _, v := range *id {
+		h.HubController.SendToUser(v, msg_json)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.CategoryChannel]{
@@ -248,6 +286,23 @@ func (h Handler) CreateChannelHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	id, err := h.Controller.ListUserOnServer(data.ServerId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	msg, _ := h.Controller.GetChannelAndCategory(data.ServerId)
+	msg_json, _ := json.Marshal(dto.ChannelCategorySocket{
+		ServerId: data.ServerId,
+		List:     *msg,
+	})
+
+	for _, v := range *id {
+		h.HubController.SendToUser(v, msg_json)
+	}
+
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelList]{
 		Message: "success create channel",
 		Data: dto.ChannelList{
@@ -272,6 +327,22 @@ func (h Handler) DeleteChannelHandler(c *fiber.Ctx) error {
 		})
 	}
 
+	id, err := h.Controller.ListUserOnServer(data.ServerId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	msg, _ := h.Controller.GetChannelAndCategory(data.ServerId)
+	msg_json, _ := json.Marshal(dto.ChannelCategorySocket{
+		ServerId: data.ServerId,
+		List:     *msg,
+	})
+
+	for _, v := range *id {
+		h.HubController.SendToUser(v, msg_json)
+	}
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelList]{
 		Message: "success delete channel",
 		Data: dto.ChannelList{
@@ -310,6 +381,23 @@ func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 			Message: err.Error(),
 		})
+	}
+
+	id, err := h.Controller.ListUserOnServer(serverId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	// msg, _ := h.Controller.GetChannelAndCategory(serverId)
+	msg_json, _ := json.Marshal(dto.ChannelCategorySocket{
+		ServerId: serverId,
+		List:     *data,
+	})
+
+	for _, v := range *id {
+		h.HubController.SendToUser(v, msg_json)
 	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelCategory]{

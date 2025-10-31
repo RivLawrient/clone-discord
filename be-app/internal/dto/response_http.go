@@ -92,3 +92,8 @@ type ChannelCategory struct {
 	Channel  []ChannelList     `json:"channel"`
 	Category []CategoryChannel `json:"category"`
 }
+
+type ChannelCategorySocket struct {
+	ServerId string          `json:"server_id"`
+	List     ChannelCategory `json:"list"`
+}

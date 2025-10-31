@@ -104,8 +104,13 @@ export function RightClickMenuCategorySection(props: {
   children: React.ReactNode;
   data: CategoryChannel;
 }) {
-  const { openDelete, setOpenDelete, loading, deleteCategoryHandle } =
-    useRightClickMenuCategorySection();
+  const {
+    openDelete,
+    setOpenDelete,
+    loading,
+    deleteCategoryHandle,
+    currentServer,
+  } = useRightClickMenuCategorySection();
   return (
     <>
       <ModalDeleteCategory
@@ -118,20 +123,22 @@ export function RightClickMenuCategorySection(props: {
       <ContextMenu.Root>
         <ContextMenu.Trigger asChild>{props.children}</ContextMenu.Trigger>
         <ContextMenu.Portal>
-          <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
-            <ContextMenu.Item
-              // onClick={() => setOpenDelete(true)}
-              className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
-            >
-              Edit Category
-            </ContextMenu.Item>
-            <ContextMenu.Item
-              onClick={() => setOpenDelete(true)}
-              className="p-2 rounded-lg hover:bg-[#36292e] text-[#ee6d6a] outline-none cursor-pointer transition-all"
-            >
-              Delete Category
-            </ContextMenu.Item>
-          </ContextMenu.Content>
+          {currentServer?.is_owner && (
+            <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
+              <ContextMenu.Item
+                // onClick={() => setOpenDelete(true)}
+                className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
+              >
+                Edit Category
+              </ContextMenu.Item>
+              <ContextMenu.Item
+                onClick={() => setOpenDelete(true)}
+                className="p-2 rounded-lg hover:bg-[#36292e] text-[#ee6d6a] outline-none cursor-pointer transition-all"
+              >
+                Delete Category
+              </ContextMenu.Item>
+            </ContextMenu.Content>
+          )}
         </ContextMenu.Portal>
       </ContextMenu.Root>
     </>
@@ -143,8 +150,13 @@ export function RightClickMenuChannel(props: {
   data: ChannelList;
   dataCategory?: CategoryChannel;
 }) {
-  const { openDelete, setOpenDelete, loading, deleteCategoryHandle } =
-    useRightClickMenuChannel();
+  const {
+    openDelete,
+    setOpenDelete,
+    loading,
+    deleteCategoryHandle,
+    currentServer,
+  } = useRightClickMenuChannel();
   return (
     <>
       <ModalDeleteChannel
@@ -158,20 +170,22 @@ export function RightClickMenuChannel(props: {
       <ContextMenu.Root>
         <ContextMenu.Trigger asChild>{props.children}</ContextMenu.Trigger>
         <ContextMenu.Portal>
-          <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
-            <ContextMenu.Item
-              // onClick={() => setOpenDelete(true)}
-              className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
-            >
-              Edit Channel
-            </ContextMenu.Item>
-            <ContextMenu.Item
-              onClick={() => setOpenDelete(true)}
-              className="p-2 rounded-lg hover:bg-[#36292e] text-[#ee6d6a] outline-none cursor-pointer transition-all"
-            >
-              Delete Channel
-            </ContextMenu.Item>
-          </ContextMenu.Content>
+          {currentServer?.is_owner && (
+            <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
+              <ContextMenu.Item
+                // onClick={() => setOpenDelete(true)}
+                className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
+              >
+                Edit Channel
+              </ContextMenu.Item>
+              <ContextMenu.Item
+                onClick={() => setOpenDelete(true)}
+                className="p-2 rounded-lg hover:bg-[#36292e] text-[#ee6d6a] outline-none cursor-pointer transition-all"
+              >
+                Delete Channel
+              </ContextMenu.Item>
+            </ContextMenu.Content>
+          )}
         </ContextMenu.Portal>
       </ContextMenu.Root>
     </>

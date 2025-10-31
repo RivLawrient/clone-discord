@@ -49,7 +49,7 @@ func Apps(a *AppsConfig) {
 	chattingController := chatting.NewController(a.DB, textChatUserRepo)
 	chattingHandler := chatting.NewHandler(*a.Validate, chattingController, hubController)
 	groupingController := grouping.NewController(a.DB, serverRepo, joinServerRepo, categorychannelRepo, channelRepo)
-	groupingHandler := grouping.NewHandler(groupingController, *a.Validate)
+	groupingHandler := grouping.NewHandler(groupingController, *a.Validate, hubController)
 
 	route.Routes{
 		App:              a.App,

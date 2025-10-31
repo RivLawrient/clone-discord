@@ -35,7 +35,7 @@ export function useRightClickMenuMainSection() {
         const res = await resp.json();
         if (resp.ok) {
           const data: CategoryChannel = res.data;
-          setChannel((p) => ({ ...p, category: [...p.category, data] }));
+          // setChannel((p) => ({ ...p, category: [...p.category, data] }));
           setInputCategory("");
           setOpenCategory(false);
         }
@@ -70,7 +70,7 @@ export function useRightClickMenuMainSection() {
         const res = await resp.json();
         if (resp.ok) {
           const data: ChannelList = res.data;
-          setChannel((p) => ({ ...p, channel: [...p.channel, data] }));
+          // setChannel((p) => ({ ...p, channel: [...p.channel, data] }));
           setInputChannel("");
           setOpenChannel(false);
         }
@@ -96,13 +96,13 @@ export function useRightClickMenuMainSection() {
         const res = await resp.json();
         if (resp.ok) {
           const data: ChannelList = res.data;
-          setChannel((p) => ({
-            ...p,
-            category: p.category.map((v) =>
-              v.id === categoryId ? { ...v, channel: [...v.channel, data] } : v
-            ),
-          }));
-          setInputChannel("");
+          // setChannel((p) => ({
+          //   ...p,
+          //   category: p.category.map((v) =>
+          //     v.id === categoryId ? { ...v, channel: [...v.channel, data] } : v
+          //   ),
+          // }));
+          // setInputChannel("");
           setOpenChannel(false);
         }
       })
@@ -138,6 +138,9 @@ export function useRightClickMenuCategorySection() {
   const [openDelete, setOpenDelete] = useState(false);
   const [loading, setLoading] = useState(false);
   const [channel, setChannel] = useAtom(channelListAtom);
+  const [servers] = useAtom(serverAtom);
+  const { server } = useParams();
+  const currentServer = servers?.find((v) => v.id === server);
 
   const deleteCategoryHandle = (id: string) => {
     setLoading(true);
@@ -166,6 +169,7 @@ export function useRightClickMenuCategorySection() {
     setOpenDelete,
     loading,
     deleteCategoryHandle,
+    currentServer,
   };
 }
 
@@ -173,6 +177,9 @@ export function useRightClickMenuChannel() {
   const [openDelete, setOpenDelete] = useState(false);
   const [loading, setLoading] = useState(false);
   const [channel, setChannel] = useAtom(channelListAtom);
+  const [servers] = useAtom(serverAtom);
+  const { server } = useParams();
+  const currentServer = servers?.find((v) => v.id === server);
 
   const deleteCategoryHandle = (id: string, categoryId?: string) => {
     setLoading(true);
@@ -184,28 +191,28 @@ export function useRightClickMenuChannel() {
     })
       .then(async (resp) => {
         const res = await resp.json();
-        if (resp.ok) {
-          const data: ChannelList = res.data;
-          if (categoryId) {
-            setChannel((p) => ({
-              ...p,
-              category: p.category.map((v) =>
-                v.id == categoryId
-                  ? {
-                      ...v,
-                      channel: v.channel.filter((vv) => vv.id != data.id),
-                    }
-                  : v
-              ),
-            }));
-          } else {
-            setChannel((p) => ({
-              ...p,
-              channel: p.channel.filter((v) => v.id != data.id),
-            }));
-          }
-          setOpenDelete(false);
-        }
+        // if (resp.ok) {
+        //   const data: ChannelList = res.data;
+        //   if (categoryId) {
+        //     setChannel((p) => ({
+        //       ...p,
+        //       category: p.category.map((v) =>
+        //         v.id == categoryId
+        //           ? {
+        //               ...v,
+        //               channel: v.channel.filter((vv) => vv.id != data.id),
+        //             }
+        //           : v
+        //       ),
+        //     }));
+        //   } else {
+        //     setChannel((p) => ({
+        //       ...p,
+        //       channel: p.channel.filter((v) => v.id != data.id),
+        //     }));
+        //   }
+        setOpenDelete(false);
+        // }
       })
       .catch(() => {})
       .finally(() => {
@@ -218,5 +225,6 @@ export function useRightClickMenuChannel() {
     setOpenDelete,
     loading,
     deleteCategoryHandle,
+    currentServer,
   };
 }
