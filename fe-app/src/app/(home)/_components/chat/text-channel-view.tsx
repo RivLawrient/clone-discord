@@ -97,6 +97,7 @@ export default function TextChannelView(props: { data: ChannelList }) {
   const { Icons, setShowSide, showSide, list, setList, loading } =
     useTextChannelView(props.data);
 
+  return (
     <div className="flex flex-col min-h-0 min-w-0 bg-[#1a1a1e]">
       <div className="flex p-3.5 gap-2 border-y border-[#29292e] ">
         <div className="brightness-75">
