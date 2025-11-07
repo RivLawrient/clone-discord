@@ -9,9 +9,10 @@ import { socketAtom } from "../_state/socket-atom";
 import { serverAtom } from "../_state/server-atom";
 import { mediaAtom } from "../_state/media-atom";
 import { usePathname, useRouter } from "next/navigation";
+import { channelListAtom } from "../_state/channel-list-atom";
 
 export default function AuthProvider(props: { children: React.ReactNode }) {
-  const [loadingCount, setLoadingCount] = useState(3);
+  const [loadingCount, setLoadingCount] = useState(5);
   const [user, setUser] = useAtom(userAtom);
   const [friend, setFriend] = useAtom(friendAtom);
   const idleDelay = 1 * 60 * 1000; // 1 menit
@@ -21,6 +22,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   const lastStatus = useRef<"online" | "idle">("online");
   const [server, setServer] = useAtom(serverAtom);
   const [media, setMedia] = useAtom(mediaAtom);
+  const [channels, setChannels] = useAtom(channelListAtom);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -37,7 +39,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (loadingCount == 2) {
+    if (loadingCount == 4) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friend/list`, {
         method: "GET",
       })
@@ -53,7 +55,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, [loadingCount]);
 
   useEffect(() => {
-    if (loadingCount == 1) {
+    if (loadingCount == 3) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
         method: "GET",
       })
@@ -61,6 +63,23 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
           if (resp.ok) {
             const res = await resp.json();
             setServer(res.data);
+            setLoadingCount((p) => p - 1);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loadingCount]);
+
+  useEffect(() => {
+    if (loadingCount == 2) {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel`, {
+        method: "GET",
+      })
+        .then(async (resp) => {
+          if (resp.ok) {
+            const res = await resp.json();
+            setChannels(res.data);
+            // setServer(res.data);
             setLoadingCount((p) => p - 1);
           }
         })
@@ -78,6 +97,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
       ws.onopen = () => {
         console.log("websocket is Connected");
         setSocket(ws);
+        setLoadingCount((p) => p - 1);
       };
 
       ws.onclose = () => {
@@ -136,7 +156,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
       };
     };
 
-    if (loadingCount === 0) {
+    if (loadingCount == 1) {
       connect();
     }
   }, [loadingCount]);

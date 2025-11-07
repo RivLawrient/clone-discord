@@ -14,5 +14,6 @@ var (
 	ErrPasswordNotMatch  = errors.New("password does not match")
 	ErrServerNotFound    = errors.New("server not found")
 	ErrAlreadyJoinServer = errors.New("user already join server")
+	ErrNotJoinServer     = errors.New("user not join server")
 	ErrNotOwnerServer    = errors.New("user is not owner server")
 )

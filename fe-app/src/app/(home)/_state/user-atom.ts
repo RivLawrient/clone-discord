@@ -28,3 +28,14 @@ export const userAtom = atom<UserCurrent>({
   banner_color: "#ffffff",
   status_activity: "Do Not Disturb",
 });
+
+export type UserOther = {
+  user_id: string;
+  name: string;
+  username: string;
+  avatar: string;
+  avatar_bg: string;
+  status_activity: keyof typeof USER_STATUS;
+  bio: string;
+  banner_color: string;
+};

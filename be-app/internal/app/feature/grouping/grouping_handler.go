@@ -369,6 +369,21 @@ func (h Handler) GetChannelAndCategoryHandler(c *fiber.Ctx) error {
 		Data:    *data,
 	})
 }
+func (h Handler) GetAllChannelJoinServerHandler(c *fiber.Ctx) error {
+	userId := c.Locals("user_id").(string)
+
+	data, err := h.Controller.GetAllChannelJoinServer(userId)
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[[]dto.ChannelCategory]{
+		Message: "success delete category channel",
+		Data:    *data,
+	})
+}
 
 func (h Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 	userId := c.Locals("user_id").(string)

@@ -8,55 +8,51 @@ import {
 import { useEffect, useState } from "react";
 import { apiCall } from "../_helper/api-client";
 import { socketAtom } from "../_state/socket-atom";
+import { Dialog } from "radix-ui";
+import { useParams } from "next/navigation";
 
-export default function HydrateChannel(props: {
-  server: string;
-  children: React.ReactNode;
-}) {
-  const [channel, setChannel] = useAtom(channelListAtom);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel/` + props.server, {
-      method: "GET",
-    })
-      .then(async (resp) => {
-        const res = await resp.json();
-        if (resp.ok) {
-          const channel: ChannelList[] = res.data.channel;
-          const category: CategoryChannel[] = res.data.category;
-          if (channel.length > 0) {
-            // route.push("/channels/" + server + "/" + channel[0].id);
-          } else {
-          }
-          setChannel({ category: category, channel: channel });
-        }
-      })
-      .finally(() => {
-        setLoading(false);
-      })
-      .catch(() => {});
-  }, [props, setChannel]);
-
+export default function HydrateChannel(props: { children: React.ReactNode }) {
+  const [channels, setChannels] = useAtom(channelListAtom);
+  const [loading, setLoading] = useState(false);
+  const { server } = useParams();
   const [sockets, setSockets] = useAtom(socketAtom);
 
   useEffect(() => {
-    if (sockets) {
-      sockets.onmessage = (e) => {
-        const data = JSON.parse(e.data);
+    if (!sockets) return;
 
-        if (data.server_id && data.list) {
-          if (data.server_id == props.server) {
-            setChannel({
-              channel: data.list.channel,
-              category: data.list.category,
-            });
-          }
-        }
-      };
-    }
-  }, [sockets, props.server]);
+    const handleMessage = (e: MessageEvent) => {
+      const data = JSON.parse(e.data);
 
-  if (!loading) return props.children;
-  else return <div className="bg-[#1a1a1e]"></div>;
+      if (data.server_id && data.list && data.server_id === server) {
+        setChannels((p) =>
+          p.map((v) =>
+            v.server_id == data.server_id
+              ? {
+                  ...v,
+                  category: data.list.category,
+                  channel: data.list.channel,
+                }
+              : v
+          )
+        );
+      }
+    };
+
+    sockets.addEventListener("message", handleMessage);
+
+    return () => {
+      sockets.removeEventListener("message", handleMessage);
+    };
+  }, [sockets, server]);
+
+  return (
+    <>
+      <Dialog.Root open={false}>
+        <Dialog.Content className="fixed top-0 left-0 right-0 bottom-0 bg-white z-999">
+          <Dialog.Title></Dialog.Title>
+        </Dialog.Content>
+      </Dialog.Root>
+      {!loading && props.children}
+    </>
+  );
 }

@@ -5,12 +5,14 @@ import (
 	"be-app/internal/app/domain/channel"
 	"be-app/internal/app/domain/friend"
 	joinserver "be-app/internal/app/domain/join_server"
+	messagechannel "be-app/internal/app/domain/message_channel"
 	refreshtoken "be-app/internal/app/domain/refresh_token"
 	"be-app/internal/app/domain/server"
 	textchatuser "be-app/internal/app/domain/text_chat_user"
 	"be-app/internal/app/domain/user"
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/app/feature/auth"
+	channelmessaging "be-app/internal/app/feature/channel_messaging"
 	"be-app/internal/app/feature/chatting"
 	"be-app/internal/app/feature/grouping"
 	"be-app/internal/app/feature/hub"
@@ -38,6 +40,7 @@ func Apps(a *AppsConfig) {
 	joinServerRepo := joinserver.NewRepo()
 	categorychannelRepo := categorychannel.NewRepo()
 	channelRepo := channel.NewRepo()
+	messageChannelRepo := messagechannel.NewRepo()
 
 	hubController := hub.NewController(a.DB, profileRepo, friendRepo)
 
@@ -50,13 +53,16 @@ func Apps(a *AppsConfig) {
 	chattingHandler := chatting.NewHandler(*a.Validate, chattingController, hubController)
 	groupingController := grouping.NewController(a.DB, serverRepo, joinServerRepo, categorychannelRepo, channelRepo)
 	groupingHandler := grouping.NewHandler(groupingController, *a.Validate, hubController)
+	channelMessageingController := channelmessaging.NewController(a.DB, messageChannelRepo, joinServerRepo, channelRepo, profileRepo)
+	channelMessagingHandler := channelmessaging.NewHandler(*a.Validate, channelMessageingController, hubController)
 
 	route.Routes{
-		App:              a.App,
-		AuthHandler:      authHandler,
-		RealtionsHandler: relationsHandler,
-		HubHandler:       hubHandler,
-		ChattingHandler:  chattingHandler,
-		GroupingHandler:  groupingHandler,
+		App:                     a.App,
+		AuthHandler:             authHandler,
+		RealtionsHandler:        relationsHandler,
+		HubHandler:              hubHandler,
+		ChattingHandler:         chattingHandler,
+		GroupingHandler:         groupingHandler,
+		ChannelMessagingHandler: channelMessagingHandler,
 	}.SetupRoutes()
 }

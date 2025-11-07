@@ -1,17 +1,13 @@
 "use client";
 import { usePathname, useRouter } from "next/navigation";
-import { SetStateAction, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import TooltipDesc from "../tooltip-desc";
 import { useAtom } from "jotai";
 import { serverAtom, ServerList } from "../../_state/server-atom";
 import { apiCall, GetCookie } from "../../_helper/api-client";
 import AddServerBtn from "./add-server-btn";
-import {
-  CategoryChannel,
-  ChannelList,
-  channelListAtom,
-} from "../../_state/channel-list-atom";
+import { channelListAtom } from "../../_state/channel-list-atom";
 
 export default function Sidebar() {
   const [list, setList] = useAtom(serverAtom);
@@ -60,7 +56,7 @@ function DMBtn() {
         side={"right"}
       >
         <div
-          onClick={() => router.replace("/channels/me")}
+          onClick={() => router.push("/channels/me")}
           className={twMerge(
             "bg-server-btn-bg hover:bg-server-btn-hover peer mx-4 size-10 cursor-pointer rounded-xl p-2 font-semibold",
             path === "me" && "bg-server-btn-hover"
@@ -100,6 +96,8 @@ function ServerBtn(props: {
   const path_channel = usePathname().split("/")[2];
   const is_current_path = path_start === "channels" && path_channel == props.id;
   const [channels, setChannels] = useAtom(channelListAtom);
+  const current = channels.find((v) => v.server_id == props.id);
+
   return (
     <div className="relative">
       {props.isdrag && (
@@ -122,8 +120,17 @@ function ServerBtn(props: {
           }}
           onDragEnd={() => props.setIsdrag(false)}
           onClick={() => {
-            setChannels({ category: [], channel: [] });
-            router.replace("/channels/" + props.id);
+            console.log("server apa", current);
+            if (current) {
+              const check =
+                current.channel[0] ||
+                current.category.find((v) => v.channel.length > 0)?.channel[0];
+              if (check) {
+                router.push(`/channels/${props.id}/${check.id}`);
+              } else {
+                router.push("/channels/" + props.id);
+              }
+            }
           }}
           className={twMerge(
             "peer bg-server-btn-bg hover:bg-server-btn-hover mx-4 flex size-10 cursor-pointer items-center justify-center overflow-hidden rounded-xl font-semibold",

@@ -32,43 +32,47 @@ export default function MainSectionInnerSidebar() {
   const [whoDrag, setWhoDrag] = useState(0);
   const [whoCategory, setWhoCategory] = useState(0);
   const { channel } = useParams();
+  const { server } = useParams();
+  const current = channels.find((v) => v.server_id == server);
 
   return (
     <RightClickMenuMainSection>
       <div className="custom-scrollbar font-semibold min-h-0 gap-0.5 min-w-0 flex flex-col overflow-y-scroll pt-3 pr-3 relative">
-        {channels.channel
-          .sort((a, b) => a.position - b.position)
-          .map((v, i, a) => (
-            <ChannelBtnList
-              key={v.id}
-              data={v}
-              position={v.position}
-              isDrag={isDrag}
-              setIsDrag={setIsdrag}
-              whoDrag={whoDrag}
-              setWhoDrag={setWhoDrag}
-              category={0}
-              whoCategory={whoCategory}
-              setWhoCategory={setWhoCategory}
-              isSelect={channel == v.id}
-            />
-          ))}
+        <>
+          {current?.channel
+            .sort((a, b) => a.position - b.position)
+            .map((v, i, a) => (
+              <ChannelBtnList
+                key={v.id}
+                data={v}
+                position={v.position}
+                isDrag={isDrag}
+                setIsDrag={setIsdrag}
+                whoDrag={whoDrag}
+                setWhoDrag={setWhoDrag}
+                category={0}
+                whoCategory={whoCategory}
+                setWhoCategory={setWhoCategory}
+                isSelect={channel == v.id}
+              />
+            ))}
 
-        {channels.category
-          .sort((a, b) => a.position - b.position)
-          .map((v, i, a) => (
-            <CategoryBtnSection
-              key={v.id}
-              data={v}
-              isDrag={isDrag}
-              whoDrag={whoDrag}
-              position={v.position}
-              setWhodrag={setWhoDrag}
-              setIsdrag={setIsdrag}
-              whoCategory={whoCategory}
-              setWhoCategory={setWhoCategory}
-            />
-          ))}
+          {current?.category
+            .sort((a, b) => a.position - b.position)
+            .map((v, i, a) => (
+              <CategoryBtnSection
+                key={v.id}
+                data={v}
+                isDrag={isDrag}
+                whoDrag={whoDrag}
+                position={v.position}
+                setWhodrag={setWhoDrag}
+                setIsdrag={setIsdrag}
+                whoCategory={whoCategory}
+                setWhoCategory={setWhoCategory}
+              />
+            ))}
+        </>
       </div>
     </RightClickMenuMainSection>
   );
@@ -92,7 +96,7 @@ function DragZone(props: {
 
   const [channel, setChannel] = useAtom(channelListAtom);
   const { server } = useParams();
-
+  const current = channel.find((v) => v.server_id == server);
   return (
     <>
       <div
@@ -125,16 +129,18 @@ function DragZone(props: {
               fromCategory: props.whoCategory,
             };
           } else {
-            ref = {
-              position: three
-                ? props.category == 1
-                  ? channel.channel.length + 1
-                  : channel.category[props.category - 2].channel.length + 1
-                : props.position,
-              category: three ? props.category - 1 : props.category,
-              fromPosition: props.whoDrag,
-              fromCategory: props.whoCategory,
-            };
+            if (current) {
+              ref = {
+                position: three
+                  ? props.category == 1
+                    ? current.channel.length + 1
+                    : current.category[props.category - 2].channel.length + 1
+                  : props.position,
+                category: three ? props.category - 1 : props.category,
+                fromPosition: props.whoDrag,
+                fromCategory: props.whoCategory,
+              };
+            }
           }
           // console.log(ref);
 

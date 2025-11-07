@@ -8,10 +8,6 @@ export type ServerList = {
   invite_code: string;
   position: number;
   is_owner: boolean;
-  list: {
-    channel: ChannelList[];
-    category: CategoryChannel[];
-  };
 };
 
 export const serverAtom = atom<ServerList[]>([]);

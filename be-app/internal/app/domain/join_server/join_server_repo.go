@@ -65,3 +65,7 @@ func (r Repo) GetById(db *gorm.DB, serverId string, userId string, joinServer *J
 func (r Repo) GetListUserIdByServerId(db *gorm.DB, serverId string, id *[]string) error {
 	return db.Model(&JoinServer{}).Where("server_id = ?", serverId).Select("user_id").Find(id).Error
 }
+
+func (r Repo) GetListServerIdByUserId(db *gorm.DB, userId string, id *[]string) error {
+	return db.Model(&JoinServer{}).Where("user_id = ?", userId).Select("server_id").Find(id).Error
+}

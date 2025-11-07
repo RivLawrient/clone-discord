@@ -322,6 +322,25 @@ func (c Controller) DeleteCategoryChannel(userId string, categoryId string) (*ca
 		return nil, errs.ErrNotOwnerServer
 	}
 
+	categories := new([]categorychannel.CategoryChannel)
+	if err := c.CategoryChannelRepo.GetListByServerId(tx, categoryChannel.ServerId, categories); err != nil {
+		return nil, err
+	}
+
+	newCategories := []categorychannel.CategoryChannel{}
+	for _, v := range *categories {
+		if v.ID != categoryId {
+			if v.Position > categoryChannel.Position {
+				v.Position = v.Position - 1
+			}
+			newCategories = append(newCategories, v)
+		}
+	}
+
+	if err := c.CategoryChannelRepo.UpdateBatch(tx, newCategories); err != nil {
+		return nil, err
+	}
+
 	if err := c.CategoryChannelRepo.RemoveById(tx, categoryId); err != nil {
 		return nil, err
 	}
@@ -473,6 +492,7 @@ func (c Controller) GetChannelAndCategory(serverId string) (*dto.ChannelCategory
 
 	// Siapkan hasil
 	result := dto.ChannelCategory{
+		ServerId: serverId,
 		Channel:  []dto.ChannelList{},
 		Category: []dto.CategoryChannel{},
 	}
@@ -514,6 +534,78 @@ func (c Controller) GetChannelAndCategory(serverId string) (*dto.ChannelCategory
 	}
 
 	return &result, nil
+}
+
+func (c Controller) GetAllChannelJoinServer(userId string) (*[]dto.ChannelCategory, error) {
+	tx := c.DB.Begin()
+	defer tx.Rollback()
+
+	var serversId []string
+	if err := c.JoinServerRepo.GetListServerIdByUserId(tx, userId, &serversId); err != nil {
+		return nil, err
+	}
+
+	var channels []channel.Channel
+	if err := c.ChannelRepo.GetListByListServerId(tx, serversId, &channels); err != nil {
+		return nil, err
+	}
+	var categories []categorychannel.CategoryChannel
+	if err := c.CategoryChannelRepo.GetListByListServerId(tx, serversId, &categories); err != nil {
+		return nil, err
+	}
+
+	newLists := []dto.ChannelCategory{}
+	for _, v := range serversId {
+		newList := dto.ChannelCategory{
+			ServerId: v,
+			Channel:  []dto.ChannelList{},
+			Category: []dto.CategoryChannel{},
+		}
+
+		for _, vv := range categories {
+			if v == vv.ServerId {
+				catDto := dto.CategoryChannel{
+					ID:       vv.ID,
+					Name:     vv.Name,
+					Position: vv.Position,
+					Channel:  []dto.ChannelList{},
+				}
+
+				for _, vvv := range channels {
+					if vvv.CategoryChannelId != nil && *vvv.CategoryChannelId == vv.ID {
+						catDto.Channel = append(catDto.Channel, dto.ChannelList{
+							ID:       vvv.ID,
+							Name:     vvv.Name,
+							IsVoice:  vvv.IsVoice,
+							Position: vvv.Position,
+						})
+					}
+				}
+
+				newList.Category = append(newList.Category, catDto)
+			}
+		}
+
+		for _, ch := range channels {
+			if ch.ServerId == v {
+				if ch.CategoryChannelId == nil {
+					newList.Channel = append(newList.Channel, dto.ChannelList{
+						ID:       ch.ID,
+						Name:     ch.Name,
+						IsVoice:  ch.IsVoice,
+						Position: ch.Position,
+					})
+				}
+			}
+		}
+
+		newLists = append(newLists, newList)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return &newLists, nil
 }
 
 func (c Controller) ReorderChannel(userId string, serverId string, req dto.ReorderChannelRequest) (*dto.ChannelCategory, error) {

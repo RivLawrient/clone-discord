@@ -17,6 +17,14 @@ func (r Repo) Create(db *gorm.DB, profile *UserProfile) error {
 	return db.Create(profile).Error
 }
 
+func (r Repo) GetByUserId(db *gorm.DB, userId string, profile *UserProfile) error {
+	return db.Where("user_id = ?", userId).First(profile).Error
+}
+
+func (r Repo) GetListByListUserId(db *gorm.DB, userId []string, profile *[]UserProfile) error {
+	return db.Where("user_id IN ?", userId).Find(profile).Error
+}
+
 func (r Repo) CheckUsernameDuplicate(db *gorm.DB, username string) error {
 	var count int64
 	err := db.Model(&UserProfile{}).Where("username = ?", username).Count(&count).Error

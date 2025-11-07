@@ -51,6 +51,10 @@ func (r Repo) GetListByServerId(db *gorm.DB, serverId string, channel *[]Channel
 	return db.Where("server_id = ?", serverId).Find(channel).Order("position").Error
 }
 
+func (r Repo) GetListByListServerId(db *gorm.DB, serversId []string, channel *[]Channel) error {
+	return db.Where("server_id IN ? ", serversId).Find(channel).Order("position").Error
+}
+
 func (r Repo) GetListByServerIdWithoutCategory(db *gorm.DB, serverId string, channel *[]Channel) error {
 	return db.Where("server_id = ? AND category_channel_id IS NULL", serverId).Find(channel).Order("position").Error
 }

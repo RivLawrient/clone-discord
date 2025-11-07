@@ -89,6 +89,7 @@ type CategoryChannel struct {
 }
 
 type ChannelCategory struct {
+	ServerId string            `json:"server_id"`
 	Channel  []ChannelList     `json:"channel"`
 	Category []CategoryChannel `json:"category"`
 }
@@ -96,4 +97,25 @@ type ChannelCategory struct {
 type ChannelCategorySocket struct {
 	ServerId string          `json:"server_id"`
 	List     ChannelCategory `json:"list"`
+}
+type UserOther struct {
+	UserId         string `json:"user_id"`
+	Name           string `json:"name"`
+	Username       string `json:"username"`
+	Avatar         string `json:"avatar"`
+	AvatarBg       string `json:"avatar_bg"`
+	StatusActivity string `json:"status_activity"`
+	Bio            string `json:"bio"`
+	BannerColor    string `json:"banner_color"`
+}
+type MessageChannel struct {
+	ID        string    `json:"id"`
+	User      UserOther `json:"user"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type MessageChannelSocket struct {
+	ChannelId      string         `json:"channel_id"`
+	MessageChannel MessageChannel `json:"message_channel"`
 }

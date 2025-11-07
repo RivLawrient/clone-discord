@@ -62,3 +62,7 @@ type ReorderChannelRequest struct {
 type DeleteChannelRequest struct {
 	CategoryId *string `json:"category_id"`
 }
+
+type TextMessageRequest struct {
+	Text string `json:"text" validate:"required"`
+}

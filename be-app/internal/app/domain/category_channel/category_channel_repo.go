@@ -1,6 +1,11 @@
 package categorychannel
 
-import "gorm.io/gorm"
+import (
+	"fmt"
+	"strings"
+
+	"gorm.io/gorm"
+)
 
 type Repo struct {
 }
@@ -41,6 +46,10 @@ func (r Repo) GetListByServerId(db *gorm.DB, serverId string, categoryChannel *[
 	return db.Where("server_id = ?", serverId).Find(categoryChannel).Error
 }
 
+func (r Repo) GetListByListServerId(db *gorm.DB, serversId []string, cat *[]CategoryChannel) error {
+	return db.Where("server_id IN ?", serversId).Find(cat).Error
+}
+
 func (r Repo) GetIdByPositionAndServerId(db *gorm.DB, serverId string, position int) (string, error) {
 	var id string
 	err := db.
@@ -54,4 +63,39 @@ func (r Repo) GetIdByPositionAndServerId(db *gorm.DB, serverId string, position 
 	}
 
 	return id, nil
+}
+
+func (r Repo) UpdateBatch(db *gorm.DB, categories []CategoryChannel) error {
+	if len(categories) == 0 {
+		return nil
+	}
+
+	// Susun bagian CASE untuk setiap kolom yang ingin diupdate
+	caseName := "CASE id"
+	casePosition := "CASE id"
+	ids := make([]string, 0, len(categories))
+
+	for _, cat := range categories {
+		caseName += " WHEN '" + cat.ID + "' THEN '" + cat.Name + "'"
+		casePosition += " WHEN '" + cat.ID + "' THEN " + fmt.Sprint(cat.Position)
+		ids = append(ids, "'"+cat.ID+"'")
+	}
+
+	caseName += " END"
+	casePosition += " END"
+
+	// Gabungkan semua ID untuk filter WHERE
+	idList := strings.Join(ids, ",")
+
+	// Bangun query final
+	query := fmt.Sprintf(`
+		UPDATE category_channel
+		SET 
+			name = %s,
+			position = %s,
+			updated_at = NOW()
+		WHERE id IN (%s)
+	`, caseName, casePosition, idList)
+
+	return db.Exec(query).Error
 }

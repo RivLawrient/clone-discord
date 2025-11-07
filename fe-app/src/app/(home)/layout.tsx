@@ -3,7 +3,6 @@ import Sidebar from "./_components/sidebar/sidebar";
 import Header from "./_components/header";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-// import AuthProvider from "./_provider/auth/auth-provider";
 import AuthProvider from "./_components/auth-provider";
 
 export default async function Layout(props: { children: React.ReactNode }) {

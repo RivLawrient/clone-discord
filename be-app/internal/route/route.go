@@ -2,6 +2,7 @@ package route
 
 import (
 	"be-app/internal/app/feature/auth"
+	channelmessaging "be-app/internal/app/feature/channel_messaging"
 	"be-app/internal/app/feature/chatting"
 	"be-app/internal/app/feature/grouping"
 	"be-app/internal/app/feature/hub"
@@ -21,7 +22,8 @@ type Routes struct {
 	HubHandler       hub.Handler
 	ChattingHandler  chatting.Handler
 	GroupingHandler  grouping.Handler
-	HubServerHandler hub.Handler
+	// HubServerHandler        hub.Handler
+	ChannelMessagingHandler channelmessaging.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -65,8 +67,12 @@ func (r Routes) SetupRoutes() {
 	r.App.Delete("/channel/category/:category_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteCategoryChannelHandler)
 	r.App.Post("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.CreateChannelHandler)
 	r.App.Get("/channel/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.GetChannelAndCategoryHandler)
+	r.App.Get("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.GetAllChannelJoinServerHandler)
 	r.App.Delete("/channel/:channel_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteChannelHandler)
 	r.App.Put("/channel/reorder/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.ReorderChannelHandler)
+
+	r.App.Post("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.AddTextMessageToChannel)
+	r.App.Get("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.ListTextMsgByChannelHandler)
 
 	r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
 	r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)

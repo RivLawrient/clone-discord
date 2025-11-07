@@ -15,11 +15,9 @@ export type CategoryChannel = {
 };
 
 export type Channel = {
+  server_id: string;
   channel: ChannelList[];
   category: CategoryChannel[];
 };
 
-export const channelListAtom = atom<Channel>({
-  channel: [],
-  category: [],
-});
+export const channelListAtom = atom<Channel[]>([]);

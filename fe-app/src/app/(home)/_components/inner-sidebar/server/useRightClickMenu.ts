@@ -150,11 +150,11 @@ export function useRightClickMenuCategorySection() {
       .then(async (resp) => {
         const res = await resp.json();
         if (resp.ok) {
-          const data: CategoryChannel = res.data;
-          setChannel((p) => ({
-            ...p,
-            category: p.category.filter((v) => v.id != data.id),
-          }));
+          // const data: CategoryChannel = res.data;
+          // setChannel((p) => ({
+          //   ...p,
+          //   category: p.category.filter((v) => v.id != data.id),
+          // }));
           setOpenDelete(false);
         }
       })
