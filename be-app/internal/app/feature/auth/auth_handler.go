@@ -28,8 +28,7 @@ func NewHandler(validate validator.Validate, authController Controller) Handler 
 
 func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 	request := new(dto.RegisterRequest)
-	errd := c.BodyParser(request)
-	log.Println(errd)
+	c.BodyParser(request)
 
 	if err := a.Validate.Struct(request); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
@@ -59,7 +58,7 @@ func (a Handler) RegisterHandler(c *fiber.Ctx) error {
 		}
 
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: err.Error(),
+			Message: errs.ErrInternal.Error(),
 		})
 	}
 
@@ -169,7 +168,7 @@ func (a Handler) MeHandler(c *fiber.Ctx) error {
 		}
 
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: err.Error(),
+			Message: errs.ErrInternal.Error(),
 		})
 	}
 
@@ -177,13 +176,13 @@ func (a Handler) MeHandler(c *fiber.Ctx) error {
 		Message: "user logged",
 		Data: dto.AuthMeReponse{
 			Email:          response.Email,
-			Name:           response.Profile.Name,
-			Username:       response.Profile.Username,
-			Bio:            response.Profile.Bio,
-			Avatar:         response.Profile.Avatar,
-			AvatarBg:       response.Profile.AvatarBg,
-			BannerColor:    response.Profile.BannerColor,
-			StatusActivity: response.Profile.StatusActivity,
+			Name:           response.UserProfile.Name,
+			Username:       response.UserProfile.Username,
+			Bio:            response.UserProfile.Bio,
+			Avatar:         response.UserProfile.Avatar,
+			AvatarBg:       response.UserProfile.AvatarBg,
+			BannerColor:    response.UserProfile.BannerColor,
+			StatusActivity: response.UserProfile.StatusActivity,
 		},
 	})
 }
@@ -232,7 +231,7 @@ func (a Handler) RefreshJWTHandler(c *fiber.Ctx) error {
 	token, err := helper.GenerateJWT(refresh.UserID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: "something wrong",
+			Message: errs.ErrInternal.Error(),
 		})
 	}
 
@@ -249,7 +248,7 @@ func (a Handler) LogoutHandler(c *fiber.Ctx) error {
 
 	if err := a.AuthController.RemoveRefreshToken(user_id); err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: "something wrong",
+			Message: errs.ErrInternal.Error(),
 		})
 	}
 

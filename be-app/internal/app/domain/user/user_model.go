@@ -15,7 +15,7 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	Profile userprofile.UserProfile `gorm:"foreignKey:UserId;constraint:OnDelete:SET NULL"`
+	UserProfile userprofile.UserProfile `gorm:"constraint:OnDelete:CASCADE"`
 
 	Refresh refreshtoken.RefreshToken `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 

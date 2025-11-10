@@ -3,7 +3,7 @@ package dto
 import "mime/multipart"
 
 type RegisterRequest struct {
-	Email     string `json:"email" validate:"required,email"`
+	Email     string `json:"email" validate:"required,email,max=255"`
 	Name      string `json:"name" validate:"max=255"`
 	Username  string `json:"username" validate:"required,max=255"`
 	Password  string `json:"password" validate:"required,min=8,max=100"`
@@ -11,9 +11,11 @@ type RegisterRequest struct {
 }
 
 type LoginRequest struct {
-	Email    string `json:"email" validate:"required,email"`
+	Email    string `json:"email" validate:"required,email,max=255"`
 	Password string `json:"password" validate:"required,min=8,max=255"`
 }
+
+// done
 
 type NewFriendRequest struct {
 	Username string `json:"username" validate:"required"`

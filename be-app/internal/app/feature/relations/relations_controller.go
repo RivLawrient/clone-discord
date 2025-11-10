@@ -178,7 +178,7 @@ func (c Controller) OtherUserByUsername(username string) (*dto.OtherUser, error)
 	}
 
 	return &dto.OtherUser{
-		UserId:         user.UserId,
+		UserId:         user.UserID,
 		Name:           user.Name,
 		Username:       user.Username,
 		Avatar:         user.Avatar,
@@ -186,4 +186,3 @@ func (c Controller) OtherUserByUsername(username string) (*dto.OtherUser, error)
 		StatusActivity: user.StatusActivity,
 	}, nil
 }
-

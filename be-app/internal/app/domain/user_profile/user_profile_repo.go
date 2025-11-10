@@ -49,7 +49,7 @@ func (r Repo) GetUserIDByUsername(db *gorm.DB, username string, userID *string) 
 		return err
 	}
 
-	*userID = profile.UserId
+	*userID = profile.UserID
 	return nil
 }
 

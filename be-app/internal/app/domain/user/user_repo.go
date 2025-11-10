@@ -50,7 +50,7 @@ func (r Repo) FindByEmail(db *gorm.DB, email string, user *User) error {
 }
 
 func (r Repo) FindById(db *gorm.DB, id string, user *User) error {
-	return db.Preload("Profile").Where("id = ?", id).First(user).Error
+	return db.Preload("UserProfile").Where("id = ?", id).First(user).Error
 }
 
 func (r Repo) FindPasswordById(db *gorm.DB, id string, password *string) error {

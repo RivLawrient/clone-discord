@@ -40,21 +40,21 @@ func seedUserAndProfile(t *testing.T) (user.User, user.User, user.User) {
 
 	profile1 := userprofile.UserProfile{
 		ID:        uuid.NewString(),
-		UserId:    user1.ID,
+		UserID:    user1.ID,
 		Name:      "san",
 		Username:  "san",
 		Birthdate: time.Now(),
 	}
 	profile2 := userprofile.UserProfile{
 		ID:        uuid.NewString(),
-		UserId:    user2.ID,
+		UserID:    user2.ID,
 		Name:      "san2",
 		Username:  "san2",
 		Birthdate: time.Now(),
 	}
 	profile3 := userprofile.UserProfile{
 		ID:        uuid.NewString(),
-		UserId:    user3.ID,
+		UserID:    user3.ID,
 		Name:      "san3",
 		Username:  "san3",
 		Birthdate: time.Now(),

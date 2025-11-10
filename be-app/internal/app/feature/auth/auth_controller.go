@@ -6,8 +6,7 @@ import (
 	userprofile "be-app/internal/app/domain/user_profile"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
-	"fmt"
-	"math/rand"
+	"be-app/internal/helper"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -48,17 +47,9 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 	if err := a.UserRepo.CheckEmailDuplicate(tx, request.Email); err != nil {
 		return nil, err
 	}
+
 	password, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
-	}
-	users := user.User{
-		ID:       uuid.NewString(),
-		Email:    request.Email,
-		Password: string(password),
-	}
-
-	if err := a.UserRepo.NewUser(tx, &users); err != nil {
 		return nil, err
 	}
 
@@ -76,20 +67,24 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 		name = request.Username
 	}
 
-	profile := userprofile.UserProfile{
-		ID:             uuid.NewString(),
-		UserId:         users.ID,
-		Name:           name,
-		Username:       request.Username,
-		Bio:            "",
-		Avatar:         "",
-		AvatarBg:       RandomHexColor(),
-		BannerColor:    "#ffffff",
-		Birthdate:      birth,
-		StatusActivity: string(StatusOffline),
+	users := user.User{
+		ID:       uuid.NewString(),
+		Email:    request.Email,
+		Password: string(password),
+		UserProfile: userprofile.UserProfile{
+			ID:             uuid.NewString(),
+			Name:           name,
+			Username:       request.Username,
+			Bio:            "",
+			Avatar:         "",
+			AvatarBg:       helper.RandomHexColor(),
+			BannerColor:    "#ffffff",
+			Birthdate:      birth,
+			StatusActivity: string(StatusOffline),
+		},
 	}
 
-	if err := a.ProfileRepo.Create(tx, &profile); err != nil {
+	if err := a.UserRepo.NewUser(tx, &users); err != nil {
 		return nil, err
 	}
 
@@ -100,23 +95,12 @@ func (a Controller) RegisterUser(request *dto.RegisterRequest) (*user.User, erro
 	return &user.User{
 		ID:    users.ID,
 		Email: users.Email,
-		Profile: userprofile.UserProfile{
-			ID:       profile.ID,
-			Name:     profile.Name,
-			Username: profile.Username,
+		UserProfile: userprofile.UserProfile{
+			ID:       users.UserProfile.ID,
+			Name:     users.UserProfile.Name,
+			Username: users.UserProfile.Username,
 		},
 	}, nil
-}
-
-func RandomHexColor() string {
-	// bikin random generator baru dengan seed dari waktu
-	r := rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	// generate angka antara 0x000000 sampai 0xFFFFFF
-	color := r.Intn(0xFFFFFF + 1)
-
-	// format ke hex string dengan 6 digit
-	return fmt.Sprintf("#%06X", color)
 }
 
 func (a Controller) LoginUser(request *dto.LoginRequest) (*user.User, error) {

@@ -88,56 +88,6 @@ func (c Controller) AddTextMsgToChannel(userId string, channelId string, text st
 	return &message, profile, &userList, nil
 }
 
-// func (c Controller) ListTextMsgByChannel(channelId string) (*[]dto.MessageChannel, error) {
-// 	tx := c.DB.Begin()
-// 	defer tx.Rollback()
-
-// 	list := new([]messagechannel.MessageChannel)
-// 	if err := c.MessageChannelRepo.ListByChannelId(tx, channelId, list); err != nil {
-// 		return nil, err
-// 	}
-
-// 	var listId []string
-
-// 	for _, v := range *list {
-// 		listId = append(listId, v.UserId)
-// 	}
-
-// 	listProfile := new([]userprofile.UserProfile)
-// 	if err := c.UserProfileRepo.GetListByListUserId(tx, listId, listProfile); err != nil {
-// 		return nil, err
-// 	}
-
-// 	result := []dto.MessageChannel{}
-
-// 	for _, v := range *list {
-// 		for _, vv := range *listProfile {
-// 			if v.UserId == vv.UserId {
-// 				result = append(result, dto.MessageChannel{
-// 					ID: v.ID,
-// 					User: dto.UserOther{
-// 						UserId:         vv.UserId,
-// 						Name:           vv.Name,
-// 						Username:       vv.Username,
-// 						Avatar:         vv.Avatar,
-// 						AvatarBg:       vv.AvatarBg,
-// 						StatusActivity: vv.StatusActivity,
-// 						Bio:            vv.Bio,
-// 						BannerColor:    vv.BannerColor,
-// 					},
-// 					Text:      v.Text,
-// 					CreatedAt: v.CreatedAt,
-// 				})
-// 			}
-// 		}
-// 	}
-
-// 	if err := tx.Commit().Error; err != nil {
-// 		return nil, err
-// 	}
-// 	return &result, nil
-// }
-
 func (c Controller) ListTextMsgByChannel(channelId string) (*[]dto.MessageChannel, error) {
 	tx := c.DB.Begin()
 	defer func() {
@@ -179,7 +129,7 @@ func (c Controller) ListTextMsgByChannel(channelId string) (*[]dto.MessageChanne
 	// --- 4️⃣ Buat map user_id -> profile untuk akses cepat ---
 	profileMap := make(map[string]userprofile.UserProfile, len(*listProfile))
 	for _, p := range *listProfile {
-		profileMap[p.UserId] = p
+		profileMap[p.UserID] = p
 	}
 
 	// --- 5️⃣ Gabungkan pesan dengan profil user ---
@@ -190,7 +140,7 @@ func (c Controller) ListTextMsgByChannel(channelId string) (*[]dto.MessageChanne
 			result = append(result, dto.MessageChannel{
 				ID: msg.ID,
 				User: dto.UserOther{
-					UserId:         profile.UserId,
+					UserId:         profile.UserID,
 					Name:           profile.Name,
 					Username:       profile.Username,
 					Avatar:         profile.Avatar,

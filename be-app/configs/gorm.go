@@ -1,6 +1,7 @@
 package configs
 
 import (
+	"be-app/internal/apps/domain/entity"
 	"fmt"
 	"log"
 	"os"
@@ -67,6 +68,17 @@ func NewDB() *gorm.DB {
 	// 	&channel.Channel{},
 	// 	&messagechannel.MessageChannel{},
 	// )
+
+	db.Migrator().DropTable(
+		&entity.User{},
+		&entity.UserProfile{},
+		&entity.RefreshToken{},
+	)
+	db.AutoMigrate(
+		&entity.User{},
+		&entity.UserProfile{},
+		&entity.RefreshToken{},
+	)
 
 	return db
 }

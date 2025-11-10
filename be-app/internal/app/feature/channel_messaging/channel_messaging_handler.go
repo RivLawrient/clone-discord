@@ -50,7 +50,7 @@ func (h Handler) AddTextMessageToChannel(c *fiber.Ctx) error {
 		MessageChannel: dto.MessageChannel{
 			ID: msg.ID,
 			User: dto.UserOther{
-				UserId:         profile.UserId,
+				UserId:         profile.UserID,
 				Name:           profile.Name,
 				Username:       profile.Username,
 				Avatar:         profile.Avatar,
@@ -72,7 +72,7 @@ func (h Handler) AddTextMessageToChannel(c *fiber.Ctx) error {
 		Data: dto.MessageChannel{
 			ID: msg.ID,
 			User: dto.UserOther{
-				UserId:         profile.UserId,
+				UserId:         profile.UserID,
 				Name:           profile.Name,
 				Username:       profile.Username,
 				Avatar:         profile.Avatar,

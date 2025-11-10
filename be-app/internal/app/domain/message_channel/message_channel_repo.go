@@ -15,3 +15,4 @@ func (r Repo) NewChat(db *gorm.DB, msg *MessageChannel) error {
 func (r Repo) ListByChannelId(db *gorm.DB, channelId string, list *[]MessageChannel) error {
 	return db.Where("channel_id = ?", channelId).Find(list).Error
 }
+

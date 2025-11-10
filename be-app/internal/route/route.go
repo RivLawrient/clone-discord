@@ -1,29 +1,23 @@
 package route
 
 import (
-	"be-app/internal/app/feature/auth"
-	channelmessaging "be-app/internal/app/feature/channel_messaging"
-	"be-app/internal/app/feature/chatting"
-	"be-app/internal/app/feature/grouping"
-	"be-app/internal/app/feature/hub"
-	"be-app/internal/app/feature/relations"
+	"be-app/internal/apps/feature/auth"
 	"be-app/internal/dto"
 	"be-app/internal/middleware"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
-	"github.com/gofiber/websocket/v2"
 )
 
 type Routes struct {
-	App              *fiber.App
-	AuthHandler      auth.Handler
-	RealtionsHandler relations.Handler
-	HubHandler       hub.Handler
-	ChattingHandler  chatting.Handler
-	GroupingHandler  grouping.Handler
+	App         *fiber.App
+	AuthHandler auth.Handler
+	// RealtionsHandler relations.Handler
+	// HubHandler       hub.Handler
+	// ChattingHandler  chatting.Handler
+	// GroupingHandler  grouping.Handler
 	// HubServerHandler        hub.Handler
-	ChannelMessagingHandler channelmessaging.Handler
+	// ChannelMessagingHandler channelmessaging.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -40,59 +34,63 @@ func (r Routes) SetupRoutes() {
 		})
 	})
 
-	r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
-	r.App.Post("/auth/login", r.AuthHandler.LoginHandler)
-	r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
-	r.App.Get("/auth/refresh", r.AuthHandler.RefreshJWTHandler)
+	r.App.Post("/auth/register", r.AuthHandler.RegisterUserHandler)
+	r.App.Put("/auth/login", r.AuthHandler.LoginUserHandler)
 	r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
-	r.App.Put("/auth/username", middleware.RequireJWTAuth(), r.AuthHandler.ChangeUsernameHandler)
-	r.App.Put("/auth/profile", middleware.RequireJWTAuth(), r.AuthHandler.UpdateProfileHandler)
 
-	r.App.Get("/user/:username", r.RealtionsHandler.GetOtherUser)
+	// r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
+	// r.App.Post("/auth/login", r.AuthHandler.LoginHandler)
+	// r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
+	// r.App.Get("/auth/refresh", r.AuthHandler.RefreshJWTHandler)
+	// r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
+	// r.App.Put("/auth/username", middleware.RequireJWTAuth(), r.AuthHandler.ChangeUsernameHandler)
+	// r.App.Put("/auth/profile", middleware.RequireJWTAuth(), r.AuthHandler.UpdateProfileHandler)
 
-	r.App.Post("/friend/add/:username", middleware.RequireJWTAuth(), r.RealtionsHandler.AddFriendHandler)
-	r.App.Get("/friend/list", middleware.RequireJWTAuth(), r.RealtionsHandler.GetListFriendHandler)
-	r.App.Delete("/friend/cancel/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.CancelSentFriendHandler)
-	r.App.Delete("/friend/decline/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.DeclineRequestFriendHandler)
-	r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
-	r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
+	// r.App.Get("/user/:username", r.RealtionsHandler.GetOtherUser)
 
-	r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.CreateServerHandler)
-	r.App.Get("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GetJoinServerHandler)
-	r.App.Put("/server/:id/:position", middleware.RequireJWTAuth(), r.GroupingHandler.UpdatePositionServerHandler)
-	r.App.Get("/server/:code", middleware.RequireJWTAuth(), r.GroupingHandler.GetServerByCodeHandler)
-	r.App.Post("/server/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.JoinServerHandler)
+	// r.App.Post("/friend/add/:username", middleware.RequireJWTAuth(), r.RealtionsHandler.AddFriendHandler)
+	// r.App.Get("/friend/list", middleware.RequireJWTAuth(), r.RealtionsHandler.GetListFriendHandler)
+	// r.App.Delete("/friend/cancel/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.CancelSentFriendHandler)
+	// r.App.Delete("/friend/decline/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.DeclineRequestFriendHandler)
+	// r.App.Post("/friend/accept/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.AcceptRequestFriendHandler)
+	// r.App.Delete("/friend/remove/:user_id", middleware.RequireJWTAuth(), r.RealtionsHandler.RemoveFriendHandler)
 
-	r.App.Post("/channel/category", middleware.RequireJWTAuth(), r.GroupingHandler.CreateCategoryChannelHandler)
-	r.App.Delete("/channel/category/:category_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteCategoryChannelHandler)
-	r.App.Post("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.CreateChannelHandler)
-	r.App.Get("/channel/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.GetChannelAndCategoryHandler)
-	r.App.Get("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.GetAllChannelJoinServerHandler)
-	r.App.Delete("/channel/:channel_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteChannelHandler)
-	r.App.Put("/channel/reorder/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.ReorderChannelHandler)
+	// r.App.Post("/server", middleware.RequireJWTAuth(), r.GroupingHandler.CreateServerHandler)
+	// r.App.Get("/server", middleware.RequireJWTAuth(), r.GroupingHandler.GetJoinServerHandler)
+	// r.App.Put("/server/:id/:position", middleware.RequireJWTAuth(), r.GroupingHandler.UpdatePositionServerHandler)
+	// r.App.Get("/server/:code", middleware.RequireJWTAuth(), r.GroupingHandler.GetServerByCodeHandler)
+	// r.App.Post("/server/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.JoinServerHandler)
 
-	r.App.Post("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.AddTextMessageToChannel)
-	r.App.Get("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.ListTextMsgByChannelHandler)
+	// r.App.Post("/channel/category", middleware.RequireJWTAuth(), r.GroupingHandler.CreateCategoryChannelHandler)
+	// r.App.Delete("/channel/category/:category_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteCategoryChannelHandler)
+	// r.App.Post("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.CreateChannelHandler)
+	// r.App.Get("/channel/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.GetChannelAndCategoryHandler)
+	// r.App.Get("/channel", middleware.RequireJWTAuth(), r.GroupingHandler.GetAllChannelJoinServerHandler)
+	// r.App.Delete("/channel/:channel_id", middleware.RequireJWTAuth(), r.GroupingHandler.DeleteChannelHandler)
+	// r.App.Put("/channel/reorder/:server_id", middleware.RequireJWTAuth(), r.GroupingHandler.ReorderChannelHandler)
 
-	r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
-	r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)
+	// r.App.Post("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.AddTextMessageToChannel)
+	// r.App.Get("/msg/channel/:channel_id", middleware.RequireJWTAuth(), r.ChannelMessagingHandler.ListTextMsgByChannelHandler)
 
-	r.App.Use("/ws", func(c *fiber.Ctx) error {
-		if websocket.IsWebSocketUpgrade(c) {
-			return c.Next()
-		}
-		return fiber.ErrUpgradeRequired
-	})
-	r.App.Get("/ws", websocket.New(r.HubHandler.Socket))
+	// r.App.Post("/dm-text/send/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.AddTextChatHandler)
+	// r.App.Get("/dm-text/list/:user_id", middleware.RequireJWTAuth(), r.ChattingHandler.ListTextChatHandler)
 
-	r.App.Get("/img/:id", func(c *fiber.Ctx) error {
+	// r.App.Use("/ws", func(c *fiber.Ctx) error {
+	// 	if websocket.IsWebSocketUpgrade(c) {
+	// 		return c.Next()
+	// 	}
+	// 	return fiber.ErrUpgradeRequired
+	// })
+	// r.App.Get("/ws", websocket.New(r.HubHandler.Socket))
 
-		filename := c.Params("id")
-		imageDir := "./public/"
+	// r.App.Get("/img/:id", func(c *fiber.Ctx) error {
 
-		return c.SendFile(imageDir + filename)
+	// 	filename := c.Params("id")
+	// 	imageDir := "./public/"
 
-	})
+	// 	return c.SendFile(imageDir + filename)
+
+	// })
 }
 
 func RouteNotFound(c *fiber.Ctx, err error) error {

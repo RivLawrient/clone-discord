@@ -5,7 +5,7 @@ import "errors"
 var (
 	ErrEmailUsed         = errors.New("email already used")
 	ErrUsernameUsed      = errors.New("username already used")
-	ErrUserNotFound      = errors.New("user not found")
+	ErrUserNotFound      = errors.New("user is not found")
 	ErrUserLogout        = errors.New("user was logout")
 	ErrTokenNotFound     = errors.New("token not found")
 	ErrTokenExpired      = errors.New("token is expired")

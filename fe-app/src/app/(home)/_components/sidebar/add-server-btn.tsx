@@ -14,6 +14,7 @@ import { SetStateAction, useAtom } from "jotai";
 import { userAtom } from "../../_state/user-atom";
 import { apiCall, GetCookie } from "../../_helper/api-client";
 import { serverAtom } from "../../_state/server-atom";
+import { channelListAtom } from "../../_state/channel-list-atom";
 
 export default function AddServerBtn() {
   return (
@@ -21,10 +22,14 @@ export default function AddServerBtn() {
       <ModalCreateServer>
         <div
           className={twMerge(
-            "bg-server-btn-bg hover:bg-server-btn-hover group mx-4 size-10 cursor-pointer rounded-xl font-semibold",
+            "bg-server-btn-bg hover:bg-server-btn-hover group mx-4 size-10 cursor-pointer rounded-xl font-semibold"
           )}
         >
-          <TooltipDesc text="Add a Server" side={"right"} is_child>
+          <TooltipDesc
+            text="Add a Server"
+            side={"right"}
+            is_child
+          >
             <div className="size-full cursor-pointer">
               <PlusCircleIcon className="text-server-btn-bg group-hover:text-server-btn-hover m-2 cursor-pointer fill-white" />
             </div>
@@ -52,7 +57,10 @@ function ModalCreateServer(props: { children: React.ReactNode }) {
         }, 300);
       }}
     >
-      <Dialog.Trigger asChild className="outline-none">
+      <Dialog.Trigger
+        asChild
+        className="outline-none"
+      >
         {props.children}
       </Dialog.Trigger>
       <Dialog.Portal>
@@ -118,9 +126,15 @@ function Step(props: {
         }}
         className="flex w-full cursor-pointer items-center rounded-lg border border-[#36363d] bg-[#29292d] transition-all outline-none hover:brightness-110"
       >
-        <PenSquareIcon className="m-4" size={20} />
+        <PenSquareIcon
+          className="m-4"
+          size={20}
+        />
         <span className="grow text-start font-semibold">Create My Own</span>
-        <ChevronRightIcon size={20} className="m-2 brightness-75" />
+        <ChevronRightIcon
+          size={20}
+          className="m-2 brightness-75"
+        />
       </button>
       <h1 className="mt-4 mb-2 text-lg font-semibold">
         Have an invite already ?
@@ -154,6 +168,7 @@ function StepCreate(props: {
   const refInput = useRef<HTMLInputElement>(null);
   const [server, setServer] = useAtom(serverAtom);
   const [loading, setLoading] = useState(false);
+  const [channels, setChannels] = useAtom(channelListAtom);
 
   const imageChangeHandle = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -195,6 +210,14 @@ function StepCreate(props: {
         const res = await resp.json();
         if (resp.ok) {
           setServer([...server, res.data]);
+          setChannels((p) => [
+            ...p,
+            {
+              server_id: res.data.id,
+              category: [],
+              channel: [],
+            },
+          ]);
         }
       })
       .catch(() => {})
@@ -216,7 +239,7 @@ function StepCreate(props: {
       <div
         className={twMerge(
           "relative flex size-20 flex-col items-center justify-center rounded-full border-dashed border-white/75",
-          !previewUrl && "border-2",
+          !previewUrl && "border-2"
         )}
       >
         <input
@@ -224,7 +247,7 @@ function StepCreate(props: {
           accept="image/*"
           onChange={imageChangeHandle}
           className={twMerge(
-            "absolute z-10 size-full cursor-pointer rounded-full opacity-0",
+            "absolute z-10 size-full cursor-pointer rounded-full opacity-0"
           )}
           title=""
         />
@@ -274,7 +297,10 @@ function StepCreate(props: {
           className="cursor-pointer rounded-lg bg-[#5965f2] px-6 py-2 font-semibold transition-all hover:bg-[#5965f2]/75"
         >
           {loading ? (
-            <Loader2Icon size={20} className="mx-3 animate-spin" />
+            <Loader2Icon
+              size={20}
+              className="mx-3 animate-spin"
+            />
           ) : (
             "Create"
           )}

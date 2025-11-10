@@ -6,3 +6,5 @@ type AuthResponse struct {
 	Username string
 	Email    string
 }
+
+

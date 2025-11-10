@@ -18,6 +18,8 @@ type AuthMeReponse struct {
 	StatusActivity string `json:"status_activity"`
 }
 
+// done
+
 type FriendList struct {
 	UserId         string    `json:"user_id"`
 	IsPending      bool      `json:"is_pending"`

@@ -6,7 +6,7 @@ import (
 
 type UserProfile struct {
 	ID             string    `gorm:"primaryKey;type:uuid"`
-	UserId         string    `gorm:"unique;not null"`
+	UserID         string    `gorm:"unique;not null"`
 	Name           string    `gorm:"type:varchar(255);not null"`
 	Username       string    `gorm:"type:varchar(255);unique;not null;unique"`
 	Bio            string    `gorm:"type:text"`

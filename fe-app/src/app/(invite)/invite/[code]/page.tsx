@@ -1,5 +1,6 @@
 "use client";
 import { apiCall } from "@/app/(home)/_helper/api-client";
+import { channelListAtom } from "@/app/(home)/_state/channel-list-atom";
 import { serverAtom, ServerList } from "@/app/(home)/_state/server-atom";
 import { useAtom } from "jotai";
 import { Loader2Icon } from "lucide-react";
@@ -66,6 +67,7 @@ export default function page() {
 function Found(props: { data: ServerInvite }) {
   const [loading, setLoading] = useState(false);
   const [server, setServer] = useAtom(serverAtom);
+  const [channels, setChannels] = useAtom(channelListAtom);
   const router = useRouter();
 
   const acceptHandle = () => {
@@ -77,6 +79,14 @@ function Found(props: { data: ServerInvite }) {
         const res = await resp.json();
         if (resp.ok) {
           setServer((p) => [...p, res.data]);
+          setChannels((p) => [
+            ...p,
+            {
+              server_id: res.data.id,
+              category: [],
+              channel: [],
+            },
+          ]);
           router.replace("/channels/" + res.data.id);
         }
       })
