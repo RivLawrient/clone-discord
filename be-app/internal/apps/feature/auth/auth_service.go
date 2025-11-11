@@ -38,22 +38,22 @@ func NewService(db *gorm.DB, userRepo repository.UserRepo, userProfileRepo repos
 	}
 }
 
-func (s *Service) RegisterUser(req dto.RegisterRequest, userAgent string, IP string) (*entity.User, error) {
+func (s *Service) RegisterUser(req dto.RegisterRequest, userAgent string, IP string) (*entity.User, *string, error) {
 	tx := s.DB.Begin()
 	defer tx.Rollback()
 
 	if err := s.UserRepo.CheckEmailDuplicate(tx, req.Email); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	password, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	birth, err := time.Parse("2006-01-02", req.BirthDate)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	name := req.Name
@@ -81,44 +81,55 @@ func (s *Service) RegisterUser(req dto.RegisterRequest, userAgent string, IP str
 	}
 
 	if err := s.UserRepo.Create(tx, &newUser); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := s.generateRefreshToken(tx, &newUser.RefreshToken, newUser.ID, userAgent, IP); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &newUser, nil
+	token, err := helper.GenerateJWT(newUser.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &newUser, &token, nil
 }
 
-func (s *Service) LoginUser(req dto.LoginRequest, userAgent string, IP string) (*entity.User, error) {
+func (s *Service) LoginUser(req dto.LoginRequest, userAgent string, IP string) (*entity.User, *string, error) {
 	tx := s.DB.Begin()
 	defer tx.Rollback()
 
 	var user entity.User
 	if err := s.UserRepo.FindByEmail(s.DB, req.Email, &user); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password)); err != nil {
-		return nil, errs.ErrUserNotFound
+		return nil, nil, errs.ErrUserNotFound
 	}
 
 	if err := s.generateRefreshToken(tx, &user.RefreshToken, user.ID, userAgent, IP); err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &user, nil
+	token, err := helper.GenerateJWT(user.ID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return &user, &token, nil
 }
 
+// hanya digunakan saat register atau login
 func (s *Service) generateRefreshToken(db *gorm.DB, rt *entity.RefreshToken, userID string, userAgent string, IP string) error {
 	if err := s.RefreshTokenRepo.FindByUserID(db, userID, rt); err == nil {
 		if err := s.RefreshTokenRepo.DeleteByUserID(db, userID); err != nil {
@@ -140,6 +151,7 @@ func (s *Service) generateRefreshToken(db *gorm.DB, rt *entity.RefreshToken, use
 	return nil
 }
 
+// return data user yang sedang login
 func (s *Service) Me(userID string) (*entity.User, error) {
 	var user entity.User
 
@@ -152,4 +164,28 @@ func (s *Service) Me(userID string) (*entity.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (s *Service) RefreshJWT(refreshToken string) (*string, error) {
+	var rt entity.RefreshToken
+	//melakukan validasi pada token terlebih dahulu
+	if err := s.RefreshTokenRepo.FindByToken(s.DB, refreshToken, &rt); err != nil {
+		return nil, err
+	}
+
+	//cek expire token
+	if rt.ExpiresAt.Before(time.Now()) {
+		return nil, errs.ErrTokenExpired
+	}
+
+	token, err := helper.GenerateJWT(rt.UserID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &token, nil
+}
+
+func (s *Service) Logout(userID string) error {
+	return s.RefreshTokenRepo.DeleteByUserID(s.DB, userID)
 }

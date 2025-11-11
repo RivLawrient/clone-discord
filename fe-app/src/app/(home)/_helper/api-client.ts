@@ -30,7 +30,7 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
 
   if (hit.status === 401) {
     await fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
-      method: "GET",
+      method: "PUT",
       credentials: "include",
     }).then(async (resp) => {
       const res = await resp.json();

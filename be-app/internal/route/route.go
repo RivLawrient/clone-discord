@@ -37,6 +37,8 @@ func (r Routes) SetupRoutes() {
 	r.App.Post("/auth/register", r.AuthHandler.RegisterUserHandler)
 	r.App.Put("/auth/login", r.AuthHandler.LoginUserHandler)
 	r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
+	r.App.Put("/auth/refresh", r.AuthHandler.RefreshTokenHandler)
+	r.App.Delete("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
 
 	// r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
 	// r.App.Post("/auth/login", r.AuthHandler.LoginHandler)

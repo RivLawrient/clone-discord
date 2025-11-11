@@ -24,3 +24,6 @@ func (r *RefreshTokenRepo) Create(db *gorm.DB, rt *entity.RefreshToken) error {
 	return db.Create(rt).Error
 }
 
+func (r *RefreshTokenRepo) FindByToken(db *gorm.DB, token string, rt *entity.RefreshToken) error {
+	return db.Where("token = ?", token).First(rt).Error
+}

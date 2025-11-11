@@ -33,7 +33,7 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := h.Service.RegisterUser(*req, c.Get("User-Agent"), c.IP())
+	response, token, err := h.Service.RegisterUser(*req, c.Get("User-Agent"), c.IP())
 	if err != nil {
 		if errors.Is(err, errs.ErrEmailUsed) {
 			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
@@ -57,31 +57,19 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 			Message: errs.ErrInternal.Error(),
 		})
 	}
-
-	token, err := helper.GenerateJWT(response.ID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: errs.ErrInternal.Error(),
-		})
-	}
-
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
-		// Secure:   true,
-		// Expires:  refreshToken.ExpiresAt,
-		// Expires:  time.Now().Add(7 * 24 * time.Hour),
-		// Expires: time.Now().Add(2 * time.Minute),
+		Path:     "/auth/refresh",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
 		Message: "register success",
 		Data: dto.TokenResponse{
 			Email: response.Email,
-			Token: token,
+			Token: *token,
 		},
 	})
 }
@@ -97,7 +85,7 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	response, err := h.Service.LoginUser(*req, c.Get("User-Agent"), c.IP())
+	response, token, err := h.Service.LoginUser(*req, c.Get("User-Agent"), c.IP())
 	if err != nil {
 		if errors.Is(err, errs.ErrUserNotFound) {
 			return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseWeb[string]{
@@ -111,28 +99,19 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	token, err := helper.GenerateJWT(response.ID)
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
-			Message: errs.ErrInternal.Error(),
-		})
-	}
-
 	c.Cookie(&fiber.Cookie{
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh", // hanya endpoint ini yang bisa akses
-		// Secure:   true,
-		// Expires:  refreshToken.ExpiresAt,
+		Path:     "/auth/refresh",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
 		Message: "login success",
 		Data: dto.TokenResponse{
 			Email: response.Email,
-			Token: token,
+			Token: *token,
 		},
 	})
 }
@@ -165,5 +144,64 @@ func (h *Handler) MeHandler(c *fiber.Ctx) error {
 			BannerColor:    response.UserProfile.BannerColor,
 			StatusActivity: response.UserProfile.StatusActivity,
 		},
+	})
+}
+
+func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
+	refreshToken := c.Cookies("refresh_token")
+	if refreshToken == "" {
+		return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseWeb[any]{
+			Message: "refresh token missing",
+		})
+	}
+
+	token, err := h.Service.RefreshJWT(refreshToken)
+	if err != nil {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			HTTPOnly: true,
+			SameSite: "Strict",
+			Path:     "/auth/refresh",
+		})
+
+		if errors.Is(err, errs.ErrTokenExpired) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "refresh success",
+		Data: fiber.Map{
+			"token": token,
+		},
+	})
+}
+
+func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+
+	if err := h.Service.Logout(userID); err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "refresh_token",
+		Value:    "",
+		HTTPOnly: true,
+		SameSite: "Strict",
+		Path:     "/auth/refresh",
+	})
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "logout success",
 	})
 }

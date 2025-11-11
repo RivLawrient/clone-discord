@@ -16,7 +16,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
     v
       .replace(/\s+/g, "")
       .toLowerCase()
-      .includes(search.replace(/\s+/g, "").toLowerCase()),
+      .includes(search.replace(/\s+/g, "").toLowerCase())
   );
   let CurrentTab = tab;
 
@@ -34,7 +34,10 @@ export default function SettingModal(props: { children: React.ReactNode }) {
 
           <div className="flex min-h-0 grow justify-end overflow-y-scroll bg-[#121214] text-white">
             <div className="flex min-h-0 w-[250px] shrink-0 flex-col pt-[60px] pr-4">
-              <SearchInput value={search} setValue={setSearch} />
+              <SearchInput
+                value={search}
+                setValue={setSearch}
+              />
               <div className="mt-2 flex flex-col gap-0.5">
                 {search != "" && (
                   <h1 className="mx-3 text-[11px] font-semibold brightness-75">
@@ -62,7 +65,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
                         "rounded-lg p-1.5 px-2 text-start font-semibold",
                         CurrentTab === C
                           ? "bg-[#2d2d30] brightness-100"
-                          : "cursor-pointer brightness-75 hover:bg-[#1c1c1f] hover:brightness-100",
+                          : "cursor-pointer brightness-75 hover:bg-[#1c1c1f] hover:brightness-100"
                       )}
                     >
                       {v}
@@ -133,7 +136,7 @@ function SearchInput(props: {
 function LogoutBtn() {
   const logoutHandle = () => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/logout`, {
-      method: "POST",
+      method: "DELETE",
       credentials: "include",
     }).then(async (reps) => {
       if (reps.ok) {
@@ -146,7 +149,10 @@ function LogoutBtn() {
       <Dialog.Trigger asChild>
         <button className="flex cursor-pointer justify-between rounded-lg p-1.5 px-2 text-start font-semibold text-[#f57976] hover:bg-[#221517]">
           Log Out
-          <LogOutIcon size={18} className="my-auto" />
+          <LogOutIcon
+            size={18}
+            className="my-auto"
+          />
         </button>
       </Dialog.Trigger>
       <Dialog.Portal>
