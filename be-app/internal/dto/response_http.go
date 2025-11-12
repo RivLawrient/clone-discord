@@ -18,6 +18,15 @@ type AuthMeReponse struct {
 	StatusActivity string `json:"status_activity"`
 }
 
+type ServerListResponse struct {
+	ID           string `json:"id"`
+	Name         string `json:"name"`
+	ProfileImage string `json:"profile_image"`
+	InviteCode   string `json:"invite_code"`
+	Position     int    `json:"position"`
+	IsOwner      bool   `json:"is_owner"`
+}
+
 // done
 
 type FriendList struct {

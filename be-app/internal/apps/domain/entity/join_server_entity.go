@@ -10,6 +10,9 @@ type JoinServer struct {
 	IsOwner   bool   `gorm:"not null;type:bool;default:false"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+
+	Server Server
+	User   User
 }
 
 func (j *JoinServer) TableName() string {

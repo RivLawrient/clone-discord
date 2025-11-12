@@ -15,6 +15,18 @@ type LoginRequest struct {
 	Password string `json:"password" validate:"required,min=8,max=255"`
 }
 
+type UpdateProfileRequest struct {
+	Name        string                `form:"name"`
+	BannerColor string                `form:"banner_color"`
+	Bio         string                `form:"bio" validate:"max=50"`
+	Avatar      *multipart.FileHeader `form:"avatar"`
+}
+
+type NewServerRequest struct {
+	Name         string                `form:"name" validate:"required"`
+	ProfileImage *multipart.FileHeader `form:"profile_image"`
+}
+
 // done
 
 type NewFriendRequest struct {
@@ -28,18 +40,6 @@ type TextChatRequest struct {
 type ChangeUsernameRequest struct {
 	Username string `json:"username" validate:"required"`
 	Password string `json:"password" validate:"required"`
-}
-
-type UpdateProfileRequest struct {
-	Name        string                `form:"name"`
-	BannerColor string                `form:"banner_color"`
-	Bio         string                `form:"bio" validate:"max=50"`
-	Avatar      *multipart.FileHeader `form:"avatar"`
-}
-
-type NewServerRequest struct {
-	Name         string                `form:"name" validate:"required"`
-	ProfileImage *multipart.FileHeader `form:"profile_image"`
 }
 
 type CreateCategoryChannelRequest struct {

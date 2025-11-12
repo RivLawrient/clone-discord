@@ -3,6 +3,8 @@ package internal
 import (
 	"be-app/internal/apps/domain/repository"
 	"be-app/internal/apps/feature/auth"
+	servermanagement "be-app/internal/apps/feature/server_management"
+	servermember "be-app/internal/apps/feature/server_member"
 	"be-app/internal/route"
 
 	"github.com/go-playground/validator/v10"
@@ -45,13 +47,21 @@ func Apps(a *AppsConfig) {
 	userRepo := repository.NewUserRepo()
 	userProfileRepo := repository.NewUserProfileRepo()
 	refreshTokenRepo := repository.NewRefreshTokenRepo()
+	serverRepo := repository.NewServerRepo()
+	joinServerRepo := repository.NewJoinServerRepo()
 
 	authService := auth.NewService(a.DB, *userRepo, *userProfileRepo, *refreshTokenRepo)
 	authHandler := auth.NewHandler(*authService, *a.Validate)
+	serverManagementService := servermanagement.NewService(a.DB, *serverRepo, *joinServerRepo)
+	serverManagementHandler := servermanagement.NewHandler(*serverManagementService, *a.Validate)
+	serverMemberService := servermember.NewService(a.DB, *joinServerRepo)
+	serverMemberhandler := servermember.NewHandler(*serverMemberService, *a.Validate)
 
 	route.Routes{
-		App:         a.App,
-		AuthHandler: *authHandler,
+		App:                     a.App,
+		AuthHandler:             *authHandler,
+		ServerManagementHandler: *serverManagementHandler,
+		ServerMemberHandler:     *serverMemberhandler,
 		// AuthHandler:             authHandler,
 		// RealtionsHandler:        relationsHandler,
 		// HubHandler:              hubHandler,

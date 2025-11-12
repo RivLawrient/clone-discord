@@ -2,6 +2,8 @@ package route
 
 import (
 	"be-app/internal/apps/feature/auth"
+	servermanagement "be-app/internal/apps/feature/server_management"
+	servermember "be-app/internal/apps/feature/server_member"
 	"be-app/internal/dto"
 	"be-app/internal/middleware"
 
@@ -10,8 +12,10 @@ import (
 )
 
 type Routes struct {
-	App         *fiber.App
-	AuthHandler auth.Handler
+	App                     *fiber.App
+	AuthHandler             auth.Handler
+	ServerManagementHandler servermanagement.Handler
+	ServerMemberHandler     servermember.Handler
 	// RealtionsHandler relations.Handler
 	// HubHandler       hub.Handler
 	// ChattingHandler  chatting.Handler
@@ -30,7 +34,7 @@ func (r Routes) SetupRoutes() {
 
 	r.App.Get("/", func(c *fiber.Ctx) error {
 		return c.JSON(dto.ResponseWeb[any]{
-			Message: "This yout root api",
+			Message: "This your root api",
 		})
 	})
 
@@ -40,6 +44,10 @@ func (r Routes) SetupRoutes() {
 	r.App.Put("/auth/refresh", r.AuthHandler.RefreshTokenHandler)
 	r.App.Delete("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
 
+	r.App.Post("/server/new", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateNewServerHandler)
+	r.App.Get("/server/:code", r.ServerManagementHandler.GetServerByCodeHandler)
+
+	r.App.Get("/server/member", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)
 	// r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
 	// r.App.Post("/auth/login", r.AuthHandler.LoginHandler)
 	// r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
