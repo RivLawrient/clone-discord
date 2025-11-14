@@ -12,10 +12,10 @@ type ChannelCategory struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
+	Server  Server
 	Channel []Channel `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 func (c *ChannelCategory) TableName() string {
 	return "channel_category"
 }
-

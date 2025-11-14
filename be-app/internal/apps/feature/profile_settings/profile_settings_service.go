@@ -1,4 +1,4 @@
-package profilesetting
+package profilesettings
 
 import (
 	"be-app/internal/apps/domain/repository"

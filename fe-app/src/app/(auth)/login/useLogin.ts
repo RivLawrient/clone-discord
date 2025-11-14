@@ -21,15 +21,15 @@ export default function useLogin() {
     password: "",
   });
   const [loading, setLoading] = useState(false);
-  const path = usePathname()
+  const path = usePathname();
   const router = useRouter();
-  const returnTo = useSearchParams().get("returnTo")
+  const returnTo = useSearchParams().get("returnTo");
 
   const login_handle = () => {
     setLoading(true);
 
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/login`, {
-      method: "POST",
+      method: "PUT",
       headers: {
         "Content-Type": "application/json",
       },
@@ -45,7 +45,7 @@ export default function useLogin() {
           }));
           const data: ResponseSucces = res.data;
           document.cookie = `token=${data.token}; path=/`;
-          
+
           router.push(returnTo || "/");
         }
         if (resp.status === 400) {
@@ -77,13 +77,13 @@ export default function useLogin() {
       });
   };
 
-  const router_register = () =>{
-    if(returnTo) {
-      router.push("/register?returnTo="+returnTo)
-    }else{
-      router.push("/register")
+  const router_register = () => {
+    if (returnTo) {
+      router.push("/register?returnTo=" + returnTo);
+    } else {
+      router.push("/register");
     }
-  }
+  };
 
   return {
     login_handle,
@@ -92,6 +92,6 @@ export default function useLogin() {
     error,
     loading,
     router,
-    router_register
+    router_register,
   };
 }

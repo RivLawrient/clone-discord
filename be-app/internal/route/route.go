@@ -38,16 +38,37 @@ func (r Routes) SetupRoutes() {
 		})
 	})
 
+	//AUTH
 	r.App.Post("/auth/register", r.AuthHandler.RegisterUserHandler)
-	r.App.Put("/auth/login", r.AuthHandler.LoginUserHandler)
+	r.App.Post("/auth/login", r.AuthHandler.LoginUserHandler)
 	r.App.Get("/auth/me", middleware.RequireJWTAuth(), r.AuthHandler.MeHandler)
-	r.App.Put("/auth/refresh", r.AuthHandler.RefreshTokenHandler)
-	r.App.Delete("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
+	r.App.Post("/auth/refresh", r.AuthHandler.RefreshTokenHandler)
+	r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)
 
-	r.App.Post("/server/new", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateNewServerHandler)
-	r.App.Get("/server/:code", r.ServerManagementHandler.GetServerByCodeHandler)
+	
 
-	r.App.Get("/server/member", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)
+	// r.App.Post("/server/new", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateNewServerHandler)
+	// r.App.Get("/server/code/:code", r.ServerManagementHandler.GetServerByCodeHandler)
+	// r.App.Post("/server/category", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateCategoryChannelHandler)
+	// r.App.Delete("/server/category/:category_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.DeleteCategoryChannelHandler)
+	// r.App.Post("/server/channel", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateChannelHandler)
+	// r.App.Delete("/server/channel/:channel_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.DeleteChannelHandler)
+	// r.App.Get("/server/channels/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.GetListChannelAndCategoryServerHandler)
+	// r.App.Get("/server/channels", middleware.RequireJWTAuth(), r.ServerManagementHandler.GetListChannelAndCategoryUserHandler)
+
+	// r.App.Get("/server/member", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)
+
+	// r.App.Get("/friend/list", middleware.RequireJWTAuth(), func(c *fiber.Ctx) error {
+	// 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+	// 		Message: "",
+	// 	})
+	// })
+
+	//
+	//
+	//
+	//
+
 	// r.App.Post("/auth/register", r.AuthHandler.RegisterHandler)
 	// r.App.Post("/auth/login", r.AuthHandler.LoginHandler)
 	// r.App.Post("/auth/logout", middleware.RequireJWTAuth(), r.AuthHandler.LogoutHandler)

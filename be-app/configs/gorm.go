@@ -74,6 +74,8 @@ func NewDB() *gorm.DB {
 	// 	&entity.RefreshToken{},
 	// 	&entity.Server{},
 	// 	&entity.JoinServer{},
+	// 	&entity.ChannelCategory{},
+	// 	&entity.Channel{},
 	// )
 	// db.AutoMigrate(
 	// 	&entity.User{},
@@ -81,6 +83,8 @@ func NewDB() *gorm.DB {
 	// 	&entity.RefreshToken{},
 	// 	&entity.Server{},
 	// 	&entity.JoinServer{},
+	// 	&entity.ChannelCategory{},
+	// 	&entity.Channel{},
 	// )
 
 	return db

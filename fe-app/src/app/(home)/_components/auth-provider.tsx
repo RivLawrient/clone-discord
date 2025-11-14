@@ -46,17 +46,18 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
         .then(async (resp) => {
           if (resp.ok) {
             const res = await resp.json();
-            setFriend(res.data);
-            setLoadingCount((p) => p - 1);
+            // setFriend(res.data);
+            // setLoadingCount((p) => p - 1);
           }
         })
         .catch(() => {});
+      setLoadingCount((p) => p - 1);
     }
   }, [loadingCount]);
 
   useEffect(() => {
     if (loadingCount == 3) {
-      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server`, {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/member`, {
         method: "GET",
       })
         .then(async (resp) => {
@@ -72,7 +73,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (loadingCount == 2) {
-      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel`, {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/channels`, {
         method: "GET",
       })
         .then(async (resp) => {
@@ -87,79 +88,79 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
     }
   }, [loadingCount]);
 
-  useEffect(() => {
-    const connect = () => {
-      const ws = new WebSocket(
-        `${process.env.NEXT_PUBLIC_HOST_WS}?token=${GetCookie("token")}`
-      );
-      socketRef.current = ws;
+  // useEffect(() => {
+  //   const connect = () => {
+  //     const ws = new WebSocket(
+  //       `${process.env.NEXT_PUBLIC_HOST_WS}?token=${GetCookie("token")}`
+  //     );
+  //     socketRef.current = ws;
 
-      ws.onopen = () => {
-        console.log("websocket is Connected");
-        setSocket(ws);
-        setLoadingCount((p) => p - 1);
-      };
+  //     ws.onopen = () => {
+  //       console.log("websocket is Connected");
+  //       setSocket(ws);
+  //       setLoadingCount((p) => p - 1);
+  //     };
 
-      ws.onclose = () => {
-        const interval = setInterval(async () => {
-          console.log("websocket Reconnect ...");
+  //     ws.onclose = () => {
+  //       const interval = setInterval(async () => {
+  //         console.log("websocket Reconnect ...");
 
-          await fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
-            method: "GET",
-            credentials: "include",
-          })
-            .then(async (resp) => {
-              if (resp.ok) {
-                const res = await resp.json();
-                document.cookie = `token=${res.data.token}; path=/`;
-                connect();
-                clearInterval(interval);
-              }
-              if (resp.status === 401) {
-                document.cookie = `token=; max-age=0; path=/`;
-                window.location.reload();
-              }
-            })
-            .catch(() => {});
-        }, 3000);
-      };
+  //         await fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/refresh`, {
+  //           method: "PUT",
+  //           credentials: "include",
+  //         })
+  //           .then(async (resp) => {
+  //             if (resp.ok) {
+  //               const res = await resp.json();
+  //               document.cookie = `token=${res.data.token}; path=/`;
+  //               connect();
+  //               clearInterval(interval);
+  //             }
+  //             if (resp.status === 401) {
+  //               document.cookie = `token=; max-age=0; path=/`;
+  //               window.location.reload();
+  //             }
+  //           })
+  //           .catch(() => {});
+  //       }, 3000);
+  //     };
 
-      ws.onmessage = (e) => {
-        const data = JSON.parse(e.data);
+  //     ws.onmessage = (e) => {
+  //       const data = JSON.parse(e.data);
 
-        if (data.request) {
-          setFriend((v) => ({ ...v, request: data.request }));
-        }
-        if (data.sent) {
-          setFriend((v) => ({ ...v, sent: data.sent }));
-        }
-        if (data.all) {
-          setFriend((v) => ({ ...v, all: data.all }));
-        }
-        if (data.friend) {
-          setFriend((v) => ({
-            ...v,
-            all: v.all.map((vv) =>
-              vv.user_id === data.friend.user_id
-                ? { ...vv, status_activity: data.friend.status_activity }
-                : vv
-            ),
-          }));
-        }
-        if (data.user_id) {
-          setUser((v) => ({ ...v, status_activity: data.status_activity }));
-        }
-      };
+  //       if (data.request) {
+  //         setFriend((v) => ({ ...v, request: data.request }));
+  //       }
+  //       if (data.sent) {
+  //         setFriend((v) => ({ ...v, sent: data.sent }));
+  //       }
+  //       if (data.all) {
+  //         setFriend((v) => ({ ...v, all: data.all }));
+  //       }
+  //       if (data.friend) {
+  //         setFriend((v) => ({
+  //           ...v,
+  //           all: v.all.map((vv) =>
+  //             vv.user_id === data.friend.user_id
+  //               ? { ...vv, status_activity: data.friend.status_activity }
+  //               : vv
+  //           ),
+  //         }));
+  //       }
+  //       if (data.user_id) {
+  //         setUser((v) => ({ ...v, status_activity: data.status_activity }));
+  //       }
+  //     };
 
-      ws.onerror = () => {
-        console.log("ws errror");
-      };
-    };
+  //     ws.onerror = () => {
+  //       console.log("ws errror");
+  //     };
+  //   };
 
-    if (loadingCount == 1) {
-      connect();
-    }
-  }, [loadingCount]);
+  //   if (loadingCount == 1) {
+  //     connect();
+  //   }
+  // }, [loadingCount]);
 
   useEffect(() => {
     if (loadingCount === 0) {

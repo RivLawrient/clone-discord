@@ -49,10 +49,12 @@ func Apps(a *AppsConfig) {
 	refreshTokenRepo := repository.NewRefreshTokenRepo()
 	serverRepo := repository.NewServerRepo()
 	joinServerRepo := repository.NewJoinServerRepo()
+	channelRepo := repository.NewChannelRepo()
+	channelCategoryRepo := repository.NewChannelCategoryRepo()
 
 	authService := auth.NewService(a.DB, *userRepo, *userProfileRepo, *refreshTokenRepo)
 	authHandler := auth.NewHandler(*authService, *a.Validate)
-	serverManagementService := servermanagement.NewService(a.DB, *serverRepo, *joinServerRepo)
+	serverManagementService := servermanagement.NewService(a.DB, *serverRepo, *joinServerRepo, *channelRepo, *channelCategoryRepo)
 	serverManagementHandler := servermanagement.NewHandler(*serverManagementService, *a.Validate)
 	serverMemberService := servermember.NewService(a.DB, *joinServerRepo)
 	serverMemberhandler := servermember.NewHandler(*serverMemberService, *a.Validate)

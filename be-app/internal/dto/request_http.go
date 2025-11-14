@@ -62,7 +62,7 @@ type ReorderChannelRequest struct {
 }
 
 type DeleteChannelRequest struct {
-	CategoryId *string `json:"category_id"`
+	CategoryId *string `json:"category_id" validate:"omitempty,uuid"`
 }
 
 type TextMessageRequest struct {

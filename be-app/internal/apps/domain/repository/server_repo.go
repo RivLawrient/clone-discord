@@ -19,3 +19,7 @@ func (r *ServerRepo) Create(db *gorm.DB, server *entity.Server) error {
 func (r *ServerRepo) GetListByInviteCode(db *gorm.DB, code string, server *entity.Server) error {
 	return db.Where("invite_code = ?", code).Preload("JoinServer.User.UserProfile").First(server).Error
 }
+
+func (r *ServerRepo) GetWithChannelAndCategory(db *gorm.DB, id string, server *entity.Server) error {
+	return db.Where("id = ? ", id).Preload("Channel").Preload("ChannelCategory.Channel").First(server).Error
+}
