@@ -136,7 +136,7 @@ function SearchInput(props: {
 function LogoutBtn() {
   const logoutHandle = () => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/logout`, {
-      method: "DELETE",
+      method: "POST",
       credentials: "include",
     }).then(async (reps) => {
       if (reps.ok) {

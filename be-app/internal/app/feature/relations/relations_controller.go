@@ -28,7 +28,7 @@ func (c Controller) NewRequestFriend(username string, user_id string) (*friend.F
 	tx := c.DB.Begin()
 	defer tx.Rollback()
 
-	if err := c.ProfileRepo.CheckUsernameDuplicate(tx, username); err != errs.ErrUsernameUsed {
+	if err := c.ProfileRepo.CheckUsernameDuplicate(tx, username); err != errs.ErrUserNotFound {
 		return nil, errs.ErrUserNotFound
 	}
 	var uid string

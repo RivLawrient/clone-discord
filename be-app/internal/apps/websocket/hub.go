@@ -1,6 +1,7 @@
 package websocket
 
 import (
+	"encoding/json"
 	"log"
 	"sync"
 )
@@ -29,7 +30,7 @@ func (h *Hub) RegisterClient(client *Client) {
 
 	// Tambahkan client ke list koneksi milik userID tersebut
 	h.Clients[client.UserID] = append(h.Clients[client.UserID], client)
-	log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.Clients[client.UserID]))
+	log.Printf("User %s connected. Total connections: %d", client.UserID, len(h.Clients))
 
 	// Di sini seharusnya Anda memanggil Service untuk update status ke "Online"
 	// (Hub hanya memanggil, tidak boleh mengandung logic update DB)
@@ -60,22 +61,27 @@ func (h *Hub) UnregisterClient(client *Client) {
 }
 
 // SendToUser mengirim pesan ke semua koneksi milik userID tertentu
-func (h *Hub) SendToUser(userID string, message []byte) {
+func (h *Hub) SendToUser(userID []string, msg any) {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
-	if clients, ok := h.Clients[userID]; ok {
-		for _, client := range clients {
-			// Kirim melalui channel (ini lebih aman daripada langsung WriteMessage)
-			select {
-			case client.Send <- message:
-			default:
-				// Jika channel penuh, disconnect client
-				close(client.Send)
-				h.UnregisterClient(client)
+	message, _ := json.Marshal(msg)
+	for _, v := range userID {
+
+		if clients, ok := h.Clients[v]; ok {
+			for _, client := range clients {
+				// Kirim melalui channel (ini lebih aman daripada langsung WriteMessage)
+				select {
+				case client.Send <- message:
+				default:
+					// Jika channel penuh, disconnect client
+					close(client.Send)
+					h.UnregisterClient(client)
+				}
 			}
 		}
 	}
+
 }
 
 // Broadcast mengirim pesan ke semua klien aktif

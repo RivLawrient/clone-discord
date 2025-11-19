@@ -24,7 +24,7 @@ export function useRightClickMenuMainSection() {
 
   const createCategoryHandle = () => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel/category`, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/category`, {
       method: "POST",
       body: JSON.stringify({
         name: inputCategory,
@@ -57,7 +57,7 @@ export function useRightClickMenuMainSection() {
 
   const createChannelHandle = () => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel`, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/channel`, {
       method: "POST",
       body: JSON.stringify({
         server_id: currentServer?.id,
@@ -83,7 +83,7 @@ export function useRightClickMenuMainSection() {
 
   const createChannelinCategoryHandle = (categoryId: string) => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel`, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/channel`, {
       method: "POST",
       body: JSON.stringify({
         server_id: currentServer?.id,
@@ -144,7 +144,7 @@ export function useRightClickMenuCategorySection() {
 
   const deleteCategoryHandle = (id: string) => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel/category/` + id, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/category/` + id, {
       method: "DELETE",
     })
       .then(async (resp) => {
@@ -183,7 +183,7 @@ export function useRightClickMenuChannel() {
 
   const deleteCategoryHandle = (id: string, categoryId?: string) => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}channel/` + id, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/channel/` + id, {
       method: "DELETE",
       body: JSON.stringify({
         category_id: categoryId,
@@ -191,28 +191,7 @@ export function useRightClickMenuChannel() {
     })
       .then(async (resp) => {
         const res = await resp.json();
-        // if (resp.ok) {
-        //   const data: ChannelList = res.data;
-        //   if (categoryId) {
-        //     setChannel((p) => ({
-        //       ...p,
-        //       category: p.category.map((v) =>
-        //         v.id == categoryId
-        //           ? {
-        //               ...v,
-        //               channel: v.channel.filter((vv) => vv.id != data.id),
-        //             }
-        //           : v
-        //       ),
-        //     }));
-        //   } else {
-        //     setChannel((p) => ({
-        //       ...p,
-        //       channel: p.channel.filter((v) => v.id != data.id),
-        //     }));
-        //   }
         setOpenDelete(false);
-        // }
       })
       .catch(() => {})
       .finally(() => {

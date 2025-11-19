@@ -7,7 +7,7 @@ export default function AddFriendView() {
   const [success, setSuccess] = useState(false);
   const [failed, setFailed] = useState(false);
 
-  const add_friend_api = `${process.env.NEXT_PUBLIC_HOST_API}friend/add/${add_input}`;
+  const add_friend_api = `${process.env.NEXT_PUBLIC_HOST_API}friends/request/${add_input}`;
 
   const action = () => {
     if (add_input != "") {
@@ -44,7 +44,7 @@ export default function AddFriendView() {
           "relative mt-5 mb-2 flex rounded-lg border border-black bg-[#1e1f22] px-3 py-2.5",
           !success && !failed && "focus-within:border-inpt-border-2",
           failed && "border-red-500",
-          success && "border-green-500",
+          success && "border-green-500"
         )}
       >
         <input
@@ -62,7 +62,7 @@ export default function AddFriendView() {
           onClick={action}
           className={twMerge(
             "bg-btn-bg-1 rounded-lg p-2.5 text-xs font-semibold text-white",
-            add_input === "" ? "brightness-75" : "cursor-pointer",
+            add_input === "" ? "brightness-75" : "cursor-pointer"
           )}
         >
           Send Friend Request
@@ -78,7 +78,7 @@ export default function AddFriendView() {
           className={twMerge(
             "text-xs text-[#f57876]",
             failed && "text-red-text",
-            success && "text-green-text",
+            success && "text-green-text"
           )}
         >
           {success && ` Success! Your friend request to ${add_input} was sent.`}

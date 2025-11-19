@@ -29,7 +29,7 @@ export default function useLogin() {
     setLoading(true);
 
     fetch(`${process.env.NEXT_PUBLIC_HOST_API}auth/login`, {
-      method: "PUT",
+      method: "POST",
       headers: {
         "Content-Type": "application/json",
       },

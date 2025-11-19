@@ -45,15 +45,14 @@ export default function Page() {
     }
   }, [channels, channel]);
 
-
   if (curretChannel)
     return (
       <>
-        {!curretChannel.is_voice ? (
+        {/* {!curretChannel.is_voice ? (
           <TextChannelView data={curretChannel} />
         ) : (
           <>voice channel</>
-        )}
+        )} */}
       </>
     );
 }

@@ -23,3 +23,7 @@ func (r *ServerRepo) GetListByInviteCode(db *gorm.DB, code string, server *entit
 func (r *ServerRepo) GetWithChannelAndCategory(db *gorm.DB, id string, server *entity.Server) error {
 	return db.Where("id = ? ", id).Preload("Channel").Preload("ChannelCategory.Channel").First(server).Error
 }
+
+func (r *ServerRepo) GetByID(db *gorm.DB, id string, server *entity.Server) error {
+	return db.Where("id = ?", id).First(server).Error
+}

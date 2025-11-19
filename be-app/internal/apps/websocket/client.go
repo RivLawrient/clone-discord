@@ -1,15 +1,13 @@
 package websocket
 
 import (
-	"time"
-
 	"github.com/gofiber/websocket/v2"
 )
 
-const (
-	// Waktu tunggu untuk menulis pesan
-	writeWait = 10 * time.Second
-)
+// const (
+// 	// Waktu tunggu untuk menulis pesan
+// 	writeWait = 10 * time.Second
+// )
 
 type Client struct {
 	Hub    *Hub            // Referensi ke Hub untuk registrasi/deregistrasi
@@ -78,6 +76,27 @@ type Client struct {
 // 			// c.Conn.SetWriteDeadline...
 // 			// c.Conn.WriteMessage(websocket.PingMessage, nil)
 
+//			}
+//		}
+//	}
+// func (c *Client) ReadPump() {
+// 	for {
+// 		_, message, err := c.Conn.ReadMessage()
+// 		if err != nil {
+// 			break
 // 		}
+
+// 		// Kirim ke hub (misalnya broadcast ke user tertentu)
+// 		// Bisa lo modif sesuai kebutuhan.
+// 		c.Hub.SendToUser(c.UserID, message)
 // 	}
 // }
+
+func (c *Client) WritePump() {
+	for msg := range c.Send {
+		err := c.Conn.WriteMessage(websocket.TextMessage, msg)
+		if err != nil {
+			break
+		}
+	}
+}

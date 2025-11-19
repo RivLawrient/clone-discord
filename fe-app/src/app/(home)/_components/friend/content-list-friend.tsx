@@ -19,28 +19,28 @@ export default function ContentListFriend(props: {
   const router = useRouter();
   const cancel_handle = () => {
     apiCall(
-      `${process.env.NEXT_PUBLIC_HOST_API}friend/cancel/${props.data.user_id}`,
+      `${process.env.NEXT_PUBLIC_HOST_API}friends/decline/${props.data.user_id}`,
       {
-        method: "DELETE",
-      },
+        method: "POST",
+      }
     ).catch(() => {});
   };
 
   const decline_handle = () => {
     apiCall(
-      `${process.env.NEXT_PUBLIC_HOST_API}friend/decline/${props.data.user_id}`,
+      `${process.env.NEXT_PUBLIC_HOST_API}friends/decline/${props.data.user_id}`,
       {
-        method: "DELETE",
-      },
+        method: "POST",
+      }
     ).catch(() => {});
   };
 
   const accept_handle = () => {
     apiCall(
-      `${process.env.NEXT_PUBLIC_HOST_API}friend/accept/${props.data.user_id}`,
+      `${process.env.NEXT_PUBLIC_HOST_API}friends/accept/${props.data.user_id}`,
       {
         method: "POST",
-      },
+      }
     ).catch(() => {});
   };
 
@@ -72,7 +72,10 @@ export default function ContentListFriend(props: {
       </div>
       {!props.is_sent && !props.is_pending && (
         <div className="flex gap-2">
-          <TooltipDesc side="top" text="Message">
+          <TooltipDesc
+            side="top"
+            text="Message"
+          >
             <button
               onClick={() => router.push("/channels/me/" + props.data.username)}
               className="group/btn group-hover:bg-discord-bg cursor-pointer rounded-full p-2"
@@ -101,7 +104,10 @@ export default function ContentListFriend(props: {
       )}
       {props.is_sent && (
         <div>
-          <TooltipDesc side="top" text="Cancel">
+          <TooltipDesc
+            side="top"
+            text="Cancel"
+          >
             <button
               onClick={cancel_handle}
               className="group/btn group-hover:bg-discord-bg cursor-pointer rounded-full p-2"
@@ -117,7 +123,10 @@ export default function ContentListFriend(props: {
       )}
       {props.is_pending && (
         <div className="flex gap-2">
-          <TooltipDesc side="top" text="Accept">
+          <TooltipDesc
+            side="top"
+            text="Accept"
+          >
             <button
               onClick={accept_handle}
               className="group/btn group-hover:bg-discord-bg cursor-pointer rounded-full p-2"
@@ -128,7 +137,10 @@ export default function ContentListFriend(props: {
               />
             </button>
           </TooltipDesc>
-          <TooltipDesc side="top" text="Decline">
+          <TooltipDesc
+            side="top"
+            text="Decline"
+          >
             <button
               onClick={decline_handle}
               className="group/btn group-hover:bg-discord-bg cursor-pointer rounded-full p-2"

@@ -236,9 +236,9 @@ function DragZone(props: {
               console.log(zone, data.id, data.position);
 
               apiCall(
-                `${process.env.NEXT_PUBLIC_HOST_API}server/${data.id}/${zone}`,
+                `${process.env.NEXT_PUBLIC_HOST_API}server/me/${data.id}/${zone}`,
                 {
-                  method: "PUT",
+                  method: "POST",
                   headers: {
                     Authorization: `Bearer ${GetCookie("token")}`,
                   },

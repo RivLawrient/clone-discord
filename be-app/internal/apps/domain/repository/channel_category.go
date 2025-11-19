@@ -56,3 +56,18 @@ func (r *ChannelCategoryRepo) UpdateBatch(db *gorm.DB, list *[]entity.ChannelCat
 		return nil
 	})
 }
+
+func (r *ChannelCategoryRepo) GetIDByPositionAndServerID(db *gorm.DB, serverID string, position int) (string, error) {
+	var id string
+	err := db.
+		Model(&entity.ChannelCategory{}).
+		Select("id").
+		Where("server_id = ? AND position = ?", serverID, position).
+		Scan(&id).Error
+
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}

@@ -9,6 +9,9 @@ type Friend struct {
 	IsPending  bool
 	CreatedAt  time.Time
 	UpdatedAt  time.Time
+
+	Sender   User `gorm:"foreignKey:SenderID"`
+	Receiver User `gorm:"foreignKey:ReceiverID"`
 }
 
 func (f *Friend) TableName() string {

@@ -13,14 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-type StatusActivity string
 
-const (
-	StatusOnline  StatusActivity = "Online"
-	StatusOffline StatusActivity = "Invisible"
-	StatusIdle    StatusActivity = "Idle"
-	StatusDND     StatusActivity = "Do Not Disturb"
-)
 
 type Service struct {
 	DB               *gorm.DB
@@ -62,15 +55,15 @@ func (s *Service) RegisterUser(req dto.RegisterRequest, userAgent string, IP str
 	}
 
 	newUserProfil := entity.UserProfile{
-		ID:             uuid.NewString(),
-		Name:           name,
-		Username:       req.Username,
-		Bio:            "",
-		Avatar:         "",
-		AvatarBg:       helper.RandomHexColor(),
-		BannerColor:    "#ffffff",
-		Birthdate:      birth,
-		StatusActivity: string(StatusOffline),
+		ID:          uuid.NewString(),
+		Name:        name,
+		Username:    req.Username,
+		Bio:         "",
+		Avatar:      "",
+		AvatarBg:    helper.RandomHexColor(),
+		BannerColor: "#ffffff",
+		Birthdate:   birth,
+		// StatusActivity: string(StatusOffline),
 	}
 
 	newUser := entity.User{

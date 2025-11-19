@@ -23,7 +23,7 @@ export default function page() {
   const router = useRouter();
 
   useEffect(() => {
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/${code}`, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/code/${code}`, {
       method: "GET",
     }).then(async (resp) => {
       const res = await resp.json();
@@ -72,7 +72,7 @@ function Found(props: { data: ServerInvite }) {
 
   const acceptHandle = () => {
     setLoading(true);
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/` + props.data.id, {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/join/${props.data.id}`, {
       method: "POST",
     })
       .then(async (resp) => {

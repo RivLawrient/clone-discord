@@ -1,3 +1,4 @@
+"use client";
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -401,9 +402,10 @@ function DragZone(props: {
           // }
 
           apiCall(
-            `${process.env.NEXT_PUBLIC_HOST_API}channel/reorder/` + server,
+            `${process.env.NEXT_PUBLIC_HOST_API}server/channels/reorder/` +
+              server,
             {
-              method: "PUT",
+              method: "POST",
               body: JSON.stringify({
                 from_category: ref.fromCategory, // number
                 from_position: ref.fromPosition, // number (1-based)

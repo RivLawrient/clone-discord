@@ -50,3 +50,17 @@ func (r *UserRepo) FindByEmail(db *gorm.DB, email string, user *entity.User) err
 func (r *UserRepo) FindByID(db *gorm.DB, id string, user *entity.User) error {
 	return db.Preload("UserProfile").Where("id = ?", id).First(user).Error
 }
+
+func (r *UserRepo) GetPasswordByID(db *gorm.DB, id string, password *string) error {
+	var count int64
+	err := db.Model(&entity.User{}).Where("id = ?", id).Count(&count).Select("password").First(password).Error
+	if err != nil {
+		return err
+	}
+
+	if count == 0 {
+		return errs.ErrPasswordNotMatch
+	}
+
+	return nil
+}

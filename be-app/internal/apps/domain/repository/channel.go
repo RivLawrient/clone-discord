@@ -54,6 +54,7 @@ func (r *ChannelRepo) UpdateBatch(db *gorm.DB, list *[]entity.Channel) error {
 		for _, v := range *list {
 			if err := tx.Model(&entity.Channel{}).
 				Where("id = ?", v.ID).
+				Select("ChannelCategoryID", "Position").
 				Updates(v).Error; err != nil {
 				return err
 			}
@@ -64,4 +65,16 @@ func (r *ChannelRepo) UpdateBatch(db *gorm.DB, list *[]entity.Channel) error {
 
 func (r *ChannelRepo) RemoveByID(db *gorm.DB, id string) error {
 	return db.Where("id = ?", id).Delete(&entity.Channel{}).Error
+}
+
+func (r *ChannelRepo) GetListByServerID(db *gorm.DB, serverID string, channels *[]entity.Channel) error {
+	return db.Where("server_id = ?", serverID).Find(channels).Error
+}
+
+func (r *ChannelRepo) GetByPositionAndServerIDOnCategory(db *gorm.DB, serverID string, categoryID string, position int, channel *entity.Channel) error {
+	return db.Where("server_id = ? AND channel_category_id = ? AND position = ?", serverID, categoryID, position).First(channel).Error
+}
+
+func (r *ChannelRepo) GetByPositionAndServerID(db *gorm.DB, serverID string, position int, channel *entity.Channel) error {
+	return db.Where("server_id = ? AND position = ? AND channel_category_id IS NULL", serverID, position).First(channel).Error
 }
