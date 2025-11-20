@@ -11,6 +11,8 @@ type Channel struct {
 	IsVoice           bool   `gorm:"not null;type:bool;default:false"`
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
+
+	ChannelMessage []ChannelMessage
 }
 
 func (c *Channel) TableName() string {

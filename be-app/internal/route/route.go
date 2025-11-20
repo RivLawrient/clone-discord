@@ -3,6 +3,7 @@ package route
 import (
 	"be-app/internal/apps/feature/auth"
 	"be-app/internal/apps/feature/friendship"
+	messagingchannel "be-app/internal/apps/feature/messaging_channel"
 	profilesettings "be-app/internal/apps/feature/profile_settings"
 	servermanagement "be-app/internal/apps/feature/server_management"
 	servermember "be-app/internal/apps/feature/server_member"
@@ -23,6 +24,7 @@ type Routes struct {
 	ServerManagementHandler servermanagement.Handler
 	ServerMemberHandler     servermember.Handler
 	HubHandler              ws.Handler
+	MessagingChannel        messagingchannel.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -76,6 +78,10 @@ func (r Routes) SetupRoutes() {
 	r.App.Get("/server/me", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)
 	r.App.Post("/server/me/:server_id/:new_position", middleware.RequireJWTAuth(), r.ServerMemberHandler.UpdateServerPositionHandler)
 	r.App.Post("/server/join/:server_id", middleware.RequireJWTAuth(), r.ServerMemberHandler.JoinServerHandler)
+
+	// CHANNEL MESSAGE
+	r.App.Post("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.AddTextMsgHandler)
+	r.App.Get("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.GetListTextMsgHandler)
 
 	// HUB
 	r.App.Use("/ws", func(c *fiber.Ctx) error {

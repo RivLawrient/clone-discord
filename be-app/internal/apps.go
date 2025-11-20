@@ -4,6 +4,7 @@ import (
 	"be-app/internal/apps/domain/repository"
 	"be-app/internal/apps/feature/auth"
 	"be-app/internal/apps/feature/friendship"
+	messagingchannel "be-app/internal/apps/feature/messaging_channel"
 	profilesettings "be-app/internal/apps/feature/profile_settings"
 	servermanagement "be-app/internal/apps/feature/server_management"
 	servermember "be-app/internal/apps/feature/server_member"
@@ -31,6 +32,7 @@ func Apps(a *AppsConfig) {
 	joinServerRepo := repository.NewJoinServerRepo()
 	channelRepo := repository.NewChannelRepo()
 	channelCategoryRepo := repository.NewChannelCategoryRepo()
+	channelMessageRepo := repository.NewChannelMessageRepo()
 
 	hub := ws.NewHub()
 
@@ -45,6 +47,8 @@ func Apps(a *AppsConfig) {
 	serverMemberService := servermember.NewService(a.DB, *joinServerRepo, *serverRepo)
 	serverMemberhandler := servermember.NewHandler(*serverMemberService, *a.Validate)
 	statusActivityService := statusactivitiy.NewService(a.DB, *userProfileRepo, *friendRepo)
+	messagingChannelService := messagingchannel.NewService(a.DB, *userRepo, *userProfileRepo, *channelMessageRepo, *serverRepo, *joinServerRepo, *channelRepo, *channelCategoryRepo)
+	messagingChannelHandler := messagingchannel.NewHandler(*messagingChannelService, *a.Validate, hub)
 
 	hubHandler := ws.NewHandler(hub, *statusActivityService)
 
@@ -56,5 +60,6 @@ func Apps(a *AppsConfig) {
 		ServerManagementHandler: *serverManagementHandler,
 		ServerMemberHandler:     *serverMemberhandler,
 		HubHandler:              *hubHandler,
+		MessagingChannel:        *messagingChannelHandler,
 	}.SetupRoutes()
 }

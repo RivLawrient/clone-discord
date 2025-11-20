@@ -64,3 +64,7 @@ func (r *UserProfileRepo) GetUserIDByUsername(db *gorm.DB, username string, user
 func (r *UserProfileRepo) UpdateStatusActivityByUserID(db *gorm.DB, userID string, status string) error {
 	return db.Model(&entity.UserProfile{}).Where("user_id = ?", userID).Update("status_activity", status).Error
 }
+
+func (r *UserProfileRepo) GetByUserID(db *gorm.DB, userID string, data *entity.UserProfile) error {
+	return db.Where("user_id = ?", userID).First(data).Error
+}

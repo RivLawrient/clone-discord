@@ -3,9 +3,8 @@ import { ChatList } from "./text-channel-view";
 import { serverAtom } from "../../_state/server-atom";
 import { useParams } from "next/navigation";
 import { useEffect, useRef } from "react";
-import { socketAtom } from "../../_state/socket-atom";
 
-export default function useChatListSection(list: ChatList[]) {
+export default function useChatListSection(list: ChatList[], loading: boolean) {
   const date = (data: string) => {
     return new Date(data).toLocaleString("default", {
       day: "numeric",
@@ -102,17 +101,17 @@ export default function useChatListSection(list: ChatList[]) {
   const bottomRef = useRef<HTMLDivElement | null>(null);
 
   // scroll ke bawah setiap kali props.data berubah
-  useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
-    }
-  }, [list]);
+  // useEffect(() => {
+  //   if (bottomRef.current) {
+  //     bottomRef.current.scrollIntoView({ behavior: "instant" });
+  //   }
+  // }, [list]);
 
   useEffect(() => {
     if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "auto" });
+      bottomRef.current.scrollIntoView({ behavior: "instant" });
     }
-  }, []);
+  }, [loading]);
 
   const lastMargin = (data: ChatList, arr: ChatList[], index: number) => {
     const notOver = index + 1 < arr.length;

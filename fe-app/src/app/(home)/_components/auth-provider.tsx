@@ -91,13 +91,13 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
       const ws = new WebSocket(
         `${process.env.NEXT_PUBLIC_HOST_WS}?token=${GetCookie("token")}`
       );
+      socketRef.current = ws;
 
       ws.onopen = () => {
         console.log("websocket is Connected");
         setSocket(ws);
-        socketRef.current = ws;
-        // ws.send("online");
-        setLoadingCount((p) => p - 1);
+        ws.send("online");
+        // setLoadingCount((p) => p - 1);
       };
 
       ws.onclose = () => {
@@ -174,13 +174,12 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
 
     if (loadingCount == 1) {
       connect();
+      setLoadingCount((p) => p - 1);
     }
   }, [loadingCount]);
 
   useEffect(() => {
-    if (!socketRef.current) return; // <--- cegah race
     if (loadingCount === 0) {
-      socketRef.current?.send("online");
       const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
       const handleActivity = () => {
         if (lastStatus.current === "idle") {
@@ -210,7 +209,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
         if (idleTimeout.current) clearTimeout(idleTimeout.current);
       };
     }
-  }, [loadingCount, socketRef]);
+  }, [loadingCount]);
 
   useEffect(() => {
     if (loadingCount === 0) {

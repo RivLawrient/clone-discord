@@ -2,7 +2,7 @@ import { SetStateAction, useEffect, useRef, useState } from "react";
 import { apiCall } from "../../_helper/api-client";
 import { ChannelList } from "../../_state/channel-list-atom";
 import { UserOther } from "../../_state/user-atom";
-import { ChatList } from "./text-channel-view";
+import { ChatList } from "./useTextChannelView";
 
 export default function useInputChat(
   data: ChannelList | UserOther,
@@ -51,12 +51,15 @@ export default function useInputChat(
       if (input.trim() != "") {
         console.log(input);
         if ("is_voice" in data) {
-          apiCall(`${process.env.NEXT_PUBLIC_HOST_API}msg/channel/${data.id}`, {
-            method: "POST",
-            body: JSON.stringify({
-              text: input,
-            }),
-          }).then(async (resp) => {
+          apiCall(
+            `${process.env.NEXT_PUBLIC_HOST_API}message/channel/${data.id}`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                text: input,
+              }),
+            }
+          ).then(async (resp) => {
             const res = await resp.json();
             // setList((p) => [...p, res.data]);
           });

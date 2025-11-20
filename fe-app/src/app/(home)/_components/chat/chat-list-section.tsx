@@ -1,10 +1,15 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useMemo, useRef } from "react";
 import { cn } from "../../_helper/cn";
 import UserAvatar from "../user-avatar";
 import { ChatList } from "./text-channel-view";
 import useChatListSection from "./useChatListSection";
 
-export default function ChatListSection(props: { data: ChatList[] }) {
+export default function ChatListSection(props: {
+  data: ChatList[];
+  isLast: boolean;
+  loading: boolean;
+  onLoadMore: () => void; // Function untuk fetch API
+}) {
   const {
     current,
     displayTime,
@@ -14,21 +19,85 @@ export default function ChatListSection(props: { data: ChatList[] }) {
     time,
     bottomRef,
     lastMargin,
-  } = useChatListSection(props.data);
+  } = useChatListSection(props.data, props.loading);
+
+  const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!topRef.current) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+
+      // INILAH CEKNYA
+      if (entry.isIntersecting) {
+        console.log("User lagi melihat div topRef");
+        setTimeout(() => {
+          loadMore();
+        }, 1000);
+      } else {
+        console.log("User tidak melihat div topRef");
+      }
+    });
+
+    observer.observe(topRef.current);
+
+    return () => observer.disconnect();
+  }, [props.loading, props.isLast, props.data]);
+
+  const scrollRef = useRef<HTMLUListElement>(null);
+  const prevHeightRef = useRef(0);
+  const prevScrollRef = useRef(0);
+  const loadingMoreRef = useRef(false);
+
+  const loadMore = () => {
+    const box = scrollRef.current;
+    if (!box) return;
+
+    loadingMoreRef.current = true;
+
+    prevHeightRef.current = box.scrollHeight;
+    prevScrollRef.current = box.scrollTop;
+
+    props.onLoadMore();
+  };
+
+  useEffect(() => {
+    if (!scrollRef.current) return;
+
+    const box = scrollRef.current;
+
+    if (loadingMoreRef.current) {
+      const newHeight = box.scrollHeight;
+
+      box.scrollTop = newHeight - prevHeightRef.current + prevScrollRef.current;
+
+      loadingMoreRef.current = false;
+    }
+  }, [props.data]);
 
   return (
     <>
-      <div className="grow items-center justify-end flex flex-col font-semibold mt-2 mb-4">
-        <h1 className="text-[32px] leading-none">Welcome to</h1>
-        <h1 className="text-[32px]">{current?.name}</h1>
-        <span>This is the beginning of this server.</span>
-      </div>
-      {props.data
-        .sort(
-          (a, b) =>
-            new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        )
-        .map((v, i, a) => (
+      <ul
+        ref={scrollRef}
+        className=" grow min-h-0 overflow-scroll  min-w-0 flex flex-col custom-scrollbar "
+      >
+        {props.isLast ? (
+          <div className="grow items-center justify-end flex flex-col font-semibold mt-2 mb-4">
+            <h1 className="text-[32px] leading-none">Welcome to</h1>
+            <h1 className="text-[32px]">{current?.name}</h1>
+            <span>This is the beginning of this server.</span>
+          </div>
+        ) : (
+          <DiscordChatSkeleton />
+        )}
+        {!props.loading && !props.isLast && (
+          <div
+            ref={topRef}
+            className="w-full p-2 invisible bg-red-500"
+          ></div>
+        )}
+        {[...props.data].reverse().map((v, i, a) => (
           <Fragment key={i}>
             {showGap(v, a, i) && (
               <div className="flex flex-row items-center my-2 mx-4 gap-2">
@@ -78,7 +147,91 @@ export default function ChatListSection(props: { data: ChatList[] }) {
             </li>
           </Fragment>
         ))}
-      <div ref={bottomRef} />
+        <div ref={bottomRef} />
+      </ul>
     </>
   );
 }
+
+const DiscordChatSkeleton = () => {
+  // Kita definisikan pola "palsu" agar terlihat acak tapi tetap terkontrol
+  // type: 'short' (chat pendek), 'long' (chat panjang/paragraf), 'media' (gambar)
+  const skeletonRows = [
+    { type: "short", width: "w-1/3" },
+    { type: "long", width: "w-3/4" }, // Simulasi chat panjang
+    { type: "media", width: "w-1/2" }, // Simulasi kirim gambar
+    { type: "short", width: "w-1/4" },
+    { type: "long", width: "w-5/6" },
+    { type: "short", width: "w-1/3" },
+    { type: "long", width: "w-3/4" }, // Simulasi chat panjang
+    { type: "media", width: "w-1/2" }, // Simulasi kirim gambar
+    { type: "short", width: "w-1/4" },
+    { type: "long", width: "w-5/6" },
+    { type: "short", width: "w-1/3" },
+    { type: "long", width: "w-3/4" }, // Simulasi chat panjang
+    { type: "media", width: "w-1/2" }, // Simulasi kirim gambar
+    { type: "short", width: "w-1/4" },
+    { type: "long", width: "w-5/6" },
+    { type: "short", width: "w-1/3" },
+    { type: "long", width: "w-3/4" }, // Simulasi chat panjang
+    { type: "media", width: "w-1/2" }, // Simulasi kirim gambar
+    { type: "short", width: "w-1/4" },
+    { type: "long", width: "w-5/6" },
+    { type: "short", width: "w-1/3" },
+    { type: "long", width: "w-3/4" }, // Simulasi chat panjang
+    { type: "media", width: "w-1/2" }, // Simulasi kirim gambar
+    { type: "short", width: "w-1/4" },
+    { type: "long", width: "w-5/6" },
+  ];
+
+  return (
+    <ul className="flex flex-col gap-6 mx-3 py-4 w-full max-w-3xl">
+      {skeletonRows.map((row, index) => (
+        <li
+          key={index}
+          className="flex flex-row gap-4 animate-pulse group"
+        >
+          {/* Avatar Section */}
+          <div className="shrink-0 mt-0.5">
+            <div className="size-10 bg-[#2b2b2f] rounded-full" />
+          </div>
+
+          {/* Content Section */}
+          <div className="flex flex-col w-full gap-1">
+            {/* Username & Timestamp Header */}
+            <div className="flex items-center gap-3 mb-1">
+              {/* Username placeholder */}
+              <div className="h-4 w-24 bg-[#3a3a3d] rounded-full" />
+              {/* Timestamp placeholder */}
+              <div className="h-3 w-12 bg-[#2b2b2f] rounded-full" />
+            </div>
+
+            {/* --- LOGIKA VARIASI KONTEN --- */}
+
+            {/* VARIASI 1: MEDIA / GAMBAR */}
+            {row.type === "media" ? (
+              <div className="mt-1">
+                {/* Placeholder Image: Kotak besar dengan rounded corners */}
+                <div className="h-48 w-64 bg-[#2b2b2f] rounded-lg" />
+              </div>
+            ) : (
+              /* VARIASI 2: TEXT (Short & Long) */
+              <div className="flex flex-col gap-1.5">
+                {/* Baris 1: Utama */}
+                <div className={`h-4 bg-[#2b2b2f] rounded-full ${row.width}`} />
+
+                {/* Jika tipe 'long', tambah baris ekstra untuk efek paragraf/word wrap */}
+                {row.type === "long" && (
+                  <>
+                    <div className="h-4 w-1/2 bg-[#2b2b2f] rounded-full opacity-90" />
+                    <div className="h-4 w-1/3 bg-[#2b2b2f] rounded-full opacity-80" />
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+};

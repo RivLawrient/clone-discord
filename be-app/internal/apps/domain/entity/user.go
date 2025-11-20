@@ -9,11 +9,12 @@ type User struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 
-	UserProfile      UserProfile  `gorm:"constraint:OnDelete:CASCADE"`
-	RefreshToken     RefreshToken `gorm:"constraint:OnDelete:CASCADE"`
-	SentRequests     []Friend     `gorm:"foreignKey:SenderID;constraint:OnDelete:CASCADE"`
-	ReceivedRequests []Friend     `gorm:"foreignKey:ReceiverID;constraint:OnDelete:CASCADE"`
-	JoinServer       []JoinServer `gorm:"constraint:OnDelete:CASCADE"`
+	UserProfile      UserProfile      `gorm:"constraint:OnDelete:CASCADE"`
+	RefreshToken     RefreshToken     `gorm:"constraint:OnDelete:CASCADE"`
+	SentRequests     []Friend         `gorm:"foreignKey:SenderID;constraint:OnDelete:CASCADE"`
+	ReceivedRequests []Friend         `gorm:"foreignKey:ReceiverID;constraint:OnDelete:CASCADE"`
+	JoinServer       []JoinServer     `gorm:"constraint:OnDelete:CASCADE"`
+	ChannelMessage   []ChannelMessage `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) TableName() string {

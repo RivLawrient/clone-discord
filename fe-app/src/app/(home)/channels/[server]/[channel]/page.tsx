@@ -48,11 +48,11 @@ export default function Page() {
   if (curretChannel)
     return (
       <>
-        {/* {!curretChannel.is_voice ? (
+        {!curretChannel.is_voice ? (
           <TextChannelView data={curretChannel} />
         ) : (
           <>voice channel</>
-        )} */}
+        )}
       </>
     );
 }
