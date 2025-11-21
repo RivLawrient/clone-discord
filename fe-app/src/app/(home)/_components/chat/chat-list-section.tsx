@@ -39,7 +39,7 @@ export default function ChatListSection(props: {
         console.log("User tidak melihat div topRef");
       }
     });
-
+  
     observer.observe(topRef.current);
 
     return () => observer.disconnect();

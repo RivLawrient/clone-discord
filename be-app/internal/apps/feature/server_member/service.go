@@ -59,16 +59,17 @@ func (s *Service) UpdateServerPosition(userID string, serverID string, newPositi
 	var newList []entity.JoinServer
 	for _, v := range list {
 		if v.Position == target.Position {
-			v.Position = newPosition
+			continue
 		}
 
 		if newPosition > target.Position {
-			if v.Position < newPosition && v.Position > target.Position {
+			if v.Position > target.Position && v.Position <= newPosition {
 				v.Position--
 			}
 		}
+
 		if newPosition < target.Position {
-			if v.Position < newPosition && v.Position > target.Position {
+			if v.Position >= newPosition && v.Position < target.Position {
 				v.Position++
 			}
 		}
@@ -76,6 +77,8 @@ func (s *Service) UpdateServerPosition(userID string, serverID string, newPositi
 		newList = append(newList, v)
 	}
 
+	target.Position = newPosition
+	newList = append(newList, target)
 	if err := s.JoinServerRepo.UpdateBatch(tx, &newList); err != nil {
 		return nil, err
 	}

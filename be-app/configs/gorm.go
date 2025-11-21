@@ -43,32 +43,6 @@ func NewDB() *gorm.DB {
 	}
 
 	// db.Migrator().DropTable(
-	// 	&user.User{},
-	// 	&userprofile.UserProfile{},
-	// 	&refreshtoken.RefreshToken{},
-	// 	&friend.Friend{},
-	// 	&textchatuser.TextChatUser{},
-	// 	&server.Server{},
-	// 	&joinserver.JoinServer{},
-	// 	&categorychannel.CategoryChannel{},
-	// 	&channel.Channel{},
-	// 	&messagechannel.MessageChannel{},
-	// )
-
-	// db.AutoMigrate(
-	// 	&user.User{},
-	// 	&userprofile.UserProfile{},
-	// 	&refreshtoken.RefreshToken{},
-	// 	&friend.Friend{},
-	// 	&textchatuser.TextChatUser{},
-	// 	&server.Server{},
-	// 	&joinserver.JoinServer{},
-	// 	&categorychannel.CategoryChannel{},
-	// 	&channel.Channel{},
-	// 	&messagechannel.MessageChannel{},
-	// )
-
-	// db.Migrator().DropTable(
 	// 	&entity.User{},
 	// 	&entity.UserProfile{},
 	// 	&entity.RefreshToken{},
@@ -93,3 +67,4 @@ func NewDB() *gorm.DB {
 
 	return db
 }
+	

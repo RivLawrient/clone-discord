@@ -48,21 +48,17 @@ export default function TextChannelView(props: { data: ChannelList }) {
       </div>
       <div className="grow flex flex-row min-h-0 min-w-0">
         <div className="flex flex-col min-w-0 grow">
-          {/* {!loading && ( */}
-          <>
-            <ChatListSection
-              data={list}
-              isLast={isLast}
-              loading={loading}
-              onLoadMore={FetchChat}
-            />
-            <InputChat
-              data={props.data}
-              list={list}
-              setList={setList}
-            />
-          </>
-          {/* )} */}
+          <ChatListSection
+            data={list}
+            isLast={isLast}
+            loading={loading}
+            onLoadMore={FetchChat}
+          />
+          <InputChat
+            data={props.data}
+            list={list}
+            setList={setList}
+          />
         </div>
         {showSide && (
           <div className="bg-[#1a1a1e] border-l border-[#29292e] p-2 flex flex-col gap-2 min-w-[250px] ">
