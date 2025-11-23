@@ -72,10 +72,12 @@ func (r Routes) SetupRoutes() {
 	// SERVER CATEGORY
 	r.App.Post("/server/category", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateCategoryChannelHandler)
 	r.App.Delete("/server/category/:category_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.DeleteCategoryChannelHandler)
+	r.App.Post("/server/category/:category_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.RenameCateogryHandler)
 
 	// SERVER CHANNEL
 	r.App.Post("/server/channel", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateChannelHandler)
 	r.App.Delete("/server/channel/:channel_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.DeleteChannelHandler)
+	r.App.Post("/server/channel/:channel_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.RenameChannelHandler)
 
 	// SERVER ME
 	r.App.Get("/server/me", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)

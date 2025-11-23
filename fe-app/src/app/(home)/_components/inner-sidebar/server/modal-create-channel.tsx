@@ -87,7 +87,7 @@ export function ModalCreateChannel(props: {
                 : "hover:bg-[#5865f2]/60"
             )}
           >
-            Create Category
+            Create Channel
           </button>
         </div>
       </ModalContent>

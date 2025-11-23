@@ -68,3 +68,7 @@ type DeleteChannelRequest struct {
 type TextMessageRequest struct {
 	Text string `json:"text" validate:"required"`
 }
+
+type RenameChannelRequest struct {
+	Name string `json:"name" validate:"required"`
+}

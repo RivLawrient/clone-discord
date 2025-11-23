@@ -141,6 +141,7 @@ export function useRightClickMenuCategorySection() {
   const [servers] = useAtom(serverAtom);
   const { server } = useParams();
   const currentServer = servers?.find((v) => v.id === server);
+  const [openRename, setOpenRename] = useState(false);
 
   const deleteCategoryHandle = (id: string) => {
     setLoading(true);
@@ -170,11 +171,14 @@ export function useRightClickMenuCategorySection() {
     loading,
     deleteCategoryHandle,
     currentServer,
+    openRename,
+    setOpenRename,
   };
 }
 
 export function useRightClickMenuChannel() {
   const [openDelete, setOpenDelete] = useState(false);
+  const [openRename, setOpenRename] = useState(false);
   const [loading, setLoading] = useState(false);
   const [channel, setChannel] = useAtom(channelListAtom);
   const [servers] = useAtom(serverAtom);
@@ -205,5 +209,7 @@ export function useRightClickMenuChannel() {
     loading,
     deleteCategoryHandle,
     currentServer,
+    openRename,
+    setOpenRename,
   };
 }

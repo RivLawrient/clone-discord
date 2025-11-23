@@ -555,3 +555,110 @@ func (h *Handler) GetListMemberServerHandler(c *fiber.Ctx) error {
 		Data:    resp,
 	})
 }
+
+func (h *Handler) RenameChannelHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	channelID := c.Params("channel_id")
+	req := new(dto.RenameChannelRequest)
+	c.BodyParser(req)
+
+	if err := h.Validate.Var(channelID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	data, err := h.Service.RenameChannel(userID, channelID, req.Name)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotOwnerServer) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: errs.ErrIDNotFound.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	resp, _ := h.Service.GetListChannelAndCategoryServer(data.ServerID)
+	ids := h.Service.Get_listUserIDInServer(data.ServerID)
+	h.Hub.SendToUser(*ids, resp)
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ChannelList]{
+		Message: "success rename channel",
+		Data: dto.ChannelList{
+			ID:       data.ID,
+			Name:     data.Name,
+			IsVoice:  data.IsVoice,
+			Position: data.Position,
+		},
+	})
+}
+
+func (h *Handler) RenameCateogryHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	categoryID := c.Params("category_id")
+	req := new(dto.RenameChannelRequest)
+	c.BodyParser(req)
+
+	if err := h.Validate.Var(categoryID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	data, err := h.Service.RenameCateogry(userID, categoryID, req.Name)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotOwnerServer) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: errs.ErrIDNotFound.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	resp, _ := h.Service.GetListChannelAndCategoryServer(data.ServerID)
+	ids := h.Service.Get_listUserIDInServer(data.ServerID)
+	h.Hub.SendToUser(*ids, resp)
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.CategoryChannel]{
+		Message: "success rename category",
+		Data: dto.CategoryChannel{
+			ID:       categoryID,
+			Name:     data.Name,
+			Position: data.Position,
+		},
+	})
+}

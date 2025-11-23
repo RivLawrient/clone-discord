@@ -792,3 +792,67 @@ func (s *Service) GetListMemberServer(userID, serverID string) (*[]entity.UserPr
 	}
 	return &users, nil
 }
+
+func (s *Service) RenameChannel(userID, channelID, name string) (*entity.Channel, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	var channel entity.Channel
+	if err := s.ChannelRepo.GetByID(tx, channelID, &channel); err != nil {
+		return nil, err
+	}
+
+	var joinServer entity.JoinServer
+	if err := s.JoinServerRepo.GetByServerIDUserID(tx, channel.ServerID, userID, &joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	channel.Name = name
+
+	if err := s.ChannelRepo.Update(tx, &channel); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+
+		return nil, err
+	}
+
+	return &channel, nil
+}
+
+func (s *Service) RenameCateogry(userID, categoryID, name string) (*entity.ChannelCategory, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	var cat entity.ChannelCategory
+	if err := s.ChannelCategoryRepo.GetByID(tx, categoryID, &cat); err != nil {
+		return nil, err
+	}
+
+	var joinServer entity.JoinServer
+	if err := s.JoinServerRepo.GetByServerIDUserID(tx, cat.ServerID, userID, &joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	cat.Name = name
+
+	if err := s.ChannelCategoryRepo.Update(tx, &cat); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+
+		return nil, err
+	}
+
+	return &cat, nil
+}

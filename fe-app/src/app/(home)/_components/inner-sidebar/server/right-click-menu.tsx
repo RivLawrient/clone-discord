@@ -15,6 +15,8 @@ import {
   ChannelList,
 } from "@/app/(home)/_state/channel-list-atom";
 import ModalDeleteChannel from "./modal-delete-channel";
+import ModalRenameChannel from "./modal-rename-channel";
+import ModalRenameCategory from "./modal-rename-category";
 
 export function RightClickMenuMainSection(props: {
   children: React.ReactNode;
@@ -110,6 +112,8 @@ export function RightClickMenuCategorySection(props: {
     loading,
     deleteCategoryHandle,
     currentServer,
+    openRename,
+    setOpenRename,
   } = useRightClickMenuCategorySection();
   return (
     <>
@@ -120,13 +124,18 @@ export function RightClickMenuCategorySection(props: {
         loading={loading}
         handle={deleteCategoryHandle}
       />
+      <ModalRenameCategory
+        data={props.data}
+        open={openRename}
+        setOpen={setOpenRename}
+      />
       <ContextMenu.Root>
         <ContextMenu.Trigger asChild>{props.children}</ContextMenu.Trigger>
         <ContextMenu.Portal>
           {currentServer?.is_owner && (
             <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
               <ContextMenu.Item
-                // onClick={() => setOpenDelete(true)}
+                onClick={() => setOpenRename(true)}
                 className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
               >
                 Edit Category
@@ -156,6 +165,8 @@ export function RightClickMenuChannel(props: {
     loading,
     deleteCategoryHandle,
     currentServer,
+    openRename,
+    setOpenRename,
   } = useRightClickMenuChannel();
   return (
     <>
@@ -167,13 +178,18 @@ export function RightClickMenuChannel(props: {
         handle={deleteCategoryHandle}
         dataCategory={props.dataCategory}
       />
+      <ModalRenameChannel
+        open={openRename}
+        setOpen={setOpenRename}
+        data={props.data}
+      />
       <ContextMenu.Root>
         <ContextMenu.Trigger asChild>{props.children}</ContextMenu.Trigger>
         <ContextMenu.Portal>
           {currentServer?.is_owner && (
             <ContextMenu.Content className="bg-[#28282d] p-2 border border-[#36363b] rounded-lg text-white text-sm font-semibold">
               <ContextMenu.Item
-                // onClick={() => setOpenDelete(true)}
+                onClick={() => setOpenRename(true)}
                 className="p-2 rounded-lg hover:bg-[#313136] outline-none cursor-pointer transition-all"
               >
                 Edit Channel

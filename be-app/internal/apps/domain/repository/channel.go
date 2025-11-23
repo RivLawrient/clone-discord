@@ -78,3 +78,7 @@ func (r *ChannelRepo) GetByPositionAndServerIDOnCategory(db *gorm.DB, serverID s
 func (r *ChannelRepo) GetByPositionAndServerID(db *gorm.DB, serverID string, position int, channel *entity.Channel) error {
 	return db.Where("server_id = ? AND position = ? AND channel_category_id IS NULL", serverID, position).First(channel).Error
 }
+
+func (r *ChannelRepo) Update(db *gorm.DB, data *entity.Channel) error {
+	return db.Updates(data).Error
+}

@@ -71,3 +71,7 @@ func (r *ChannelCategoryRepo) GetIDByPositionAndServerID(db *gorm.DB, serverID s
 
 	return id, nil
 }
+
+func (r *ChannelCategoryRepo) Update(db *gorm.DB, data *entity.ChannelCategory) error {
+	return db.Updates(data).Error
+}
