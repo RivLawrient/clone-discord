@@ -43,6 +43,7 @@ func (r *JoinServerRepo) GetListByUserIDWithJoin(db *gorm.DB, userID string, lis
 func (r *JoinServerRepo) GetByServerIDUserID(db *gorm.DB, serverID string, userID string, joinServer *entity.JoinServer) error {
 	return db.
 		Where("server_id = ? AND user_id = ?", serverID, userID).
+		Preload("Server.JoinServer").
 		First(joinServer).
 		Error
 }
@@ -69,6 +70,7 @@ func (r *JoinServerRepo) GetListByUserID(db *gorm.DB, userID string, joinServers
 	return db.
 		Where("user_id = ?", userID).
 		Preload("Server.Channel").
+		Preload("Server.JoinServer").
 		Preload("Server.ChannelCategory.Channel").
 		Find(joinServers).
 		Error
@@ -102,4 +104,12 @@ func (r *JoinServerRepo) CheckAlreadyJoin(db *gorm.DB, serverID string, userID s
 	}
 
 	return count > 0, nil
+}
+
+func (r *JoinServerRepo) Delete(db *gorm.DB, data *entity.JoinServer) error {
+	return db.Delete(data).Error
+}
+
+func (r *JoinServerRepo) GetListByServerID(db *gorm.DB, serverID string, data *[]entity.JoinServer) error {
+	return db.Where("server_id = ?", serverID).Preload("User.UserProfile").Find(data).Error
 }

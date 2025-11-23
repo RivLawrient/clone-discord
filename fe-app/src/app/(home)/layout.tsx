@@ -1,9 +1,9 @@
-import InnerSidebar from "./_components/inner-sidebar/inner-sidebar";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AuthProvider from "./_components/auth-provider";
 import Sidebar from "@/components/sidebar/sidebar";
 import Header from "@/components/header/header";
+import InnerSidebar from "@/components/inner-sidebar/inner-sidebar";
 
 export default async function Layout(props: { children: React.ReactNode }) {
   const cookie = await cookies();

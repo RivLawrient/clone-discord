@@ -384,3 +384,174 @@ func (h *Handler) ReorderChannelHandler(c *fiber.Ctx) error {
 		Data:    *data,
 	})
 }
+
+func (h *Handler) UpdateProfileHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	serverID := c.Params("server_id")
+	req := new(dto.NewServerRequest)
+	c.BodyParser(req)
+
+	if err := h.Validate.Var(serverID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	if err := h.Validate.Struct(req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	file, _ := c.FormFile("profile_image")
+	req.ProfileImage = file
+	var imageID = ""
+	// kalau ada image langsung simpan
+	if req.ProfileImage != nil {
+		upload_dir := "./public"
+		if err := os.MkdirAll(upload_dir, os.ModePerm); err != nil {
+			log.Println("failed create dir:", err)
+			return err
+		}
+
+		ext := filepath.Ext(req.ProfileImage.Filename)
+		new_name := uuid.NewString() + ext
+		file_path := filepath.Join(upload_dir, new_name)
+		if err := c.SaveFile(req.ProfileImage, file_path); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: "something wrong",
+				Data:    err.Error(),
+			})
+		}
+
+		imageID = new_name
+	}
+
+	result, err := h.Service.UpdateProfile(userID, serverID, req.Name, imageID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotOwnerServer) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	ids := h.Service.Get_listUserIDInServer(serverID)
+	h.Hub.SendToUser(*ids, fiber.Map{
+		"server_id": serverID,
+		"data": dto.ServerList{
+			Name:         result.Name,
+			ProfileImage: result.ProfileImage,
+		},
+	})
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.ServerList]{
+		Message: "success update profile",
+		Data: dto.ServerList{
+			ID:           result.ID,
+			Name:         result.Name,
+			ProfileImage: result.ProfileImage,
+			InviteCode:   result.InviteCode,
+			Position:     result.JoinServer[0].Position,
+			IsOwner:      result.JoinServer[0].IsOwner,
+		},
+	})
+}
+
+func (h *Handler) DeleteServerHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	serverID := c.Params("server_id")
+
+	if err := h.Validate.Var(serverID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	ids := h.Service.Get_listUserIDInServer(serverID)
+	_, err := h.Service.DeleteServer(userID, serverID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotOwnerServer) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	h.Hub.SendToUser(*ids, fiber.Map{
+		"server_id": serverID,
+		"is_delete": true,
+	})
+
+	// resp := []dto.ServerList{}
+	// for _, v := range *data {
+	// 	each := dto.ServerList{
+	// 		ID:           v.Server.ID,
+	// 		Name:         v.Server.Name,
+	// 		ProfileImage: v.Server.ProfileImage,
+	// 		InviteCode:   v.Server.InviteCode,
+	// 		Position:     v.Position,
+	// 		IsOwner:      v.IsOwner,
+	// 	}
+
+	// 	resp = append(resp, each)
+	// }
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+		Message: "success delete server",
+	})
+}
+
+func (h *Handler) GetListMemberServerHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	serverID := c.Params("server_id")
+
+	if err := h.Validate.Var(serverID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	data, err := h.Service.GetListMemberServer(userID, serverID)
+	if err != nil {
+		if errors.Is(err, errs.ErrNotJoinServer) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	resp := []dto.ServerMember{}
+	for _, v := range *data {
+		resp = append(resp, dto.ServerMember{
+			UserID:         v.UserID,
+			Name:           v.Name,
+			Username:       v.Username,
+			Avatar:         v.Avatar,
+			AvatarBg:       v.AvatarBg,
+			StatusActivity: v.StatusActivity,
+			Bio:            v.Bio,
+			BannerColor:    v.BannerColor,
+		})
+	}
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[[]dto.ServerMember]{
+		Message: "success get data",
+		Data:    resp,
+	})
+}

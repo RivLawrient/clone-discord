@@ -1,5 +1,4 @@
 "use client";
-
 import UserBar from "../userbar";
 import ServerInnerSidebar from "./server/server-inner-sidebar";
 import FriendInnerSidebar from "./friend-inner-sidebar";

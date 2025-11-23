@@ -130,3 +130,14 @@ type MessageChannelSocket struct {
 	ChannelId      string         `json:"channel_id"`
 	MessageChannel MessageChannel `json:"message_channel"`
 }
+
+type ServerMember struct {
+	UserID         string `json:"user_id"`
+	Name           string `json:"name"`
+	Username       string `json:"username"`
+	Avatar         string `json:"avatar"`
+	AvatarBg       string `json:"avatar_bg"`
+	StatusActivity string `json:"status_activity"`
+	Bio            string `json:"bio"`
+	BannerColor    string `json:"banner_color"`
+}

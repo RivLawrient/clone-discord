@@ -68,6 +68,10 @@ func (h *Handler) Socket(c *websocket.Conn) {
 		h.Hub.SendToUser(*user, fiber.Map{
 			"friend_status": status,
 		})
+		member, status, _ := h.StatusActivityService.UpdateStatusToServerMember(userID, statusactivitiy.StatusOffline)
+		h.Hub.SendToUser(*member, fiber.Map{
+			"member_status": status,
+		})
 		c.Close()
 	}()
 
@@ -79,15 +83,16 @@ func (h *Handler) Socket(c *websocket.Conn) {
 			break
 		}
 
-		//send to self
-		// send to friend
-		// send to server
 		if string(msg) == "idle" {
 			idle, _ := h.StatusActivityService.SetStatusUser(userID, statusactivitiy.StatusIdle)
 			h.Hub.SendToUser([]string{userID}, idle)
 			user, status, _ := h.StatusActivityService.UpdateStatusToFriendList(userID, statusactivitiy.StatusActivity(idle.StatusActivity))
 			h.Hub.SendToUser(*user, fiber.Map{
 				"friend_status": status,
+			})
+			member, status, _ := h.StatusActivityService.UpdateStatusToServerMember(userID, statusactivitiy.StatusIdle)
+			h.Hub.SendToUser(*member, fiber.Map{
+				"member_status": status,
 			})
 		}
 		if string(msg) == "online" {
@@ -97,6 +102,10 @@ func (h *Handler) Socket(c *websocket.Conn) {
 			user, status, _ := h.StatusActivityService.UpdateStatusToFriendList(userID, statusactivitiy.StatusActivity(onl.StatusActivity))
 			h.Hub.SendToUser(*user, fiber.Map{
 				"friend_status": status,
+			})
+			member, status, _ := h.StatusActivityService.UpdateStatusToServerMember(userID, statusactivitiy.StatusOnline)
+			h.Hub.SendToUser(*member, fiber.Map{
+				"member_status": status,
 			})
 		}
 	}

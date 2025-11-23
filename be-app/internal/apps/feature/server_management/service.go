@@ -690,3 +690,105 @@ func (s *Service) Get_listUserIDInServer(serverID string) *[]string {
 	s.JoinServerRepo.GetListUserIDByServerID(s.DB, serverID, &data)
 	return &data
 }
+
+func (s *Service) UpdateProfile(userID string, serverID string, nameServer string, imageID string) (*entity.Server, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	joinServer := entity.JoinServer{}
+	if err := s.JoinServerRepo.GetByServerIDUserID(tx, serverID, userID, &joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	server := joinServer.Server
+	server.Name = nameServer
+	server.ProfileImage = imageID
+
+	if err := s.ServerRepo.Update(tx, &server); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+
+	return &server, nil
+}
+
+func (s *Service) DeleteServer(userID string, serverID string) (*entity.Server, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	joinServer := entity.JoinServer{}
+	if err := s.JoinServerRepo.GetByServerIDUserID(tx, serverID, userID, &joinServer); err != nil {
+		return nil, err
+	}
+
+	if !joinServer.IsOwner {
+		return nil, errs.ErrNotOwnerServer
+	}
+
+	// joinServers := []entity.JoinServer{}
+	// err := s.JoinServerRepo.GetListByUserID(tx, userID, &joinServers)
+	// if err != nil {
+	// 	return nil, err
+	// }
+
+	// newJoinServer := []entity.JoinServer{}
+	// for _, v := range joinServers {
+	// 	if v.ID != joinServer.ID {
+
+	// 		if v.Position > joinServer.Position {
+	// 			v.Position = v.Position - 1
+	// 		}
+
+	// 		newJoinServer = append(newJoinServer, v)
+	// 	}
+	// }
+
+	// if err := s.JoinServerRepo.UpdateBatch(tx, &newJoinServer); err != nil {
+	// 	return nil, err
+	// }
+
+	if err := s.ServerRepo.Delete(tx, &joinServer.Server); err != nil {
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return &joinServer.Server, nil
+}
+
+func (s *Service) GetListMemberServer(userID, serverID string) (*[]entity.UserProfile, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	check, err := s.JoinServerRepo.CheckAlreadyJoin(tx, serverID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	if !check {
+		return nil, errs.ErrNotJoinServer
+	}
+
+	list := []entity.JoinServer{}
+	if err := s.JoinServerRepo.GetListByServerID(tx, serverID, &list); err != nil {
+		return nil, err
+	}
+
+	users := []entity.UserProfile{}
+	for _, v := range list {
+		users = append(users, v.User.UserProfile)
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return &users, nil
+}

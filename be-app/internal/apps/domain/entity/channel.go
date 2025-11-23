@@ -12,7 +12,7 @@ type Channel struct {
 	CreatedAt         time.Time
 	UpdatedAt         time.Time
 
-	ChannelMessage []ChannelMessage
+	ChannelMessage []ChannelMessage `gorm:"constraint:OnDelete:CASCADE"`
 }
 
 func (c *Channel) TableName() string {

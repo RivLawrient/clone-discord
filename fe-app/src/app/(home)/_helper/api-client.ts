@@ -51,6 +51,10 @@ export async function apiCall(url: RequestInfo, init: RequestInit = {}) {
         document.cookie = `token=; max-age=0; path=/`;
         window.location.reload();
       }
+      if (resp.status === 500) {
+        document.cookie = `token=; max-age=0; path=/`;
+        window.location.reload();
+      }
     });
   }
 

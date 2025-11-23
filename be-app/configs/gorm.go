@@ -67,4 +67,3 @@ func NewDB() *gorm.DB {
 
 	return db
 }
-	

@@ -25,5 +25,13 @@ func (r *ServerRepo) GetWithChannelAndCategory(db *gorm.DB, id string, server *e
 }
 
 func (r *ServerRepo) GetByID(db *gorm.DB, id string, server *entity.Server) error {
-	return db.Where("id = ?", id).First(server).Error
+	return db.Where("id = ?", id).Preload("JoinServer").First(server).Error
+}
+
+func (r *ServerRepo) Update(db *gorm.DB, server *entity.Server) error {
+	return db.Updates(server).Error
+}
+
+func (r *ServerRepo) Delete(db *gorm.DB, server *entity.Server) error {
+	return db.Delete(server).Error
 }

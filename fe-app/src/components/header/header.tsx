@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/app/(home)/_helper/cn";
 import { serverAtom } from "@/app/(home)/_state/server-atom";
 import { useAtom } from "jotai";
 import { User2Icon } from "lucide-react";
@@ -66,7 +67,12 @@ function ServerHeader({ serverId }: { serverId: string }) {
 
   return (
     <>
-      <div className="bg-[#1d1d1e] size-5 rounded-sm flex items-center justify-center overflow-hidden">
+      <div
+        className={cn(
+          " size-5 rounded-sm flex items-center justify-center overflow-hidden",
+          current && "bg-[#1d1d1e]"
+        )}
+      >
         {current?.profile_image ? (
           <img
             draggable={false}

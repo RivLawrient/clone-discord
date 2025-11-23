@@ -13,13 +13,15 @@ type Service struct {
 	DB             *gorm.DB
 	JoinServerRepo repository.JoinServerRepo
 	ServerRepo     repository.ServerRepo
+	UserProfile    repository.UserProfileRepo
 }
 
-func NewService(db *gorm.DB, joinServerRepo repository.JoinServerRepo, serverRepo repository.ServerRepo) *Service {
+func NewService(db *gorm.DB, joinServerRepo repository.JoinServerRepo, serverRepo repository.ServerRepo, userProfile repository.UserProfileRepo) *Service {
 	return &Service{
 		DB:             db,
 		JoinServerRepo: joinServerRepo,
 		ServerRepo:     serverRepo,
+		UserProfile:    userProfile,
 	}
 }
 
@@ -90,27 +92,34 @@ func (s *Service) UpdateServerPosition(userID string, serverID string, newPositi
 	return newList, nil
 }
 
-func (s *Service) JoinServer(userID string, serverID string) (*entity.JoinServer, error) {
+func (s *Service) JoinServer(userID string, serverID string) (*entity.JoinServer, *[]string, *entity.UserProfile, error) {
 	tx := s.DB.Begin()
 	defer tx.Rollback()
 
+	profile := entity.UserProfile{}
+	if err := s.UserProfile.GetByUserID(tx, userID, &profile); err != nil {
+		return nil, nil, nil, err
+	}
+
 	server := entity.Server{}
 	if err := s.ServerRepo.GetByID(tx, serverID, &server); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	check, err := s.JoinServerRepo.CheckAlreadyJoin(tx, serverID, userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	if check {
-		return nil, errs.ErrAlreadyJoinServer
+		return &entity.JoinServer{
+			ServerID: server.ID,
+		}, nil, nil, errs.ErrAlreadyJoinServer
 	}
 
 	pos, err := s.JoinServerRepo.GetLastPositionByUserID(tx, userID)
 	if err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	join := entity.JoinServer{
@@ -122,11 +131,50 @@ func (s *Service) JoinServer(userID string, serverID string) (*entity.JoinServer
 	}
 
 	if err := s.JoinServerRepo.Create(tx, &join); err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
 
 	if err := tx.Commit().Error; err != nil {
-		return nil, err
+		return nil, nil, nil, err
 	}
-	return &join, nil
+
+	ids := []string{}
+	for _, v := range server.JoinServer {
+		ids = append(ids, v.UserID)
+	}
+
+	return &join, &ids, &profile, nil
+}
+
+func (s *Service) LeaveServer(userID string, serverID string) (*entity.JoinServer, *[]string, *entity.UserProfile, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	profile := entity.UserProfile{}
+	if err := s.UserProfile.GetByUserID(tx, userID, &profile); err != nil {
+		return nil, nil, nil, err
+	}
+
+	joinServer := entity.JoinServer{}
+	if err := s.JoinServerRepo.GetByServerIDUserID(tx, serverID, userID, &joinServer); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if joinServer.IsOwner {
+		return nil, nil, nil, errs.ErrInternal
+	}
+
+	if err := s.JoinServerRepo.Delete(tx, &joinServer); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, nil, nil, err
+	}
+
+	ids := []string{}
+	for _, v := range joinServer.Server.JoinServer {
+		ids = append(ids, v.UserID)
+	}
+	return &joinServer, &ids, &profile, nil
 }

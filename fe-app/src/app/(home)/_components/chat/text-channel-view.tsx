@@ -33,9 +33,11 @@ export default function TextChannelView(props: { data: ChannelList }) {
     <div className="flex flex-col min-h-0 min-w-0 bg-[#1a1a1e]">
       <div className="flex p-3.5 gap-2 border-y border-[#29292e] ">
         <div className="brightness-75">
-          <Icons />
+          <Icons size={20} />
         </div>
-        <span className="font-semibold grow">{props.data.name}</span>
+        <span className="font-semibold grow leading-4.5">
+          {props.data.name}
+        </span>
         <button
           onClick={() => setShowSide(!showSide)}
           className={cn(
@@ -43,7 +45,7 @@ export default function TextChannelView(props: { data: ChannelList }) {
             showSide ? "text-white" : "brightness-75"
           )}
         >
-          <Users2Icon />
+          <Users2Icon size={20} />
         </button>
       </div>
       <div className="grow flex flex-row min-h-0 min-w-0">

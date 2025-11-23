@@ -25,7 +25,9 @@ export default function Page() {
     current?.category.find((v) => v.channel.length > 0)?.channel[0];
 
   if (firstChannel) {
-    router.push(`/channels/${server}/${firstChannel.id}`);
+    setTimeout(() => {
+      router.push(`/channels/${server}/${firstChannel.id}`);
+    }, 1);
   }
   return (
     <div className="flex flex-col items-center justify-center text-center">

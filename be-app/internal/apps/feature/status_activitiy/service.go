@@ -21,13 +21,15 @@ type Service struct {
 	DB              *gorm.DB
 	UserProfileRepo repository.UserProfileRepo
 	FriendRepo      repository.FriendRepo
+	JoinServerRepo  repository.JoinServerRepo
 }
 
-func NewService(db *gorm.DB, userProfileRepo repository.UserProfileRepo, friendRepo repository.FriendRepo) *Service {
+func NewService(db *gorm.DB, userProfileRepo repository.UserProfileRepo, friendRepo repository.FriendRepo, joinServeRepo repository.JoinServerRepo) *Service {
 	return &Service{
 		DB:              db,
 		UserProfileRepo: userProfileRepo,
 		FriendRepo:      friendRepo,
+		JoinServerRepo:  joinServeRepo,
 	}
 }
 
@@ -77,6 +79,43 @@ func (s *Service) UpdateStatusToFriendList(userID string, status StatusActivity)
 	}
 
 	return &data, &dto.StatusUpdate{
+		UserId:         userID,
+		StatusActivity: string(status),
+	}, nil
+}
+
+func (s *Service) UpdateStatusToServerMember(userID string, status StatusActivity) (*[]string, *dto.StatusUpdate, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	join := []entity.JoinServer{}
+	err := s.JoinServerRepo.GetListByUserID(tx, userID, &join)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	ids := []string{}
+	for _, v := range join {
+		for _, vv := range v.Server.JoinServer {
+			ids = append(ids, vv.UserID)
+		}
+	}
+
+	uniqueIds := make([]string, 0)
+	seen := make(map[string]bool)
+
+	for _, id := range ids {
+		if !seen[id] {
+			seen[id] = true
+			uniqueIds = append(uniqueIds, id)
+		}
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, nil, err
+	}
+
+	return &uniqueIds, &dto.StatusUpdate{
 		UserId:         userID,
 		StatusActivity: string(status),
 	}, nil

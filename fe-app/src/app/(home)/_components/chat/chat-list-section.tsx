@@ -39,7 +39,7 @@ export default function ChatListSection(props: {
         console.log("User tidak melihat div topRef");
       }
     });
-  
+
     observer.observe(topRef.current);
 
     return () => observer.disconnect();
@@ -185,7 +185,7 @@ const DiscordChatSkeleton = () => {
   ];
 
   return (
-    <ul className="flex flex-col gap-6 mx-3 py-4 w-full max-w-3xl">
+    <ul className="flex flex-col gap-6 mx-3 py-4 max-w-full">
       {skeletonRows.map((row, index) => (
         <li
           key={index}

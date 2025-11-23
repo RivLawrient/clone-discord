@@ -65,6 +65,9 @@ func (r Routes) SetupRoutes() {
 	r.App.Get("/server/channels/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.GetListChannelAndCategoryServerHandler)
 	r.App.Get("/server/channels", middleware.RequireJWTAuth(), r.ServerManagementHandler.GetListChannelAndCategoryUserHandler)
 	r.App.Post("/server/channels/reorder/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.ReorderChannelHandler)
+	r.App.Post("/server/profile/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.UpdateProfileHandler)
+	r.App.Delete("/server/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.DeleteServerHandler)
+	r.App.Get("/server/members/:server_id", middleware.RequireJWTAuth(), r.ServerManagementHandler.GetListMemberServerHandler)
 
 	// SERVER CATEGORY
 	r.App.Post("/server/category", middleware.RequireJWTAuth(), r.ServerManagementHandler.CreateCategoryChannelHandler)
@@ -78,6 +81,8 @@ func (r Routes) SetupRoutes() {
 	r.App.Get("/server/me", middleware.RequireJWTAuth(), r.ServerMemberHandler.GetListServerHandler)
 	r.App.Post("/server/me/:server_id/:new_position", middleware.RequireJWTAuth(), r.ServerMemberHandler.UpdateServerPositionHandler)
 	r.App.Post("/server/join/:server_id", middleware.RequireJWTAuth(), r.ServerMemberHandler.JoinServerHandler)
+	r.App.Delete("/server/me/:server_id", middleware.RequireJWTAuth(),
+		r.ServerMemberHandler.LeaveServerHandler)
 
 	// CHANNEL MESSAGE
 	r.App.Post("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.AddTextMsgHandler)

@@ -10,13 +10,13 @@ import PendingFriendView from "../../_components/friend/pending-friend-view";
 
 export default function Page() {
   const [tab, setTab] = useState<"online" | "all" | "pending" | "add">(
-    "online",
+    "online"
   );
   const [friend, setFriend] = useAtom(friendAtom);
 
   return (
     <div>
-      <div className="border-discord-border-2 flex h-12 items-center gap-3 border-t border-b px-4 py-2">
+      <div className="border-discord-border-2 flex items-center gap-3 border-t border-b px-4 py-2">
         <div className="flex items-center gap-2 px-1 font-semibold">
           <UserCheck2Icon />
           Friend
@@ -57,10 +57,16 @@ export default function Page() {
         </div>
       </div>
       {(tab === "all" || tab === "online") && (
-        <ListFriendView data={friend.all} tab={tab} />
+        <ListFriendView
+          data={friend.all}
+          tab={tab}
+        />
       )}
       {tab === "pending" && (
-        <PendingFriendView sent={friend.sent} request={friend.request} />
+        <PendingFriendView
+          sent={friend.sent}
+          request={friend.request}
+        />
       )}
       {tab === "add" && <AddFriendView />}
     </div>

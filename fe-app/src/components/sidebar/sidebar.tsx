@@ -11,7 +11,7 @@ export default function Sidebar() {
       className="flex min-h-0 flex-col gap-y-2 overflow-y-scroll pb-20 select-none"
     >
       <DirectMessageBtn />
-      <div className="border-[#222225] mx-5 border-t" />
+      <div className="border-[#29292e] mx-5 border-t my-[1px]" />
       <ServerListSection />
       <AddServerBtn />
     </div>

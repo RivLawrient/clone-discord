@@ -44,9 +44,9 @@ func Apps(a *AppsConfig) {
 	friendshipHandler := friendship.NewHandler(*friendshipService, *a.Validate, hub)
 	serverManagementService := servermanagement.NewService(a.DB, *serverRepo, *joinServerRepo, *channelRepo, *channelCategoryRepo)
 	serverManagementHandler := servermanagement.NewHandler(*serverManagementService, *a.Validate, hub)
-	serverMemberService := servermember.NewService(a.DB, *joinServerRepo, *serverRepo)
-	serverMemberhandler := servermember.NewHandler(*serverMemberService, *a.Validate)
-	statusActivityService := statusactivitiy.NewService(a.DB, *userProfileRepo, *friendRepo)
+	serverMemberService := servermember.NewService(a.DB, *joinServerRepo, *serverRepo, *userProfileRepo)
+	serverMemberhandler := servermember.NewHandler(*serverMemberService, *a.Validate, hub)
+	statusActivityService := statusactivitiy.NewService(a.DB, *userProfileRepo, *friendRepo, *joinServerRepo)
 	messagingChannelService := messagingchannel.NewService(a.DB, *userRepo, *userProfileRepo, *channelMessageRepo, *serverRepo, *joinServerRepo, *channelRepo, *channelCategoryRepo)
 	messagingChannelHandler := messagingchannel.NewHandler(*messagingChannelService, *a.Validate, hub)
 

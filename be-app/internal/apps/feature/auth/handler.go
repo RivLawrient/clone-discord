@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -124,6 +125,11 @@ func (h *Handler) MeHandler(c *fiber.Ctx) error {
 		if errors.Is(err, errs.ErrUserNotFound) || errors.Is(err, errs.ErrUserLogout) {
 			return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseWeb[any]{
 				Message: err.Error(),
+			})
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) || errors.Is(err, errs.ErrUserLogout) {
+			return c.Status(fiber.StatusUnauthorized).JSON(dto.ResponseWeb[any]{
+				Message: errs.ErrUserNotFound.Error(),
 			})
 		}
 

@@ -10,6 +10,10 @@ import { serverAtom } from "../_state/server-atom";
 import { mediaAtom } from "../_state/media-atom";
 import { usePathname, useRouter } from "next/navigation";
 import { channelListAtom } from "../_state/channel-list-atom";
+import {
+  MemberList,
+  memberListServerAtom,
+} from "../_state/membet-list-server-atom";
 
 export default function AuthProvider(props: { children: React.ReactNode }) {
   const [loadingCount, setLoadingCount] = useState(5);
@@ -23,6 +27,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   const [server, setServer] = useAtom(serverAtom);
   const [media, setMedia] = useAtom(mediaAtom);
   const [channels, setChannels] = useAtom(channelListAtom);
+  const [members, setMembers] = useAtom(memberListServerAtom);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -147,6 +152,16 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
             ),
           }));
         }
+        if (data.member_status) {
+          const result: userStatus = data.member_status;
+          setMembers((v) =>
+            v.map((vv) =>
+              vv.user_id == result.user_id
+                ? { ...vv, status_activity: result.status_activity }
+                : vv
+            )
+          );
+        }
         if (data.request) {
           setFriend((v) => ({ ...v, request: data.request }));
         }
@@ -156,7 +171,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
         if (data.all) {
           setFriend((v) => ({ ...v, all: data.all }));
         }
-        if (data.server_id) {
+        if (data.server_id && data.category && data.channel) {
           setChannels((v) =>
             v.map((vv) =>
               vv.server_id == data.server_id
@@ -164,6 +179,22 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
                 : vv
             )
           );
+        }
+        if (data.server_id && data.data) {
+          setServer((v) =>
+            v.map((vv) =>
+              vv.id == data.server_id
+                ? {
+                    ...vv,
+                    name: data.data.name,
+                    profile_image: data.data.profile_image,
+                  }
+                : vv
+            )
+          );
+        }
+        if (data.server_id && data.is_delete) {
+          setServer((v) => v.filter((v) => v.id != data.server_id));
         }
       };
 

@@ -44,7 +44,15 @@ export default function HydrateChannel(props: { children: React.ReactNode }) {
   const [list, setList] = useAtom(memberListServerAtom);
 
   useEffect(() => {
-    setList(users);
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/members/${server}`, {
+      method: "GET",
+    }).then(async (resp) => {
+      const res = await resp.json();
+      if (resp.ok) {
+        const data = res.data;
+        setList(data);
+      }
+    });
   }, [server]);
 
   useEffect(() => {
@@ -65,6 +73,19 @@ export default function HydrateChannel(props: { children: React.ReactNode }) {
               : v
           )
         );
+      }
+      if (data.server_id && data.new_member) {
+        if (data.server_id == server) {
+          const result: MemberList = data.new_member;
+          setList((v) => [...v, result]);
+        }
+      }
+
+      if (data.server_id && data.leave_member) {
+        if (data.server_id == server) {
+          const result: MemberList = data.leave_member;
+          setList((v) => v.filter((vv) => vv.user_id != result.user_id));
+        }
       }
     };
 
