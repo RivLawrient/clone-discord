@@ -19,7 +19,7 @@ func (r *ChannelMessageRepo) Create(db *gorm.DB, data *entity.ChannelMessage) er
 }
 
 func (r *ChannelMessageRepo) GetByID(db *gorm.DB, id string, data *entity.ChannelMessage) error {
-	return db.Where("id = ?", id).First(data).Error
+	return db.Where("id = ?", id).Preload("Channel").First(data).Error
 }
 
 func (r *ChannelMessageRepo) GetListBeforeTimeByChannelID(db *gorm.DB, channelID string, time time.Time, id string, limit int, list *[]entity.ChannelMessage) error {
@@ -43,4 +43,12 @@ func (r *ChannelMessageRepo) GetListByChannelID(db *gorm.DB, channelID string, l
 		Limit(limit).
 		Find(list).
 		Error
+}
+
+func (r *ChannelMessageRepo) Update(db *gorm.DB, data *entity.ChannelMessage) error {
+	return db.Updates(data).Error
+}
+
+func (r *ChannelMessageRepo) Delete(db *gorm.DB, data *entity.ChannelMessage) error {
+	return db.Delete(data).Error
 }

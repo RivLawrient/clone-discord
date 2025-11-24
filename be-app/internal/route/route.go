@@ -89,6 +89,8 @@ func (r Routes) SetupRoutes() {
 	// CHANNEL MESSAGE
 	r.App.Post("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.AddTextMsgHandler)
 	r.App.Get("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.GetListTextMsgHandler)
+	r.App.Put("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannel.EditTextMsgHandler)
+	r.App.Delete("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannel.RemoveTextMsgHandler)
 
 	// HUB
 	r.App.Use("/ws", func(c *fiber.Ctx) error {

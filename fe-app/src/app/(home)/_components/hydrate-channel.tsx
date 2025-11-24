@@ -74,6 +74,7 @@ export default function HydrateChannel(props: { children: React.ReactNode }) {
           )
         );
       }
+
       if (data.server_id && data.new_member) {
         if (data.server_id == server) {
           const result: MemberList = data.new_member;

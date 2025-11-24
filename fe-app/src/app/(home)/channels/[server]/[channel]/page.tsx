@@ -5,6 +5,7 @@ import {
   channelListAtom,
 } from "@/app/(home)/_state/channel-list-atom";
 import { serverAtom } from "@/app/(home)/_state/server-atom";
+import { socketAtom } from "@/app/(home)/_state/socket-atom";
 import { useAtom } from "jotai";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -51,6 +52,8 @@ export default function Page() {
       notFound();
     }
   }, [servers, channels, channel]);
+
+  const [sockets, setSockets] = useAtom(socketAtom);
 
   if (curretChannel)
     return (

@@ -90,9 +90,6 @@ func (s *Service) GetListTextMsg(userID string, channelID string, beforeID strin
 	tx := s.DB.Begin()
 	defer tx.Rollback()
 
-	// var messages []entity.ChannelMessage
-
-	// Default limit jika user tidak mengirimkan atau limit terlalu besar
 	if limit <= 0 {
 		limit = 20
 	}
@@ -120,39 +117,6 @@ func (s *Service) GetListTextMsg(userID string, channelID string, beforeID strin
 		}
 	}
 
-	// Start Query dasar
-	// query := tx.Model(&entity.ChannelMessage{}).
-	// 	Where("channel_id = ?", channelID)
-
-	// // LOGIKA CURSOR (before_id)
-	// if beforeID != "" {
-	// 	// var lastMsg entity.ChannelMessage
-	// 	lastMsg := entity.ChannelMessage{}
-
-	// 	// 1. Cari pesan referensi (cursor) untuk mendapatkan CreatedAt-nya
-	// 	if err := tx.Select("created_at, id").First(&lastMsg, "id = ?", beforeID).Error; err != nil {
-	// 		if errors.Is(err, gorm.ErrRecordNotFound) {
-	// 			return nil, errors.New("invalid before_id")
-	// 		}
-	// 		return nil, err
-	// 	}
-
-	// 	// 2. Filter pesan yang lebih tua dari cursor
-	// 	// Kita gunakan Tuple comparison agar aman jika ada pesan di detik yang sama persis
-	// 	// Artinya: Ambil yang waktunya LEBIH KECIL, ATAU waktunya SAMA tapi ID-nya lebih kecil (secara string sorting)
-	// 	query = query.Where(
-	// 		"(created_at < ? OR (created_at = ? AND id < ?))",
-	// 		lastMsg.CreatedAt, lastMsg.CreatedAt, lastMsg.ID,
-	// 	)
-	// }
-
-	// // 3. Sorting dan Limit
-	// // Chat biasanya diambil dari Newest -> Oldest (DESC)
-	// query.Order("created_at DESC, id DESC").
-	// 	Preload("User.UserProfile").
-	// 	Limit(limit).
-	// 	Find(&messages)
-
 	if err := tx.Commit().Error; err != nil {
 		return nil, err
 	}
@@ -178,4 +142,72 @@ func (s *Service) GetListTextMsg(userID string, channelID string, beforeID strin
 	}
 
 	return &data, nil
+}
+
+func (s *Service) EditTextMsg(userID, chatID, text string) (*entity.ChannelMessage, *entity.UserProfile, *[]string, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	profile := entity.UserProfile{}
+	if err := s.UserProfileRepo.GetByUserID(tx, userID, &profile); err != nil {
+		return nil, nil, nil, err
+	}
+
+	chat := entity.ChannelMessage{}
+	if err := s.ChannelMessageRepo.GetByID(tx, chatID, &chat); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if chat.UserID != userID {
+		return nil, nil, nil, errs.ErrNotOwnerMessage
+	}
+
+	chat.Text = text
+
+	if err := s.ChannelMessageRepo.Update(tx, &chat); err != nil {
+		return nil, nil, nil, err
+	}
+
+	users := []string{}
+	if err := s.JoinServerRepo.GetListUserIDByServerID(tx, chat.Channel.ServerID, &users); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, nil, nil, err
+	}
+	return &chat, &profile, &users, nil
+}
+
+func (s *Service) RemoveTextMsg(userID, chatID string) (*entity.ChannelMessage, *entity.UserProfile, *[]string, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	profile := entity.UserProfile{}
+	if err := s.UserProfileRepo.GetByUserID(tx, userID, &profile); err != nil {
+		return nil, nil, nil, err
+	}
+
+	chat := entity.ChannelMessage{}
+	if err := s.ChannelMessageRepo.GetByID(tx, chatID, &chat); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if chat.UserID != userID {
+		return nil, nil, nil, errs.ErrNotOwnerMessage
+	}
+	if err := s.ChannelMessageRepo.Delete(tx, &chat); err != nil {
+		return nil, nil, nil, err
+	}
+
+	users := []string{}
+	if err := s.JoinServerRepo.GetListUserIDByServerID(tx, chat.Channel.ServerID, &users); err != nil {
+		return nil, nil, nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, nil, nil, err
+	}
+
+	return &chat, &profile, &users, nil
 }

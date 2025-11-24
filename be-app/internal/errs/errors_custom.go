@@ -18,5 +18,6 @@ var (
 	ErrAlreadyJoinServer       = errors.New("user already join server")
 	ErrNotJoinServer           = errors.New("user not join server")
 	ErrNotOwnerServer          = errors.New("user is not owner server")
+	ErrNotOwnerMessage         = errors.New("user is not owner message")
 	ErrRequestFriendNotFound   = errors.New("request friend is not found")
 )

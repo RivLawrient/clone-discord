@@ -1,8 +1,21 @@
-import { Fragment, useEffect, useMemo, useRef } from "react";
+import {
+  Dispatch,
+  Fragment,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "../../_helper/cn";
 import UserAvatar from "../user-avatar";
 import { ChatList } from "./text-channel-view";
 import useChatListSection from "./useChatListSection";
+import { PencilIcon, Trash2Icon } from "lucide-react";
+import TooltipDesc from "../tooltip-desc";
+import { SetStateAction, useAtom } from "jotai";
+import { apiCall } from "../../_helper/api-client";
+import { userAtom } from "../../_state/user-atom";
+import ModalDeleteChat from "./modal-delete-chat";
 
 export default function ChatListSection(props: {
   data: ChatList[];
@@ -76,8 +89,104 @@ export default function ChatListSection(props: {
     }
   }, [props.data]);
 
+  const [edit, setEdit] = useState(false);
+  const [editChat, setEditChat] = useState<ChatList>();
+  const [input, setInput] = useState("");
+  const [row, setRow] = useState(1);
+  const inputTagRef = useRef<HTMLTextAreaElement | null>(null);
+
+  const editHandle = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setInput(e.target.value);
+  };
+
+  const hitNewChat = () => {
+    if (editChat) {
+      apiCall(
+        `${process.env.NEXT_PUBLIC_HOST_API}message/chat/${editChat.id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({
+            text: input,
+          }),
+        }
+      )
+        .catch(() => {})
+        .finally(() => {
+          setEdit(false);
+          // setLoading(false);
+        });
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && e.shiftKey) {
+      e.preventDefault();
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      setInput((v) => {
+        const newValue = v.slice(0, start) + "\n" + v.slice(end);
+        setTimeout(() => {
+          textarea.selectionStart = start + 1;
+          textarea.selectionEnd = start + 1;
+        }, 0);
+
+        return newValue;
+      });
+
+      if (inputTagRef.current) {
+        inputTagRef.current.scrollTop = inputTagRef.current.scrollHeight;
+      }
+    }
+    if (e.key === "Escape") {
+      e.preventDefault();
+      setEdit(false);
+    }
+
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      if (input.trim() != "") {
+        hitNewChat();
+      }
+    }
+  };
+  useEffect(() => {
+    const textarea = inputTagRef.current;
+    if (textarea) {
+      textarea.style.height = "auto"; // reset dulu
+      const scrollHeight = textarea.scrollHeight;
+      const lineHeight = 24; // tinggi 1 baris (px), sesuaikan sama CSS
+      const maxHeight = lineHeight * 20; // maksimal 20 baris
+      textarea.style.height = `${Math.min(scrollHeight, maxHeight)}px`;
+    }
+  }, [input]);
+
+  useEffect(() => {
+    setTimeout(() => {
+      if (editChat) {
+        setInput(editChat.text);
+      }
+    }, 1);
+    if (edit && inputTagRef.current) {
+      const el = inputTagRef.current;
+      el.focus();
+      el.setSelectionRange(el.value.length, el.value.length);
+    }
+  }, [edit, inputTagRef]);
+
+  const [user, setUser] = useAtom(userAtom);
+  const [openDelete, setOpenDelete] = useState(false);
+
   return (
     <>
+      {editChat && (
+        <ModalDeleteChat
+          open={openDelete}
+          setOpen={setOpenDelete}
+          data={editChat}
+        />
+      )}
       <ul
         ref={scrollRef}
         className=" grow min-h-0 overflow-scroll  min-w-0 flex flex-col custom-scrollbar "
@@ -111,10 +220,20 @@ export default function ChatListSection(props: {
             <li
               key={v.id}
               className={cn(
-                "mr-4  whitespace-pre-line hover:bg-[#242428]  rounded-r-lg flex flex-row pl-3 group relative",
-                lastMargin(v, a, i) && "mb-5"
+                "mr-4  whitespace-pre-line hover:bg-[#242428]  rounded-r-lg flex flex-row pl-3 group peer relative",
+                lastMargin(v, a, i) && "mb-5",
+                edit && editChat == v && "bg-[#242428]"
               )}
             >
+              {!edit && v.user.username == user.username && (
+                <EditChatBar
+                  edit={edit}
+                  setEdit={setEdit}
+                  editState={v}
+                  setEditState={setEditChat}
+                  setOpenDelete={setOpenDelete}
+                />
+              )}
               {showIt(v, a, i) ? (
                 <div className="mt-1 absolute">
                   <UserAvatar
@@ -142,7 +261,39 @@ export default function ChatListSection(props: {
                     </span>
                   </div>
                 )}
-                <div className=""> {v.text} </div>
+
+                {edit && editChat == v ? (
+                  <>
+                    <div className="bg-[#222327] border focus-within:border-[#323237] border-[#27282c] mt-2 mr-2 px-3 flex flex-row rounded-lg mb-1 py-4 min-w-0">
+                      <textarea
+                        ref={inputTagRef}
+                        value={input}
+                        rows={Math.max(1, v.text.split("\n").length)}
+                        className="w-full   grow outline-none break-all resize-none"
+                        onChange={editHandle}
+                        onKeyDown={handleKeyDown}
+                      />
+                    </div>
+                    <h1 className="font-semibold text-xs mx-1 mb-1">
+                      escape to{" "}
+                      <span
+                        onClick={() => setEdit(false)}
+                        className="cursor-pointer text-blue-500 hover:underline"
+                      >
+                        cancel
+                      </span>
+                      . enter to{" "}
+                      <span
+                        onClick={hitNewChat}
+                        className="cursor-pointer text-blue-500 hover:underline"
+                      >
+                        save
+                      </span>
+                    </h1>
+                  </>
+                ) : (
+                  <div className="">{v.text}</div>
+                )}
               </div>
             </li>
           </Fragment>
@@ -150,6 +301,54 @@ export default function ChatListSection(props: {
         <div ref={bottomRef} />
       </ul>
     </>
+  );
+}
+
+function EditChatBar(props: {
+  edit: boolean;
+  setEdit: React.Dispatch<SetStateAction<boolean>>;
+  editState: ChatList;
+  setEditState: React.Dispatch<SetStateAction<ChatList | undefined>>;
+  setOpenDelete: Dispatch<SetStateAction<boolean>>;
+}) {
+  const editHandle = () => {
+    props.setEditState(props.editState);
+    props.setEdit(true);
+  };
+
+  const openHandle = () => {
+    props.setEditState(props.editState);
+    props.setOpenDelete(true);
+  };
+  return (
+    <div className="absolute z-10 invisible  group-hover:visible peer-hover:visible right-0 mx-5 -top-6 bg-[#242429] border-[#323237] flex rounded-lg p-1 border gap-1 shadow-2xl">
+      <TooltipDesc
+        side="top"
+        text="Edit"
+      >
+        <button
+          onClick={editHandle}
+          className="rounded-md hover:bg-white/5  not-hover:brightness-75 cursor-pointer p-1"
+        >
+          <div>
+            <PencilIcon size={18} />
+          </div>
+        </button>
+      </TooltipDesc>
+      <TooltipDesc
+        side="top"
+        text="Delete Message"
+      >
+        <button
+          onClick={openHandle}
+          className="rounded-md hover:bg-white/5  not-hover:brightness-75 cursor-pointer p-1 text-red-500"
+        >
+          <div>
+            <Trash2Icon size={18} />
+          </div>
+        </button>
+      </TooltipDesc>
+    </div>
   );
 }
 

@@ -68,6 +68,16 @@ export default function useTextChannelView(data: ChannelList) {
       ) {
         setList((p) => [data.message_channel, ...p]);
       }
+      if (data.chat_id && data.is_edited) {
+        setList((p) =>
+          p.map((v) =>
+            v.id == data.chat_id ? { ...v, text: data.is_edited } : v
+          )
+        );
+      }
+      if (data.chat_id && data.is_deleted) {
+        setList((p) => p.filter((v) => v.id != data.chat_id));
+      }
     };
 
     sockets.addEventListener("message", handleMessage);

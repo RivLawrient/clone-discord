@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"gorm.io/gorm"
 )
 
 type Handler struct {
@@ -127,5 +128,128 @@ func (h *Handler) GetListTextMsgHandler(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[[]dto.MessageChannel]{
 		Message: "success get message",
 		Data:    *data,
+	})
+}
+
+func (h *Handler) EditTextMsgHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	chatID := c.Params("chat_id")
+	request := new(dto.TextMessageRequest)
+	c.BodyParser(request)
+
+	if err := h.Validate.Var(chatID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	if err := h.Validate.Struct(request); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+			Message: "validation failed",
+			Data:    helper.ValidationMsg(err),
+		})
+	}
+
+	data, profile, ids, err := h.Service.EditTextMsg(userID, chatID, request.Text)
+	if err != nil {
+		if errors.Is(err, errs.ErrIDNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNotOwnerMessage) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	resp := dto.MessageChannel{
+		ID: data.ID,
+		User: dto.UserOther{
+			UserId:         profile.UserID,
+			Name:           profile.Name,
+			Username:       profile.Username,
+			Avatar:         profile.Avatar,
+			AvatarBg:       profile.AvatarBg,
+			StatusActivity: profile.StatusActivity,
+			Bio:            profile.Bio,
+			BannerColor:    profile.BannerColor,
+		},
+		Text:      data.Text,
+		CreatedAt: data.CreatedAt,
+	}
+
+	h.Hub.SendToUser(*ids, fiber.Map{
+		"chat_id":   chatID,
+		"is_edited": data.Text,
+	})
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.MessageChannel]{
+		Message: "success edit text chat",
+		Data:    resp,
+	})
+}
+
+func (h *Handler) RemoveTextMsgHandler(c *fiber.Ctx) error {
+	userID := c.Locals("user_id").(string)
+	chatID := c.Params("chat_id")
+
+	if err := h.Validate.Var(chatID, "uuid"); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+			Message: "validation failed",
+			Data:    fmt.Sprintf("params%s", helper.ValidationMsg(err)[""]),
+		})
+	}
+
+	data, profile, ids, err := h.Service.RemoveTextMsg(userID, chatID)
+	if err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: errs.ErrIDNotFound.Error(),
+			})
+		}
+
+		if errors.Is(err, errs.ErrNotOwnerMessage) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: err.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	resp := dto.MessageChannel{
+		ID: data.ID,
+		User: dto.UserOther{
+			UserId:         profile.UserID,
+			Name:           profile.Name,
+			Username:       profile.Username,
+			Avatar:         profile.Avatar,
+			AvatarBg:       profile.AvatarBg,
+			StatusActivity: profile.StatusActivity,
+			Bio:            profile.Bio,
+			BannerColor:    profile.BannerColor,
+		},
+		Text:      data.Text,
+		CreatedAt: data.CreatedAt,
+	}
+
+	h.Hub.SendToUser(*ids, fiber.Map{
+		"chat_id":    chatID,
+		"is_deleted": true,
+	})
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.MessageChannel]{
+		Message: "success delete chat",
+		Data:    resp,
 	})
 }
