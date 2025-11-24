@@ -1,5 +1,6 @@
 "use client";
 import TextChannelView from "@/app/(home)/_components/chat/text-channel-view";
+import { apiCall } from "@/app/(home)/_helper/api-client";
 import {
   ChannelList,
   channelListAtom,
@@ -9,6 +10,7 @@ import { socketAtom } from "@/app/(home)/_state/socket-atom";
 import { useAtom } from "jotai";
 import { notFound, useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import VoiceChannelView from "./voice-channel-view";
 
 export default function Page() {
   const [channels, setChannels] = useAtom(channelListAtom);
@@ -53,15 +55,13 @@ export default function Page() {
     }
   }, [servers, channels, channel]);
 
-  const [sockets, setSockets] = useAtom(socketAtom);
-
   if (curretChannel)
     return (
       <>
         {!curretChannel.is_voice ? (
           <TextChannelView data={curretChannel} />
         ) : (
-          <>voice channel</>
+          <VoiceChannelView data={curretChannel} />
         )}
       </>
     );

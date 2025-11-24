@@ -1,5 +1,3 @@
-// "use client";
-import { useMemo } from "react";
 import Input from "./input";
 import ListData from "./list-data";
 

@@ -15,3 +15,6 @@ export const outputDevicesAtom = atom<MediaDeviceInfo[]>([]);
 
 export const selectedInputAtom = atom<string | null>(null); // deviceId
 export const selectedOutputAtom = atom<string | null>(null); // device
+
+export const micOnAtom = atom(true);
+export const deafenedAtom = atom(false);

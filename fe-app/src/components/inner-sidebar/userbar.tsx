@@ -13,9 +13,15 @@ import { Dialog } from "radix-ui";
 import { SetStateAction } from "jotai";
 import { userAtom } from "@/app/(home)/_state/user-atom";
 import UserAvatar from "@/app/(home)/_components/user-avatar";
-import { mediaAtom } from "@/app/(home)/_state/media-atom";
+import {
+  deafenedAtom,
+  mediaAtom,
+  micOnAtom,
+} from "@/app/(home)/_state/media-atom";
 import TooltipDesc from "@/app/(home)/_components/tooltip-desc";
 import SettingModal from "@/app/(home)/_components/setting/setting-modal";
+import { TrackToggle } from "@livekit/components-react";
+import { Track } from "livekit-client";
 
 export default function UserBar() {
   const [user, setUser] = useAtom(userAtom);
@@ -55,6 +61,7 @@ export default function UserBar() {
         </div>
       </div>
       <div className="ml-2 flex items-center gap-1">
+        {/* <TrackToggle source={Track.Source.Microphone} /> */}
         <BtnMic />
         <BtnSpeaker />
         <BtnSettings />
@@ -93,11 +100,13 @@ function BtnAttribute(props: {
 }
 
 function BtnMic() {
+  const [micOn, setMicOn] = useAtom(micOnAtom);
   const [media, setMedia] = useAtom(mediaAtom);
   const [alertModal, setAlertModal] = useState(false);
   const streamRef = useRef<MediaStream | null>(null);
 
   const micHandle = async () => {
+    setMicOn(!micOn);
     if (media.micOn) {
       // 🔴 Matikan mic
       if (streamRef.current) {
@@ -183,6 +192,7 @@ function MicAlertModal(props: {
 }
 
 function BtnSpeaker() {
+  const [deafened, setDeafened] = useAtom(deafenedAtom);
   const [media, setMedia] = useAtom(mediaAtom);
 
   return (
@@ -195,7 +205,10 @@ function BtnSpeaker() {
         status={media.speakerOn}
         icon_on={HeadphonesIcon}
         icon_off={HeadphoneOffIcon}
-        on_click={() => setMedia((v) => ({ ...v, speakerOn: !v.speakerOn }))}
+        on_click={() => {
+          setDeafened(!deafened);
+          setMedia((v) => ({ ...v, speakerOn: !v.speakerOn }));
+        }}
       />
     </TooltipDesc>
   );
