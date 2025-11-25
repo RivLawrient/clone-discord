@@ -10,7 +10,6 @@ import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import "@livekit/components-styles";
 // Import icon untuk tombol replay/join (opsional)
-import { Play } from "lucide-react";
 import { ChannelList } from "@/app/(home)/_state/channel-list-atom";
 import { useAtom } from "jotai";
 import { deafenedAtom, micOnAtom } from "@/app/(home)/_state/media-atom";
@@ -18,18 +17,12 @@ import { deafenedAtom, micOnAtom } from "@/app/(home)/_state/media-atom";
 export default function VoiceChannelView(props: { data: ChannelList }) {
   const { server, channel } = useParams();
   const [token, setToken] = useState("");
-
-  // 1. State untuk mengontrol apakah kita ingin connect atau tidak
   const [shouldConnect, setShouldConnect] = useState(false);
-
-  // Opsional: Jika ingin custom room instance, tapi LiveKitRoom bisa handle ini otomatis
   const [room] = useState(() => new Room({}));
-
   const [micOn] = useAtom(micOnAtom);
   const [deafened] = useAtom(deafenedAtom);
 
   useEffect(() => {
-    // Reset token saat channel berubah
     setToken("");
     setShouldConnect(false);
 
@@ -39,7 +32,6 @@ export default function VoiceChannelView(props: { data: ChannelList }) {
       const res = await resp.json();
       if (resp.ok) {
         setToken(res.data.token);
-        // 2. Auto connect saat token pertama kali didapat (opsional)
         setShouldConnect(true);
       }
     });
@@ -49,16 +41,6 @@ export default function VoiceChannelView(props: { data: ChannelList }) {
     if (!room) return;
     room.localParticipant.setMicrophoneEnabled(micOn);
   }, [micOn, room]);
-
-  useEffect(() => {
-    if (!room) return;
-    room.localParticipant.setMicrophoneEnabled(micOn);
-  }, [micOn, room]);
-
-  // useEffect(() => {
-  //   if (!room) return;
-  //   room.setPlaybackAllowed(!deafened);
-  // }, [deafened, room]);
 
   if (token === "") {
     return (

@@ -17,7 +17,7 @@ import { apiCall } from "../../_helper/api-client";
 import { userAtom } from "../../_state/user-atom";
 import ModalDeleteChat from "./modal-delete-chat";
 
-export default function ChatListSection(props: {
+export default function hatListSection(props: {
   data: ChatList[];
   isLast: boolean;
   loading: boolean;
@@ -292,7 +292,7 @@ export default function ChatListSection(props: {
                     </h1>
                   </>
                 ) : (
-                  <div className="">{v.text}</div>
+                  <div className="break-all">{v.text}</div>
                 )}
               </div>
             </li>

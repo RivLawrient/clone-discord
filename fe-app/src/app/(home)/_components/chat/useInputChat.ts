@@ -63,6 +63,16 @@ export default function useInputChat(
             const res = await resp.json();
             // setList((p) => [...p, res.data]);
           });
+        } else {
+          apiCall(
+            `${process.env.NEXT_PUBLIC_HOST_API}dm/text/${data.user_id}`,
+            {
+              method: "POST",
+              body: JSON.stringify({
+                text: input,
+              }),
+            }
+          );
         }
         setInput("");
       }
