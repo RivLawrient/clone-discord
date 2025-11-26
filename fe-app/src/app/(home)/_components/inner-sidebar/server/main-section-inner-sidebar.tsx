@@ -26,6 +26,7 @@ import { ModalCreateChannel } from "./modal-create-channel";
 import { useRightClickMenuMainSection } from "./useRightClickMenu";
 import { apiCall } from "@/app/(home)/_helper/api-client";
 import { serverAtom } from "@/app/(home)/_state/server-atom";
+import ModalRenameChannel from "./modal-rename-channel";
 
 export default function MainSectionInnerSidebar() {
   const [channels, setChannels] = useAtom(channelListAtom);
@@ -465,6 +466,7 @@ function ChannelBtnList(props: {
   const { server } = useParams();
   const currentServer = servers?.find((v) => v.id === server);
   const route = useRouter();
+  const [openEdit, setOpenEdit] = useState(false);
 
   return (
     <RightClickMenuChannel
@@ -522,26 +524,34 @@ function ChannelBtnList(props: {
               props.isSelect ? "" : "group-hover:brightness-100 brightness-60"
             )}
           >
-            {props.data.name} + {props.data.position}
+            {props.data.name}
           </span>
 
           {currentServer?.is_owner && (
-            <TooltipDesc
-              side="top"
-              text="Edit Channel"
-            >
-              <div
-                className={cn(
-                  " ",
-                  props.isSelect ? "" : "group-hover:visible invisible"
-                )}
+            <>
+              <ModalRenameChannel
+                open={openEdit}
+                setOpen={setOpenEdit}
+                data={props.data}
+              />
+              <TooltipDesc
+                side="top"
+                text="Edit Channel"
               >
-                <SettingsIcon
-                  size={20}
-                  className={cn(!props.isSelect && "not-hover:brightness-60")}
-                />
-              </div>
-            </TooltipDesc>
+                <div
+                  onClick={() => setOpenEdit(true)}
+                  className={cn(
+                    " ",
+                    props.isSelect ? "" : "group-hover:visible invisible"
+                  )}
+                >
+                  <SettingsIcon
+                    size={20}
+                    className={cn(!props.isSelect && "not-hover:brightness-60")}
+                  />
+                </div>
+              </TooltipDesc>
+            </>
           )}
         </button>
       </div>

@@ -1,5 +1,8 @@
 import TooltipDesc from "@/app/(home)/_components/tooltip-desc";
+import UserAvatar from "@/app/(home)/_components/user-avatar";
 import { cn } from "@/app/(home)/_helper/cn";
+import { dmAtom } from "@/app/(home)/_state/dm-list-atom";
+import { useAtom } from "jotai";
 import {
   LucideIcon,
   PlusIcon,
@@ -7,9 +10,12 @@ import {
   StoreIcon,
   UserRoundCheckIcon,
 } from "lucide-react";
-import { usePathname, useRouter } from "next/navigation";
+import { useParams, usePathname, useRouter } from "next/navigation";
 
 export default function FriendView() {
+  const [dm, setDm] = useAtom(dmAtom);
+  const { user } = useParams();
+  const router = useRouter();
   return (
     <div className="flex flex-col">
       <div className="border-discord-border-1 border-b p-2">
@@ -50,6 +56,28 @@ export default function FriendView() {
                 className="cursor-pointer brightness-50 hover:brightness-100"
               />
             </TooltipDesc>
+          </div>
+
+          <div className="flex flex-col">
+            {[...dm].reverse().map((v) => (
+              <button
+                key={v.user_id}
+                onClick={() => router.push(`/channels/me/${v.username}`)}
+                className={cn(
+                  "hover:bg-[#1c1c1f] cursor-pointer rounded-lg p-2 flex flex-row gap-4 items-center",
+                  user == v.username && "bg-[#2e2e30]"
+                )}
+              >
+                <UserAvatar
+                  avatar={v.avatar}
+                  avatarBg={v.avatar_bg}
+                  name={v.name}
+                  px={32}
+                  StatusUser={v.status_activity}
+                />
+                <h1 className="font-semibold">{v.name}</h1>
+              </button>
+            ))}
           </div>
         </div>
       </div>

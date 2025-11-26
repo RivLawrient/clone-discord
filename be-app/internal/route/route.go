@@ -4,9 +4,11 @@ import (
 	"be-app/internal/apps/feature/auth"
 	"be-app/internal/apps/feature/friendship"
 	messagingchannel "be-app/internal/apps/feature/messaging_channel"
+	messaginguser "be-app/internal/apps/feature/messaging_user"
 	profilesettings "be-app/internal/apps/feature/profile_settings"
 	servermanagement "be-app/internal/apps/feature/server_management"
 	servermember "be-app/internal/apps/feature/server_member"
+	videoconversation "be-app/internal/apps/feature/video_conversation"
 	ws "be-app/internal/apps/websocket"
 	"be-app/internal/dto"
 	"be-app/internal/middleware"
@@ -17,14 +19,16 @@ import (
 )
 
 type Routes struct {
-	App                     *fiber.App
-	AuthHandler             auth.Handler
-	ProfileSettingsHandler  profilesettings.Handler
-	FriendshipHandler       friendship.Handler
-	ServerManagementHandler servermanagement.Handler
-	ServerMemberHandler     servermember.Handler
-	HubHandler              ws.Handler
-	MessagingChannel        messagingchannel.Handler
+	App                      *fiber.App
+	AuthHandler              auth.Handler
+	ProfileSettingsHandler   profilesettings.Handler
+	FriendshipHandler        friendship.Handler
+	ServerManagementHandler  servermanagement.Handler
+	ServerMemberHandler      servermember.Handler
+	HubHandler               ws.Handler
+	MessagingChannelHandler  messagingchannel.Handler
+	VideoConversationHandler videoconversation.Handler
+	MessagingUser            messaginguser.Handler
 }
 
 func (r Routes) SetupRoutes() {
@@ -87,10 +91,23 @@ func (r Routes) SetupRoutes() {
 		r.ServerMemberHandler.LeaveServerHandler)
 
 	// CHANNEL MESSAGE
-	r.App.Post("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.AddTextMsgHandler)
-	r.App.Get("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannel.GetListTextMsgHandler)
-	r.App.Put("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannel.EditTextMsgHandler)
-	r.App.Delete("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannel.RemoveTextMsgHandler)
+	r.App.Post("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannelHandler.AddTextMsgHandler)
+	r.App.Get("/message/channel/:channel_id", middleware.RequireJWTAuth(), r.MessagingChannelHandler.GetListTextMsgHandler)
+	r.App.Put("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannelHandler.EditTextMsgHandler)
+	r.App.Delete("/message/chat/:chat_id", middleware.RequireJWTAuth(), r.MessagingChannelHandler.RemoveTextMsgHandler)
+
+	// VIDEO CONVERSATION
+	r.App.Get("/channel/:channel_id", middleware.RequireJWTAuth(), r.VideoConversationHandler.GetTokenChannelHandler)
+
+	// DM USER
+	r.App.Post("/dm/text/:user_id", middleware.RequireJWTAuth(), r.MessagingUser.AddTextMsgHandler)
+	r.App.Get("/dm/text/:user_id", middleware.RequireJWTAuth(), r.MessagingUser.GetListTextMsgHandler)
+	r.App.Put("/dm/text/:chat_id", middleware.RequireJWTAuth(), r.MessagingUser.EditTextMsgHandler)
+	r.App.Delete("/dm/text/:chat_id", middleware.RequireJWTAuth(), r.MessagingUser.RemoveTextMsgHandler)
+	r.App.Get("/dm", middleware.RequireJWTAuth(), r.MessagingUser.ListDMHandler)
+
+	// OTHER USER
+	r.App.Get("/user/:username", middleware.RequireJWTAuth(), r.ProfileSettingsHandler.GetProfileHandler)
 
 	// HUB
 	r.App.Use("/ws", func(c *fiber.Ctx) error {
@@ -107,6 +124,7 @@ func (r Routes) SetupRoutes() {
 
 		return c.SendFile(imageDir + filename)
 	})
+
 }
 
 func RouteNotFound(c *fiber.Ctx, err error) error {

@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import { Dialog } from "radix-ui";
 import { SetStateAction, useEffect, useState } from "react";
 import UserAvatar from "../../user-avatar";
+import { apiCall } from "@/app/(home)/_helper/api-client";
 
 export function ModalInviteFriend(props: {
   open: boolean;
@@ -132,10 +133,19 @@ function FriendInviteListSection(props: { data: FriendList[] | undefined }) {
 function FriendInviteList(data: FriendList) {
   const [invite, setInvite] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { server } = useParams();
+  const [servers] = useAtom(serverAtom);
+  const currentServer = servers.find((v) => v.id == server);
 
   const inviteHandle = () => {
     setLoading(true);
-
+    if (currentServer)
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}dm/text/${data.user_id}`, {
+        method: "POST",
+        body: JSON.stringify({
+          text: `${window.location.origin}/invite/${currentServer.invite_code}`,
+        }),
+      });
     // kirim link ke chat
     setTimeout(() => {
       setInvite(true);

@@ -16,7 +16,6 @@ import InputChat from "@/app/(home)/_components/chat/input-chat";
 import { socketAtom } from "@/app/(home)/_state/socket-atom";
 import { friendAtom } from "@/app/(home)/_state/friend-atom";
 
-const chats = Array.from({ length: 100 }, (_, i) => i);
 export default function Page() {
   const [editChat, setEditChat] = useState<ChatList>();
   const [openDelete, setOpenDelete] = useState(false);
@@ -32,45 +31,64 @@ export default function Page() {
   const [input, setInput] = useState("");
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const [friend, setFriend] = useAtom(friendAtom);
-  const currentFr = friend.all.find((v) => v.username == user);
   const prevHeightRef = useRef(0);
   const prevScrollRef = useRef(0);
   const loadingMoreRef = useRef(false);
+  const [mainLoading, setMainLoading] = useState(true);
+  const [profile, setProfile] = useState<UserOther>();
 
-  const FetchChat = () => {
-    apiCall(
-      `${process.env.NEXT_PUBLIC_HOST_API}dm/text/${currentFr?.user_id}?limit=99${chat.length > 0 ? `&before_id=${chat[chat.length - 1].id}` : ``}`,
-      {
-        method: "GET",
-      }
-    ).then(async (resp) => {
+  useEffect(() => {
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}user/${user}`, {
+      method: "GET",
+    }).then(async (resp) => {
       const res = await resp.json();
       if (resp.ok) {
-        const data: ChatList[] = res.data;
-        if (chat.length > 0) {
-          setChat((v) => [...v, ...data]);
-        } else {
-          setChat(data);
-        }
-        setLoading(false);
-
-        if (data.length < 99) {
-          setIsLast(true);
-        }
+        const data = res.data;
+        setProfile(data);
       }
     });
+  }, [user]);
 
-    // setChat(DUMMY_CHAT_LIST_150);
+  // if (!pro) {
+  //   return <div>loading</div>;
+  // }
 
-    // setLoading(false);
-    // setIsLast(true);
+  const FetchChat = () => {
+    if (profile) {
+      apiCall(
+        `${process.env.NEXT_PUBLIC_HOST_API}dm/text/${profile.user_id}?limit=99${chat.length > 0 ? `&before_id=${chat[chat.length - 1].id}` : ``}`,
+        {
+          method: "GET",
+        }
+      ).then(async (resp) => {
+        const res = await resp.json();
+        if (resp.ok) {
+          const data: ChatList[] = res.data;
+          if (chat.length > 0) {
+            setChat((v) => [...v, ...data]);
+          } else {
+            setChat(data);
+          }
+          setLoading(false);
+
+          if (data.length < 99) {
+            setIsLast(true);
+          }
+        }
+      });
+
+      // setChat(DUMMY_CHAT_LIST_150);
+
+      // setLoading(false);
+      // setIsLast(true);
+    }
   };
 
   useEffect(() => {
     setTimeout(() => {
       FetchChat();
     }, 1000);
-  }, [user]);
+  }, [profile]);
 
   useEffect(() => {
     if (bottomRef.current) {
@@ -211,24 +229,46 @@ export default function Page() {
 
   const hitNewChat = () => {
     if (editChat) {
-      apiCall(
-        `${process.env.NEXT_PUBLIC_HOST_API}message/chat/${editChat.id}`,
-        {
-          method: "PUT",
-          body: JSON.stringify({
-            text: input,
-          }),
-        }
-      )
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}dm/text/${editChat.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          text: input,
+        }),
+      })
         .catch(() => {})
         .finally(() => {
           setEdit(false);
-          // setLoading(false);
         });
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const textarea = e.currentTarget;
+
+    // TAB
+    if (e.key === "Tab") {
+      e.preventDefault(); // hentikan pindah fokus
+      e.stopPropagation(); // hentikan bubbling shortcut global
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      const indent = "\t"; // atau "  " jika mau 2 spasi
+
+      setInput((v) => {
+        const newValue = v.slice(0, start) + indent + v.slice(end);
+
+        requestAnimationFrame(() => {
+          textarea.selectionStart = textarea.selectionEnd =
+            start + indent.length;
+        });
+
+        return newValue;
+      });
+
+      return;
+    }
+
     if (e.key === "Enter" && e.shiftKey) {
       e.preventDefault();
       const textarea = e.currentTarget;
@@ -296,6 +336,23 @@ export default function Page() {
       if (data.dm_sender == user || data.dm_sender == userCurrent.username) {
         setChat((v) => [data.data, ...v]);
       }
+      if (
+        data.chat_edited == user ||
+        data.chat_edited == userCurrent.username
+      ) {
+        setChat((v) =>
+          v.map((vv) =>
+            vv.id == data.data.id ? { ...vv, text: data.data.text } : vv
+          )
+        );
+      }
+
+      if (
+        data.chat_deleted == user ||
+        data.chat_deleted == userCurrent.username
+      ) {
+        setChat((v) => v.filter((vv) => vv.id != data.data.id));
+      }
     };
 
     sockets.addEventListener("message", handleMessage);
@@ -305,140 +362,147 @@ export default function Page() {
     };
   }, [sockets, user]);
 
-  if (currentFr)
-    return (
-      <div className="h-full relative grow flex flex-col min-h-0 min-w-0">
-        <div className=" p-3.5 items-center leading-4.5 flex border-[#29292e] border-y">
-          <div>
-            <BanIcon size={20} />
-          </div>
-          atas
+  if (!profile) return <div>user not found</div>;
+  return (
+    <div className="h-full relative grow flex flex-col min-h-0 min-w-0">
+      <div className=" p-3.5 gap-2 items-center leading-4.5 flex border-[#29292e] border-y">
+        <div>
+          <UserAvatar
+            avatar={profile.avatar}
+            avatarBg={profile.avatar_bg}
+            name={profile.name}
+            px={20}
+            StatusUser={profile.status_activity}
+          />
         </div>
-        <div className="grow flex flex-row min-h-0 min-w-0">
-          <div className="flex flex-col min-w-0 grow">
-            <>
-              {editChat && (
-                <ModalDeleteChat
-                  open={openDelete}
-                  setOpen={setOpenDelete}
-                  data={editChat}
-                />
+        <h1 className="font-semibold">{profile.name}</h1>
+      </div>
+      <div className="grow flex flex-row min-h-0 min-w-0">
+        <div className="flex flex-col min-w-0 grow">
+          <>
+            {editChat && (
+              <ModalDeleteChat
+                open={openDelete}
+                setOpen={setOpenDelete}
+                data={editChat}
+                is_dm
+              />
+            )}
+            <ul
+              ref={scrollRef}
+              className="grow min-h-0 overflow-scroll  min-w-0 flex flex-col custom-scrollbar"
+            >
+              {isLast ? (
+                <div className="grow items-center justify-end flex flex-col font-semibold mt-2 mb-4">
+                  <h1 className="text-[32px] leading-none">Welcome to</h1>
+                  <h1 className="text-[32px]">{user}</h1>
+                  <span>This is the beginning of this direct message.</span>
+                </div>
+              ) : (
+                <DiscordChatSkeleton />
               )}
-              <ul
-                ref={scrollRef}
-                className="grow min-h-0 overflow-scroll  min-w-0 flex flex-col custom-scrollbar"
-              >
-                {isLast ? (
-                  <div className="grow items-center justify-end flex flex-col font-semibold mt-2 mb-4">
-                    <h1 className="text-[32px] leading-none">Welcome to</h1>
-                    <h1 className="text-[32px]">{user}</h1>
-                    <span>This is the beginning of this server.</span>
-                  </div>
-                ) : (
-                  <DiscordChatSkeleton />
-                )}
-                {!loading && !isLast && (
-                  <div
-                    ref={topRef}
-                    className="w-full p-2 invisible bg-red-500"
-                  ></div>
-                )}
-                {[...chat].reverse().map((v, i, a) => (
-                  <Fragment key={i}>
-                    {showGap(v, a, i) && (
-                      <div className="flex flex-row items-center my-2 mx-4 gap-2">
-                        <hr className="grow border-[#323237]" />
-                        <span className="text-xs font-semibold text-[#94959c]">
-                          {gapTime(v)}
-                        </span>
-                        <hr className="grow border-[#323237]" />
+              {!loading && !isLast && (
+                <div
+                  ref={topRef}
+                  className="w-full p-2 invisible bg-red-500"
+                ></div>
+              )}
+              {[...chat].reverse().map((v, i, a) => (
+                <Fragment key={i}>
+                  {showGap(v, a, i) && (
+                    <div className="flex flex-row items-center my-2 mx-4 gap-2">
+                      <hr className="grow border-[#323237]" />
+                      <span className="text-xs font-semibold text-[#94959c]">
+                        {gapTime(v)}
+                      </span>
+                      <hr className="grow border-[#323237]" />
+                    </div>
+                  )}
+                  <li
+                    key={v.id}
+                    className={cn(
+                      "mr-4  whitespace-pre-line hover:bg-[#242428]  rounded-r-lg flex flex-row pl-3 group peer relative",
+                      lastMargin(v, a, i) && "mb-5",
+                      edit && editChat == v && "bg-[#242428]"
+                    )}
+                  >
+                    {!edit && v.user.username == userCurrent.username && (
+                      <EditChatBar
+                        edit={edit}
+                        setEdit={setEdit}
+                        editState={v}
+                        setEditState={setEditChat}
+                        setOpenDelete={setOpenDelete}
+                      />
+                    )}
+                    {showIt(v, a, i) ? (
+                      <div className="mt-1 absolute">
+                        <UserAvatar
+                          avatar={v.user.avatar}
+                          avatarBg={v.user.avatar_bg}
+                          name={v.user.name}
+                          px={40}
+                          StatusUser={v.user.status_activity}
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-1 absolute group-hover:visible invisible text-[10px] text-[#82838a] font-semibold">
+                        {time(v.created_at)}
                       </div>
                     )}
-                    <li
-                      key={v.id}
-                      className={cn(
-                        "mr-4  whitespace-pre-line hover:bg-[#242428]  rounded-r-lg flex flex-row pl-3 group peer relative",
-                        lastMargin(v, a, i) && "mb-5",
-                        edit && editChat == v && "bg-[#242428]"
-                      )}
-                    >
-                      {!edit && v.user.username == userCurrent.username && (
-                        <EditChatBar
-                          edit={edit}
-                          setEdit={setEdit}
-                          editState={v}
-                          setEditState={setEditChat}
-                          setOpenDelete={setOpenDelete}
-                        />
-                      )}
-                      {showIt(v, a, i) ? (
-                        <div className="mt-1 absolute">
-                          <UserAvatar
-                            avatar={v.user.avatar}
-                            avatarBg={v.user.avatar_bg}
-                            name={v.user.name}
-                            px={40}
-                            StatusUser={v.user.status_activity}
-                          />
-                        </div>
-                      ) : (
-                        <div className="mt-1 absolute group-hover:visible invisible text-[10px] text-[#82838a] font-semibold">
-                          {time(v.created_at)}
+
+                    <div className="flex flex-col grow pl-13">
+                      {showIt(v, a, i) && (
+                        <div className="flex flex-row items-end gap-2">
+                          <h1 className="font-semibold hover:underline">
+                            {v.user.name}
+                          </h1>
+                          <span className="text-xs text-[#82838a] font-semibold leading-5 ">
+                            {displayTime(v.created_at)}
+                          </span>
                         </div>
                       )}
 
-                      <div className="flex flex-col grow pl-13">
-                        {showIt(v, a, i) && (
-                          <div className="flex flex-row items-end gap-2">
-                            <h1 className="font-semibold hover:underline">
-                              {v.user.name}
-                            </h1>
-                            <span className="text-xs text-[#82838a] font-semibold leading-5 ">
-                              {displayTime(v.created_at)}
-                            </span>
+                      {edit && editChat == v ? (
+                        <>
+                          <div className="bg-[#222327] border focus-within:border-[#323237] border-[#27282c] mt-2 mr-2 px-3 flex flex-row rounded-lg mb-1 py-4 min-w-0">
+                            <textarea
+                              ref={inputTagRef}
+                              value={input}
+                              rows={Math.max(1, v.text.split("\n").length)}
+                              className="w-full   grow outline-none break-all resize-none"
+                              onChange={editHandle}
+                              onKeyDown={handleKeyDown}
+                            />
                           </div>
-                        )}
-
-                        {edit && editChat == v ? (
-                          <>
-                            <div className="bg-[#222327] border focus-within:border-[#323237] border-[#27282c] mt-2 mr-2 px-3 flex flex-row rounded-lg mb-1 py-4 min-w-0">
-                              <textarea
-                                ref={inputTagRef}
-                                value={input}
-                                rows={Math.max(1, v.text.split("\n").length)}
-                                className="w-full   grow outline-none break-all resize-none"
-                                onChange={editHandle}
-                                onKeyDown={handleKeyDown}
-                              />
-                            </div>
-                            <h1 className="font-semibold text-xs mx-1 mb-1">
-                              escape to{" "}
-                              <span
-                                onClick={() => setEdit(false)}
-                                className="cursor-pointer text-blue-500 hover:underline"
-                              >
-                                cancel
-                              </span>
-                              . enter to{" "}
-                              <span
-                                onClick={hitNewChat}
-                                className="cursor-pointer text-blue-500 hover:underline"
-                              >
-                                save
-                              </span>
-                            </h1>
-                          </>
-                        ) : (
-                          <div className="break-all">{v.text}</div>
-                        )}
-                      </div>
-                    </li>
-                  </Fragment>
-                ))}
-                <div ref={bottomRef} />
-              </ul>
-            </>
-            {/* {chats.map((v) => (
+                          <h1 className="font-semibold text-xs mx-1 mb-1">
+                            escape to{" "}
+                            <span
+                              onClick={() => setEdit(false)}
+                              className="cursor-pointer text-blue-500 hover:underline"
+                            >
+                              cancel
+                            </span>
+                            . enter to{" "}
+                            <span
+                              onClick={hitNewChat}
+                              className="cursor-pointer text-blue-500 hover:underline"
+                            >
+                              save
+                            </span>
+                          </h1>
+                        </>
+                      ) : (
+                        <div className="break-all">{v.text}</div>
+                      )}
+                    </div>
+                  </li>
+                </Fragment>
+              ))}
+              <div ref={bottomRef} />
+            </ul>
+          </>
+          {/* {chats.map((v) => (
             <div
               key={v}
               className="whitespace-pre-line hover:bg-amber-300 break-all mr-4"
@@ -448,37 +512,28 @@ export default function Page() {
               </h1>
             </div>
           ))} */}
-            <InputChat
-              data={{
-                user_id: currentFr?.user_id,
-                name: currentFr.name,
-                username: currentFr.username,
-                avatar: currentFr.avatar,
-                avatar_bg: currentFr.avatar_bg,
-                status_activity: currentFr.status_activity,
-                bio: "",
-                banner_color: "#ffffff",
-              }}
-              list={chat}
-              setList={setChat}
-            />
-          </div>
+          <InputChat
+            data={profile}
+            list={chat}
+            setList={setChat}
+          />
+        </div>
 
-          {/* <ScrollArea.Scrollbar
+        {/* <ScrollArea.Scrollbar
           orientation="vertical"
           className="w-2 m-1 "
         >
           <ScrollArea.Thumb className="bg-[#555555]  rounded-sm" />
         </ScrollArea.Scrollbar> */}
-        </div>
-        {/* <div className="grow flex">
+      </div>
+      {/* <div className="grow flex">
         <input
           type="text"
           className=" outline-none bottom-0 bg-red-500 grow"
         />
       </div> */}
-      </div>
-    );
+    </div>
+  );
 }
 
 function EditChatBar(props: {

@@ -125,6 +125,12 @@ type MessageChannel struct {
 	Text      string    `json:"text"`
 	CreatedAt time.Time `json:"created_at"`
 }
+type MessageUser struct {
+	ID        string    `json:"id"`
+	User      UserOther `json:"user"`
+	Text      string    `json:"text"`
+	CreatedAt time.Time `json:"created_at"`
+}
 
 type MessageChannelSocket struct {
 	ChannelId      string         `json:"channel_id"`

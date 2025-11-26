@@ -54,6 +54,15 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 			})
 		}
 
+		if errors.Is(err, errs.ErrInvalidBirthdate) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[map[string]string]{
+				Message: "validation failed",
+				Data: map[string]string{
+					"birthdate": err.Error(),
+				},
+			})
+		}
+
 		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
 			Message: errs.ErrInternal.Error(),
 		})

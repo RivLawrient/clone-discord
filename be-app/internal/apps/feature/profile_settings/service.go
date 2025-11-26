@@ -1,9 +1,11 @@
 package profilesettings
 
 import (
+	"be-app/internal/apps/domain/entity"
 	"be-app/internal/apps/domain/repository"
 	"be-app/internal/dto"
 	"be-app/internal/errs"
+	"errors"
 
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -75,4 +77,29 @@ func (s *Service) UpdateProfile(userID string, req dto.UpdateProfileRequest, fil
 	}
 
 	return nil
+}
+func (s *Service) GetAvatar(userID string) string {
+	data := entity.UserProfile{}
+	s.UserProfileRepo.GetByUserID(s.DB, userID, &data)
+
+	return data.Avatar
+}
+
+func (s *Service) GetProfile(username string) (*entity.UserProfile, error) {
+	tx := s.DB.Begin()
+	defer tx.Rollback()
+
+	data := entity.UserProfile{}
+	if err := s.UserProfileRepo.GetByUsernamer(tx, username, &data); err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, errs.ErrIDNotFound
+		}
+
+		return nil, err
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return nil, err
+	}
+	return &data, nil
 }

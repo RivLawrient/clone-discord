@@ -41,9 +41,9 @@ export default function Page() {
         />
         <div className="mt-1" />
 
-        <label className="text-blue-discord mr-auto cursor-pointer text-sm font-semibold hover:underline">
+        {/* <label className="text-blue-discord mr-auto cursor-pointer text-sm font-semibold hover:underline">
           Forgot your password?
-        </label>
+        </label> */}
         <button
           disabled={hooklogin.loading}
           type="submit"

@@ -22,12 +22,13 @@ export function ProfileView() {
   const save =
     user.avatar != current.avatar ||
     user.name != current.name ||
-    user.bio != current.bio ||
+    user.bio.replace(/\r\n/g, "\n").trim() !=
+      current.bio.replace(/\r\n/g, "\n").trim() ||
     user.banner_color != current.banner_color;
 
   useEffect(() => {
     setCurrent(user);
-  }, []);
+  }, [user]);
 
   const [file, setFile] = useState<File>();
 
@@ -48,6 +49,7 @@ export function ProfileView() {
 
   const removeHandler = () => {
     setCurrent((v) => ({ ...v, avatar: "" }));
+    setFile(undefined);
   };
 
   function getContrastYIQ(hex: string) {
@@ -63,11 +65,13 @@ export function ProfileView() {
     <div>
       {save && (
         <SaveModal
+          current={current}
           setCurrent={setCurrent}
           name={current.name}
           banner_color={current.banner_color}
           bio={current.bio}
           avatar={file}
+          setFile={setFile}
         />
       )}
       <h1 className="mb-4 text-2xl font-semibold text-white">Profiles</h1>
@@ -174,9 +178,11 @@ export function ProfileView() {
                     preview={!!file}
                   />
                 </div>
-                <h1 className="font-semibold">{current.name}</h1>
-                <h1 className="text-sm font-semibold">{current.username}</h1>
-                <h1 className="mt-2 mb-2 text-sm break-words whitespace-pre-line">
+                <h1 className="font-semibold truncate">{current.name}</h1>
+                <h1 className="text-sm font-semibold truncate">
+                  {current.username}
+                </h1>
+                <h1 className="mt-2 break-all mb-2 text-sm break-words whitespace-pre-line">
                   {current.bio}
                 </h1>
                 <button className="cursor-pointer rounded-lg bg-[#5865f2] py-2 text-xs font-semibold hover:bg-[#5865f2]/75">
@@ -196,7 +202,7 @@ export function ProfileView() {
                 name={current.name}
                 preview={!!file}
               />
-              <span className="ml-2 font-semibold text-white">
+              <span className="ml-2 font-semibold truncate text-white">
                 {current.name}
               </span>
             </div>
@@ -209,11 +215,13 @@ export function ProfileView() {
 }
 
 function SaveModal(props: {
+  current: UserCurrent;
   setCurrent: React.Dispatch<SetStateAction<UserCurrent>>;
   name: string;
   banner_color: string;
   bio: string;
   avatar: File | undefined;
+  setFile: React.Dispatch<SetStateAction<File | undefined>>;
 }) {
   const [user, setUser] = useAtom(userAtom);
   const formData = new FormData();
@@ -224,30 +232,34 @@ function SaveModal(props: {
   if (props.avatar) {
     formData.append("avatar", props.avatar, props.avatar.name);
   }
+  if (user.avatar != "" && props.current.avatar == "") {
+    //dihapus
+    formData.append("avatar", new Blob());
+  }
 
   const saveHandle = () => {
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/profile`, {
-      method: "PUT",
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}user/me/profile`, {
+      method: "PATCH",
       body: formData,
-      // headers: {
-      //   Authorization: `Bearer ${GetCookie("token")}`,
-      // },
     }).then(async (resp) => {
       const res = await resp.json();
       if (resp.ok) {
-        setUser((v) => ({
-          ...v,
+        const updated = {
+          ...user,
           avatar: res.data.avatar,
           name: res.data.name,
           banner_color: res.data.banner_color,
           bio: res.data.bio,
-        }));
+        };
+
+        setUser(updated);
+        props.setFile(undefined);
       }
     });
   };
 
   return (
-    <div className="absolute right-0 bottom-0 left-0 m-4 flex animate-[from-bottom_300ms] items-center rounded-lg border border-[#393a3f] bg-[#2c2d32] p-4 font-semibold shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
+    <div className="absolute z-10 right-0 bottom-0 left-0 m-4 flex animate-[from-bottom_300ms] items-center rounded-lg border border-[#393a3f] bg-[#2c2d32] p-4 font-semibold shadow-[0_4px_4px_rgba(0,0,0,0.5)]">
       <h1 className="grow">Careful — you have unsaved changes!</h1>
 
       <button
@@ -281,7 +293,10 @@ function ColoPickerPopup(props: {
           sideOffset={10}
           className="flex flex-col rounded-lg border border-[#303034] bg-[#202024] p-4"
         >
-          <ColorPicker color={props.color} setColor={props.setColor} />
+          <ColorPicker
+            color={props.color}
+            setColor={props.setColor}
+          />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

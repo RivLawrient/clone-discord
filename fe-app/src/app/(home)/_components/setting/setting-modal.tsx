@@ -1,7 +1,7 @@
 import { useAtom } from "jotai";
 import { LogOutIcon, SearchIcon, XIcon } from "lucide-react";
 import { Dialog } from "radix-ui";
-import { Fragment, SetStateAction, useEffect, useState } from "react";
+import { Fragment, JSX, SetStateAction, useEffect, useState } from "react";
 import { twMerge } from "tailwind-merge";
 import { apiCall } from "../../_helper/api-client";
 import { settingTabAtom } from "../../_state/setting-tab-atom";
@@ -9,7 +9,11 @@ import { AccountView } from "./view/account-view";
 import { ProfileView } from "./view/profile-view";
 import VoiceVideoView from "./view/voice-video-view";
 
-export default function SettingModal(props: { children: React.ReactNode }) {
+export default function SettingModal(props: {
+  open: boolean;
+  setOpen: React.Dispatch<SetStateAction<boolean>>;
+  default: boolean;
+}) {
   const [tab, setTab] = useAtom(settingTabAtom);
   const [search, setSearch] = useState("");
   const filtered = listView.filter(([v, C]) =>
@@ -21,12 +25,18 @@ export default function SettingModal(props: { children: React.ReactNode }) {
   let CurrentTab = tab;
 
   useEffect(() => {
-    setTab(() => AccountView); //default view
-  }, []);
+    if (props.default) {
+      setTab(() => ProfileView);
+    } else {
+      setTab(() => AccountView); //default view
+    }
+  }, [props.open]);
 
   return (
-    <Dialog.Root>
-      <Dialog.Trigger>{props.children}</Dialog.Trigger>
+    <Dialog.Root
+      open={props.open}
+      onOpenChange={props.setOpen}
+    >
       <Dialog.Portal>
         <Dialog.Content className="fixed top-0 right-0 bottom-0 left-0 flex min-h-0">
           <Dialog.Title />
@@ -96,7 +106,7 @@ export default function SettingModal(props: { children: React.ReactNode }) {
 const listView: [string, () => React.JSX.Element][] = [
   ["My Account", AccountView],
   ["Profiles", ProfileView],
-  ["Voice & Video", VoiceVideoView],
+  // ["Voice & Video", VoiceVideoView],
 ];
 
 function EscBtn() {

@@ -5,10 +5,12 @@ import (
 	"be-app/internal/apps/feature/auth"
 	"be-app/internal/apps/feature/friendship"
 	messagingchannel "be-app/internal/apps/feature/messaging_channel"
+	messaginguser "be-app/internal/apps/feature/messaging_user"
 	profilesettings "be-app/internal/apps/feature/profile_settings"
 	servermanagement "be-app/internal/apps/feature/server_management"
 	servermember "be-app/internal/apps/feature/server_member"
 	statusactivitiy "be-app/internal/apps/feature/status_activitiy"
+	videoconversation "be-app/internal/apps/feature/video_conversation"
 	ws "be-app/internal/apps/websocket"
 	"be-app/internal/route"
 
@@ -33,6 +35,7 @@ func Apps(a *AppsConfig) {
 	channelRepo := repository.NewChannelRepo()
 	channelCategoryRepo := repository.NewChannelCategoryRepo()
 	channelMessageRepo := repository.NewChannelMessageRepo()
+	userMessageRepo := repository.NewUserMessageRepo()
 
 	hub := ws.NewHub()
 
@@ -49,17 +52,23 @@ func Apps(a *AppsConfig) {
 	statusActivityService := statusactivitiy.NewService(a.DB, *userProfileRepo, *friendRepo, *joinServerRepo)
 	messagingChannelService := messagingchannel.NewService(a.DB, *userRepo, *userProfileRepo, *channelMessageRepo, *serverRepo, *joinServerRepo, *channelRepo, *channelCategoryRepo)
 	messagingChannelHandler := messagingchannel.NewHandler(*messagingChannelService, *a.Validate, hub)
+	videoConversationService := videoconversation.NewService(a.DB, *userProfileRepo)
+	videoConversationHandler := videoconversation.NewHandler(*videoConversationService, *a.Validate)
+	messagingUserService := messaginguser.NewService(a.DB, *userMessageRepo, *userRepo, *userProfileRepo)
+	messagingUserHandler := messaginguser.NewHandler(*messagingUserService, *a.Validate, hub)
 
 	hubHandler := ws.NewHandler(hub, *statusActivityService)
 
 	route.Routes{
-		App:                     a.App,
-		AuthHandler:             *authHandler,
-		ProfileSettingsHandler:  *profileSettingsHandler,
-		FriendshipHandler:       *friendshipHandler,
-		ServerManagementHandler: *serverManagementHandler,
-		ServerMemberHandler:     *serverMemberhandler,
-		HubHandler:              *hubHandler,
-		MessagingChannel:        *messagingChannelHandler,
+		App:                      a.App,
+		AuthHandler:              *authHandler,
+		ProfileSettingsHandler:   *profileSettingsHandler,
+		FriendshipHandler:        *friendshipHandler,
+		ServerManagementHandler:  *serverManagementHandler,
+		ServerMemberHandler:      *serverMemberhandler,
+		HubHandler:               *hubHandler,
+		MessagingChannelHandler:  *messagingChannelHandler,
+		VideoConversationHandler: *videoConversationHandler,
+		MessagingUser:            *messagingUserHandler,
 	}.SetupRoutes()
 }

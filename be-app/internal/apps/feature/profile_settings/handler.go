@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
+	"github.com/google/uuid"
 )
 
 type Handler struct {
@@ -79,9 +80,9 @@ func (h *Handler) UpdateProfileHandler(c *fiber.Ctx) error {
 	// 	})
 	// }
 
-	name := c.FormValue("name")
-	bannerColor := c.FormValue("banner_color")
-	bio := c.FormValue("bio")
+	name := c.FormValue("name")                //wajib
+	bannerColor := c.FormValue("banner_color") //wajib
+	bio := c.FormValue("bio")                  //wajib
 	avatar, err := c.FormFile("avatar")
 
 	req.Name = name
@@ -89,6 +90,27 @@ func (h *Handler) UpdateProfileHandler(c *fiber.Ctx) error {
 	req.Bio = bio
 
 	if err != nil {
+		avtr := h.Service.GetAvatar(userID)
+		if err := h.Service.UpdateProfile(userID, *req, avtr); err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: "something error",
+			})
+		}
+
+		return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
+			Message: "update profile success",
+			Data: fiber.Map{
+				"name":         name,
+				"banner_color": bannerColor,
+				"bio":          bio,
+				"avatar":       avtr,
+			},
+		})
+
+	}
+
+	if avatar.Size == 0 {
+		//hapus
 		if err := h.Service.UpdateProfile(userID, *req, ""); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
 				Message: "something error",
@@ -111,7 +133,7 @@ func (h *Handler) UpdateProfileHandler(c *fiber.Ctx) error {
 
 	os.MkdirAll(uploadDir, os.ModePerm)
 	ext := filepath.Ext(avatar.Filename)
-	newFileName := userID + ext
+	newFileName := uuid.NewString() + ext
 	filePath := filepath.Join(uploadDir, newFileName)
 	c.SaveFile(avatar, filePath)
 
@@ -131,6 +153,37 @@ func (h *Handler) UpdateProfileHandler(c *fiber.Ctx) error {
 			"banner_color": bannerColor,
 			"bio":          bio,
 			"avatar":       newFileName,
+		},
+	})
+}
+
+func (h *Handler) GetProfileHandler(c *fiber.Ctx) error {
+	username := c.Params("username")
+
+	data, err := h.Service.GetProfile(username)
+	if err != nil {
+		if errors.Is(err, errs.ErrIDNotFound) {
+			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
+				Message: errs.ErrIDNotFound.Error(),
+			})
+		}
+
+		return c.Status(fiber.StatusInternalServerError).JSON(dto.ResponseWeb[any]{
+			Message: errs.ErrInternal.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.UserOther]{
+		Message: "get profile success",
+		Data: dto.UserOther{
+			UserId:         data.UserID,
+			Name:           data.Name,
+			Username:       username,
+			Avatar:         data.Avatar,
+			AvatarBg:       data.AvatarBg,
+			StatusActivity: data.StatusActivity,
+			Bio:            data.Bio,
+			BannerColor:    data.BannerColor,
 		},
 	})
 }

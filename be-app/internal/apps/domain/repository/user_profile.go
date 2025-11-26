@@ -68,3 +68,11 @@ func (r *UserProfileRepo) UpdateStatusActivityByUserID(db *gorm.DB, userID strin
 func (r *UserProfileRepo) GetByUserID(db *gorm.DB, userID string, data *entity.UserProfile) error {
 	return db.Where("user_id = ?", userID).First(data).Error
 }
+
+func (r *UserProfileRepo) GetByListUserID(db *gorm.DB, userID []string, data *[]entity.UserProfile) error {
+	return db.Where("user_id IN ?", userID).Find(data).Error
+}
+
+func (R *UserProfileRepo) GetByUsernamer(db *gorm.DB, username string, data *entity.UserProfile) error {
+	return db.Where("username = ?", username).First(data).Error
+}

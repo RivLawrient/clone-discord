@@ -13,18 +13,29 @@ export default function ModalDeleteChat(props: {
   open: boolean;
   setOpen: React.Dispatch<SetStateAction<boolean>>;
   data: ChatList;
+  is_dm?: boolean;
 }) {
   const deleteHandle = () => {
-    apiCall(
-      `${process.env.NEXT_PUBLIC_HOST_API}message/chat/${props.data.id}`,
-      {
+    if (props.is_dm) {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}dm/text/${props.data.id}`, {
         method: "DELETE",
-      }
-    )
-      .catch(() => {})
-      .finally(() => {
-        props.setOpen(false);
-      });
+      })
+        .catch(() => {})
+        .finally(() => {
+          props.setOpen(false);
+        });
+    } else {
+      apiCall(
+        `${process.env.NEXT_PUBLIC_HOST_API}message/chat/${props.data.id}`,
+        {
+          method: "DELETE",
+        }
+      )
+        .catch(() => {})
+        .finally(() => {
+          props.setOpen(false);
+        });
+    }
   };
   return (
     <Dialog.Root

@@ -40,7 +40,7 @@ export function AccountView() {
   return (
     <div>
       <h1 className="text-2xl font-semibold text-white">My Account</h1>
-      <div className="mt-6 flex w-full flex-col overflow-hidden rounded-lg">
+      <div className="mt-6 flex w-full min-w-0 flex-col overflow-hidden rounded-lg">
         <div
           style={{
             backgroundColor: user.banner_color,
@@ -48,7 +48,7 @@ export function AccountView() {
           className="h-[100px] "
         />
         <div className="grow bg-[#121214] p-4 pb-0">
-          <div className="flex-rows flex">
+          <div className="flex-rows flex min-w-0">
             <div className="size-fit -translate-y-10 rounded-full bg-[#121214] p-1.5">
               <UserAvatar
                 avatar={user.avatar}
@@ -61,17 +61,17 @@ export function AccountView() {
                 not_hover="outline-[#121214]"
               />
             </div>
-            <div className="ml-4 flex w-full justify-between">
-              <h1 className="text-xl font-semibold">{user.name}</h1>
+            <div className="ml-4 flex w-full justify-between min-w-0">
+              <h1 className="text-xl font-semibold truncate">{user.name}</h1>
               <button
                 onClick={() => setTab(() => ProfileView)}
-                className="size-fit cursor-pointer rounded-lg bg-[#5865f2] px-3 py-2 text-sm font-semibold hover:bg-[#5865f2]/75"
+                className="size-fit cursor-pointer rounded-lg bg-[#5865f2] px-3 py-2 text-sm  font-semibold whitespace-nowrap hover:bg-[#5865f2]/75"
               >
                 Edit User Profile
               </button>
             </div>
           </div>
-          <div className="flex w-full -translate-y-4 flex-col gap-5 rounded-lg bg-[#1a1a1e] p-4">
+          <div className="flex w-full min-w-0 -translate-y-4 flex-col gap-5 rounded-lg bg-[#1a1a1e] p-4">
             <Field
               title="Display Name"
               value={user.name}
@@ -112,8 +112,8 @@ function ChangeUsernameModal(props: { children: React.ReactNode }) {
       username: "",
       password: "",
     });
-    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/username`, {
-      method: "PUT",
+    apiCall(`${process.env.NEXT_PUBLIC_HOST_API}user/me/username`, {
+      method: "PATCH",
       body: JSON.stringify({
         username: username,
         password: password,

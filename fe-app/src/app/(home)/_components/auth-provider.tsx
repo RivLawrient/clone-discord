@@ -14,9 +14,10 @@ import {
   MemberList,
   memberListServerAtom,
 } from "../_state/membet-list-server-atom";
+import { dmAtom } from "../_state/dm-list-atom";
 
 export default function AuthProvider(props: { children: React.ReactNode }) {
-  const [loadingCount, setLoadingCount] = useState(5);
+  const [loadingCount, setLoadingCount] = useState(6);
   const [user, setUser] = useAtom(userAtom);
   const [friend, setFriend] = useAtom(friendAtom);
   const idleDelay = 1 * 60 * 1000; // 1 menit
@@ -28,6 +29,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   const [media, setMedia] = useAtom(mediaAtom);
   const [channels, setChannels] = useAtom(channelListAtom);
   const [members, setMembers] = useAtom(memberListServerAtom);
+  const [dm, setDM] = useAtom(dmAtom);
 
   useEffect(() => {
     apiCall(`${process.env.NEXT_PUBLIC_HOST_API}auth/me`, {
@@ -44,7 +46,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (loadingCount == 4) {
+    if (loadingCount == 5) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}friends`, {
         method: "GET",
       })
@@ -60,7 +62,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, [loadingCount]);
 
   useEffect(() => {
-    if (loadingCount == 3) {
+    if (loadingCount == 4) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/me`, {
         method: "GET",
       })
@@ -76,7 +78,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, [loadingCount]);
 
   useEffect(() => {
-    if (loadingCount == 2) {
+    if (loadingCount == 3) {
       apiCall(`${process.env.NEXT_PUBLIC_HOST_API}server/channels`, {
         method: "GET",
       })
@@ -84,6 +86,22 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
           if (resp.ok) {
             const res = await resp.json();
             setChannels(res.data);
+            setLoadingCount((p) => p - 1);
+          }
+        })
+        .catch(() => {});
+    }
+  }, [loadingCount]);
+
+  useEffect(() => {
+    if (loadingCount == 2) {
+      apiCall(`${process.env.NEXT_PUBLIC_HOST_API}dm`, {
+        method: "GET",
+      })
+        .then(async (resp) => {
+          if (resp.ok) {
+            const res = await resp.json();
+            setDM(res.data);
             setLoadingCount((p) => p - 1);
           }
         })
@@ -195,6 +213,9 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
         }
         if (data.server_id && data.is_delete) {
           setServer((v) => v.filter((v) => v.id != data.server_id));
+        }
+        if (data.dm_list) {
+          setDM(data.dm_list);
         }
       };
 

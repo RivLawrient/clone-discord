@@ -13,8 +13,6 @@ import (
 	"gorm.io/gorm"
 )
 
-
-
 type Service struct {
 	DB               *gorm.DB
 	UserRepo         repository.UserRepo
@@ -44,9 +42,21 @@ func (s *Service) RegisterUser(req dto.RegisterRequest, userAgent string, IP str
 		return nil, nil, err
 	}
 
-	birth, err := time.Parse("2006-01-02", req.BirthDate)
+	birth, err := time.Parse("2006-01-02", req.Birthdate)
 	if err != nil {
 		return nil, nil, err
+	}
+
+	currentYear := time.Now().Year()
+
+	// Validasi tahun
+	if birth.Year() < 1950 || birth.Year() > currentYear {
+		return nil, nil, errs.ErrInvalidBirthdate
+	}
+
+	// Opsional: tidak boleh tanggal masa depan sama sekali
+	if birth.After(time.Now()) {
+		return nil, nil, errs.ErrInvalidBirthdate
 	}
 
 	name := req.Name

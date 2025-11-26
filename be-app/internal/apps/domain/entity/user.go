@@ -15,6 +15,9 @@ type User struct {
 	ReceivedRequests []Friend         `gorm:"foreignKey:ReceiverID;constraint:OnDelete:CASCADE"`
 	JoinServer       []JoinServer     `gorm:"constraint:OnDelete:CASCADE"`
 	ChannelMessage   []ChannelMessage `gorm:"constraint:OnDelete:CASCADE"`
+
+	SenderMessage   []UserMessage `gorm:"foreignKey:SenderID;constraint:OnDelete:CASCADE"`
+	ReceiverMessage []UserMessage `gorm:"foreignKey:ReceiverID;constraint:OnDelete:CASCADE"`
 }
 
 func (u *User) TableName() string {
