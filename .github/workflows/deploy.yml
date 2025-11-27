@@ -38,7 +38,11 @@ jobs:
 
       - name: Build frontend image
         run: |
-          docker build -t lawrient/fe-app:latest ./fe-app
+          docker build \
+            --build-arg NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }} \
+            --build-arg NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }} \
+            --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }} \
+            -t lawrient/fe-app:latest ./fe-app
 
       - name: Push backend image
         run: docker push lawrient/be-app:latest
@@ -66,6 +70,7 @@ jobs:
             echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "JWT_EXPIRE_MINUTES=${{ secrets.JWT_EXPIRE_MINUTES }}" >> .env
             echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
             echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
             echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
