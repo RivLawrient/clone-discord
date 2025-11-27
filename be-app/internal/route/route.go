@@ -12,6 +12,7 @@ import (
 	ws "be-app/internal/apps/websocket"
 	"be-app/internal/dto"
 	"be-app/internal/middleware"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
@@ -33,7 +34,7 @@ type Routes struct {
 
 func (r Routes) SetupRoutes() {
 	r.App.Use(cors.New(cors.Config{
-		AllowOrigins:     "http://127.0.0.1:3000, http://145.79.11.111:3000",
+		AllowOrigins:     os.Getenv("ALLOW_ORIGIN"),
 		AllowMethods:     "GET,POST,PUT,DELETE,OPTIONS,PATCH",
 		AllowHeaders:     "Content-Type, Authorization, Origin, Accept",
 		AllowCredentials: true,

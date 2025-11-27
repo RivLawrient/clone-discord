@@ -11,9 +11,7 @@ RUN bun run build
 FROM oven/bun:1.2.21
 WORKDIR /app
 
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/next.config.ts ./
-COPY --from=builder /app/package.json ./
+COPY --from=builder /app/ ./
 
 EXPOSE 3000
 CMD ["bun", "run", "start"]

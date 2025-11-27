@@ -289,7 +289,17 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
   }, [loadingCount]);
 
   if (loadingCount > 0) {
-    return <div className="h-screen w-screen">Loading ...</div>;
+    return (
+      <div className="h-screen w-screen bg-[#121214] flex items-center justify-center">
+        <div className="animate-spin">
+          <img
+            src={"/dc-logo.png"}
+            height={80}
+            width={80}
+          />
+        </div>
+      </div>
+    );
   }
 
   return props.children;
