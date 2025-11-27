@@ -36,13 +36,16 @@ jobs:
         run: |
           docker build -t lawrient/be-app:latest ./be-app
 
+      - name: Create .env file for frontend
+        working-directory: ./fe-app
+        run: |
+            echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
+            echo "NEXT_PUBLIC_SOMETHING=${{ secrets.NEXT_PUBLIC_SOMETHING }}" >> .env
+            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
+
       - name: Build frontend image
         run: |
-          docker build \
-          --build-arg NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }} \
-          --build-arg NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }} \
-          --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }} \
-          -t lawrient/fe-app:latest ./fe-app
+          docker build -t lawrient/fe-app:latest ./fe-app
 
       - name: Push backend image
         run: docker push lawrient/be-app:latest
