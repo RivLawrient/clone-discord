@@ -39,10 +39,10 @@ jobs:
       - name: Build frontend image
         run: |
           docker build \
-            --build-arg NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }} \
-            --build-arg NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }} \
-            --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }} \
-            -t lawrient/fe-app:latest ./fe-app
+          --build-arg NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }} \
+          --build-arg NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }} \
+          --build-arg NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }} \
+          -t lawrient/fe-app:latest ./fe-app
 
       - name: Push backend image
         run: docker push lawrient/be-app:latest
