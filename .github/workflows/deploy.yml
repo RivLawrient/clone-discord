@@ -12,11 +12,11 @@ jobs:
     steps:
       - name: Test secret
         run: |
-          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
-          echo "Secret DOCKER_USERNAME is empty"
+          if [ -z "${{ secrets.DOCKER_HUB_USERNAME }}" ]; then
+          echo "Secret DOCKER_HUB_USERNAME is empty"
           exit 1
           else
-          echo "Secret DOCKER_USERNAME is set"
+          echo "Secret DOCKER_HUB_USERNAME is set"
           fi
 
       - name: Checkout code
