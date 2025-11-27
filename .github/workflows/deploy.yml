@@ -34,17 +34,17 @@ jobs:
 
       - name: Build backend image
         run: |
-          docker build -t username/be-app:latest ./be-app
+          docker build -t lawrient/be-app:latest ./be-app
 
       - name: Build frontend image
         run: |
-          docker build -t username/fe-app:latest ./fe-app
+          docker build -t lawrient/fe-app:latest ./fe-app
 
       - name: Push backend image
-        run: docker push username/be-app:latest
+        run: docker push lawrient/be-app:latest
 
       - name: Push frontend image
-        run: docker push username/fe-app:latest
+        run: docker push lawrient/fe-app:latest
 
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v0.1.7
