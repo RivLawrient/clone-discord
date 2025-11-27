@@ -68,6 +68,5 @@ jobs:
             echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
             echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
             
-            docker run --rm --env-file .env lawrient/be-app:latest migrate up
 
             docker compose up -d
