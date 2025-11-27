@@ -59,7 +59,7 @@ jobs:
             git clone https://github.com/RivLawrient/clone-discord.git
             cd clone-discord
             # Buat file .env dari secrets
-            echo "ALLOW_ORIGIN=${{ secrets."ALLOW_ORIGIN }}" > .env
+            echo "ALLOW_ORIGIN=${{ secrets.ALLOW_ORIGIN }}" > .env
             echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
             echo "DB_USER=${{ secrets.DB_USER }}" >> .env
