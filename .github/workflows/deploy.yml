@@ -54,7 +54,7 @@ jobs:
           key: ${{ secrets.VPS_SSH_KEY }}
           port: 22
           script: |
-            cd /home/deployer/project
+            cd /home/lawrient/project/
             docker compose pull
             # Buat file .env dari secrets
             echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
