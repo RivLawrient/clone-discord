@@ -98,26 +98,26 @@ function BtnMic() {
   const streamRef = useRef<MediaStream | null>(null);
 
   const micHandle = async () => {
-    if (media.micOn) {
-      // 🔴 Matikan mic
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-      setMedia((prev) => ({ ...prev, micOn: false }));
-    } else {
-      // 🟢 Nyalakan mic
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: true,
-        });
-        streamRef.current = stream;
-        setMedia((prev) => ({ ...prev, micOn: true }));
-      } catch (err) {
-        console.error("Mic permission denied:", err);
-        setAlertModal(true); // tampilkan alert kalau user belum izin
-      }
-    }
+    // if (media.micOn) {
+    //   // 🔴 Matikan mic
+    //   if (streamRef.current) {
+    //     streamRef.current.getTracks().forEach((track) => track.stop());
+    //     streamRef.current = null;
+    //   }
+    //   setMedia((prev) => ({ ...prev, micOn: false }));
+    // } else {
+    //   // 🟢 Nyalakan mic
+    //   try {
+    //     const stream = await navigator.mediaDevices.getUserMedia({
+    //       audio: true,
+    //     });
+    //     streamRef.current = stream;
+    //     setMedia((prev) => ({ ...prev, micOn: true }));
+    //   } catch (err) {
+    //     console.error("Mic permission denied:", err);
+    //     setAlertModal(true); // tampilkan alert kalau user belum izin
+    //   }
+    // }
   };
 
   return (
