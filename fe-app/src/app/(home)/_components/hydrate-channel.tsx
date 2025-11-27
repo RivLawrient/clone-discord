@@ -16,26 +16,6 @@ import {
 } from "../_state/membet-list-server-atom";
 import { USER_STATUS } from "../_state/user-atom";
 
-// 🔹 Buat user dummy
-const users: MemberList[] = Array.from({ length: 5 }, (_, i) => ({
-  user_id: crypto.randomUUID(),
-  name: ["Aiden", "Maya", "Leo", "Sakura", "Noah"][i],
-  username: ["aiden_dev", "maya_ui", "leo404", "sakura.codes", "noahjs"][i],
-  avatar: ``,
-  avatar_bg: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-  status_activity: (Object.keys(USER_STATUS) as (keyof typeof USER_STATUS)[])[
-    Math.floor(Math.random() * Object.keys(USER_STATUS).length)
-  ],
-  bio: [
-    "Frontend enjoyer ☕️✨",
-    "UI/UX designer by day, gamer by night 🎮",
-    "Full-stack developer who loves chaos 🧩",
-    "TypeScript is my love language 💙",
-    "Building things that break (then fixing them) 💻",
-  ][i],
-  banner_color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
-}));
-
 export default function HydrateChannel(props: { children: React.ReactNode }) {
   const [channels, setChannels] = useAtom(channelListAtom);
   const [loading, setLoading] = useState(false);
