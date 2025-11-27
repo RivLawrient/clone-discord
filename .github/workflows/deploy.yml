@@ -55,7 +55,9 @@ jobs:
           port: 22
           script: |
             cd /home/lawrient/project/
+            rm -rf clone-discord
             git clone https://github.com/RivLawrient/clone-discord.git
+            cd clone-discord
             docker compose pull
             # Buat file .env dari secrets
             echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
