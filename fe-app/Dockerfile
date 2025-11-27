@@ -14,6 +14,10 @@ ENV NEXT_PUBLIC_LIVEKIT_URL=$NEXT_PUBLIC_LIVEKIT_URL
 COPY package.json bun.lock ./
 RUN bun install
 
+
+RUN echo "DEBUG ENV: $NEXT_PUBLIC_HOST_API"
+
+
 COPY . .
 RUN bun run build
 
