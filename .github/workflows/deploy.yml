@@ -10,6 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Test secret
+        run: |
+          if [ -z "${{ secrets.DOCKER_USERNAME }}" ]; then
+          echo "Secret DOCKER_USERNAME is empty"
+          exit 1
+          else
+          echo "Secret DOCKER_USERNAME is set"
+          fi
+
       - name: Checkout code
         uses: actions/checkout@v3
 
