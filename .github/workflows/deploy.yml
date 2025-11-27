@@ -66,7 +66,7 @@ jobs:
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
 
-            cd /fe-app
+            cd fe-app
             echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
             echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
             echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
