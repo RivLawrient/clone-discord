@@ -1,0 +1,59 @@
+version: "3.9"
+
+services:
+  frontend:
+    build: ./fe-app
+    container_name: frontend
+    restart: always
+    ports:
+    - "3000:3000"
+    env_file:
+    - ./fe-app/.env
+    environment:
+    - NEXT_PUBLIC_HOST_API=${NEXT_PUBLIC_HOST_API}
+    - NEXT_PUBLIC_HOST_WS=${NEXT_PUBLIC_HOST_WS}
+    - NEXT_PUBLIC_LIVEKIT_URL=${NEXT_PUBLIC_LIVEKIT_URL}
+    networks:
+      - app
+
+  backend:
+    build: ./be-app
+    container_name: backend
+    restart: always
+    ports:
+    - "8080:8080"
+    env_file:
+    - ./be-app/.env
+    environment:
+    - APP_PORT=${APP_PORT}
+    - DB_HOST=${DB_HOST}
+    - DB_PORT=${DB_PORT}
+    - DB_USER=${DB_USER}
+    - DB_PASSWORD=${DB_PASSWORD}
+    - DB_NAME=${DB_NAME}
+    - DB_SSLMODE=${DB_SSLMODE}
+    - JWT_SECRET=${JWT_SECRET}
+    - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES}
+    - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+    - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+    networks:
+    - app
+    depends_on:
+    - postgres
+
+  postgres:
+    image: postgres:16
+    environment:
+        POSTGRES_DB: ${DB_NAME}
+        POSTGRES_USER: ${DB_USER}
+        POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - app
+
+volumes:
+  pgdata:
+
+networks:
+  app:

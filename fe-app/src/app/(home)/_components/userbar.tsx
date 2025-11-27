@@ -78,14 +78,14 @@ function BtnAttribute(props: {
         "cursor-pointer rounded-lg p-1.5 transition-all",
         props.status
           ? "hover:bg-user-bar-hover"
-          : "bg-user-bar-red hover:bg-user-bar-redhover",
+          : "bg-user-bar-red hover:bg-user-bar-redhover"
       )}
     >
       <Icon
         size={22}
         className={twMerge(
           "transition-all",
-          props.status ? "text-user-bar-def" : "text-red-500",
+          props.status ? "text-user-bar-def" : "text-red-500"
         )}
       />
     </div>
@@ -122,8 +122,15 @@ function BtnMic() {
 
   return (
     <>
-      <MicAlertModal open={alertModal} setOpen={setAlertModal} />
-      <TooltipDesc text={media.micOn ? "Mute" : "Unmute"} side="top" is_child>
+      <MicAlertModal
+        open={alertModal}
+        setOpen={setAlertModal}
+      />
+      <TooltipDesc
+        text={media.micOn ? "Mute" : "Unmute"}
+        side="top"
+        is_child
+      >
         <BtnAttribute
           status={media.micOn}
           icon_on={MicIcon}
@@ -143,12 +150,15 @@ function MicAlertModal(props: {
     props.setOpen(false);
     window.open(
       "https://support.discord.com/hc/en-us/articles/205093487-How-do-I-enable-my-mic-in-Chrome",
-      "_blank",
+      "_blank"
     );
   };
 
   return (
-    <Dialog.Root open={props.open} onOpenChange={(v) => props.setOpen(v)}>
+    <Dialog.Root
+      open={props.open}
+      onOpenChange={(v) => props.setOpen(v)}
+    >
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60" />
         <Dialog.Content className="fixed top-1/2 left-1/2 flex w-[400px] -translate-x-1/2 -translate-y-1/2 flex-col rounded-lg border border-[#3b3b41] bg-[#242429] p-6 text-white data-[state=closed]:animate-[modal-hide_200ms] data-[state=open]:animate-[modal-show_200ms]">
@@ -193,15 +203,16 @@ function BtnSpeaker() {
 
 function BtnSettings() {
   return (
-    <SettingModal>
-      <TooltipDesc text="User Settings" side="top">
-        <div className="hover:bg-user-bar-hover group cursor-pointer rounded-lg p-1.5 outline-none">
-          <SettingsIcon
-            size={22}
-            className="text-user-bar-def group-hover:animate-spin"
-          />
-        </div>
-      </TooltipDesc>
-    </SettingModal>
+    <TooltipDesc
+      text="User Settings"
+      side="top"
+    >
+      <div className="hover:bg-user-bar-hover group cursor-pointer rounded-lg p-1.5 outline-none">
+        <SettingsIcon
+          size={22}
+          className="text-user-bar-def group-hover:animate-spin"
+        />
+      </div>
+    </TooltipDesc>
   );
 }
