@@ -53,6 +53,21 @@ services:
     networks:
       - app
 
+    
+  migrate:
+    image: migrate/migrate
+    command: [
+      "-path=/migrations",
+      "-database=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable",
+      "up"
+    ]
+    volumes:
+      - ./be-app/db/migrations:/migrations
+    depends_on:
+      - postgres
+    networks:
+      - app
+
 volumes:
   pgdata:
 
