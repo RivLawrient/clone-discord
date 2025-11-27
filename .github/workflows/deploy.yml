@@ -39,10 +39,9 @@ jobs:
       - name: Create .env file for frontend
         working-directory: ./fe-app
         run: |
-            echo "NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}" >> .env
-            echo "NEXT_PUBLIC_SOMETHING=${{ secrets.NEXT_PUBLIC_SOMETHING }}" >> .env
-            echo "SECRET_KEY=${{ secrets.SECRET_KEY }}" >> .env
-
+          echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
+          echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
+          echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
       - name: Build frontend image
         run: |
           docker build -t lawrient/fe-app:latest ./fe-app
