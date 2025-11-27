@@ -58,7 +58,6 @@ jobs:
             rm -rf clone-discord
             git clone https://github.com/RivLawrient/clone-discord.git
             cd clone-discord
-            docker compose pull
             # Buat file .env dari secrets
             echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
             echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
@@ -70,5 +69,6 @@ jobs:
             echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
             echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
             
+            docker compose pull
 
             docker compose up -d
