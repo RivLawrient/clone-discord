@@ -1,49 +1,59 @@
-name: CI/CD Docker to VPS
+name: Deploy to VPS
 
 on:
   push:
     branches:
-      - main
+      - master  # Trigger saat push ke main
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
-      - name: Checkout repo
+      - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Login ke Docker Hub
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
       - name: Log in to Docker Hub
         uses: docker/login-action@v2
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
-      # 3. Build dan push backend
-      - name: Build and push backend
+      - name: Build backend image
         run: |
-          docker build -t yourusername/be-app:latest ./be-app
-          docker push yourusername/be-app:latest
+          docker build -t username/be-app:latest ./be-app
 
-      # 4. Build dan push frontend
-      - name: Build and push frontend
+      - name: Build frontend image
         run: |
-          docker build -t yourusername/fe-app:latest ./fe-app
-          docker push yourusername/fe-app:latest
+          docker build -t username/fe-app:latest ./fe-app
 
-      # 5. Setup SSH
-      - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.9.1
+      - name: Push backend image
+        run: docker push username/be-app:latest
+
+      - name: Push frontend image
+        run: docker push username/fe-app:latest
+
+      - name: Deploy to VPS via SSH
+        uses: appleboy/ssh-action@v0.1.7
         with:
-          ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
-
-      # 6. Deploy ke VPS
-      - name: Deploy on VPS
-        run: |
-          ssh -o StrictHostKeyChecking=no ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} "
-            cd /home/${{ secrets.VPS_USER }}/project &&
-            docker compose pull &&
-            docker compose up -d --build
-          "
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: 22
+          script: |
+            cd /home/deployer/project
+            docker compose pull
+            # Buat file .env dari secrets
+            echo "DB_HOST=${{ secrets.DB_HOST }}" > .env
+            echo "DB_PORT=${{ secrets.DB_PORT }}" >> .env
+            echo "DB_USER=${{ secrets.DB_USER }}" >> .env
+            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> .env
+            echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
+            echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
+            echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
+            echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
+            echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
+            docker compose up -d
