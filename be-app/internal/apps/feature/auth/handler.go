@@ -73,7 +73,7 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 		Domain:   "discord.muhsandisv.com",
 	})
 
@@ -117,7 +117,7 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 		Domain:   "discord.muhsandisv.com",
 	})
 
@@ -182,7 +182,7 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 			HTTPOnly: true,
 			Secure:   true,
 			SameSite: "Strict",
-			Path:     "/auth/refresh",
+			Path:     "/api/auth/refresh",
 			Domain:   "discord.muhsandisv.com",
 		})
 
@@ -220,7 +220,7 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		HTTPOnly: true,
 		Secure:   true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 		Domain:   "discord.muhsandisv.com",
 	})
 
