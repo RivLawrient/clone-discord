@@ -140,7 +140,7 @@ export default function AuthProvider(props: { children: React.ReactNode }) {
               }
               if (resp.status === 401) {
                 document.cookie = `token=; max-age=0; path=/`;
-                // window.location.reload();
+                window.location.reload();
               }
             })
             .catch(() => {});
