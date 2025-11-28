@@ -71,6 +71,7 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
+		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
 	})
@@ -113,6 +114,7 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
+		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
 	})
@@ -176,6 +178,7 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 			Name:     "refresh_token",
 			Value:    "",
 			HTTPOnly: true,
+			Secure:   true,
 			SameSite: "Strict",
 			Path:     "/api/auth/refresh",
 		})
@@ -212,6 +215,7 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    "",
 		HTTPOnly: true,
+		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
 	})
