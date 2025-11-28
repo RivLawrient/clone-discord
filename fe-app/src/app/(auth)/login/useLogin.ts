@@ -46,7 +46,7 @@ export default function useLogin() {
           const data: ResponseSucces = res.data;
           document.cookie = `token=${data.token}; path=/`;
 
-          router.push(returnTo || "/");
+          // router.push(returnTo || "/");
         }
         if (resp.status === 400) {
           const data: LoginField = res.data;
