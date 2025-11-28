@@ -8,12 +8,6 @@ services:
     restart: always
     ports:
     - "3000:3000"
-    # env_file:
-    # - ./.env
-    # environment:
-    # - NEXT_PUBLIC_HOST_API=${NEXT_PUBLIC_HOST_API}
-    # - NEXT_PUBLIC_HOST_WS=${NEXT_PUBLIC_HOST_WS}
-    # - NEXT_PUBLIC_LIVEKIT_URL=${NEXT_PUBLIC_LIVEKIT_URL}
     networks:
       - app
 
