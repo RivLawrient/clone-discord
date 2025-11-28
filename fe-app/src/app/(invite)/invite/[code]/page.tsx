@@ -89,6 +89,9 @@ function Found(props: { data: ServerInvite }) {
           ]);
           router.replace("/channels/" + res.data.id);
         }
+        if (resp.status == 409) {
+          router.replace(res.data.redirect);
+        }
       })
       .finally(() => {
         setLoading(false);
