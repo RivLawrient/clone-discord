@@ -72,7 +72,7 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -114,7 +114,7 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -177,7 +177,7 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 			Value:    "",
 			HTTPOnly: true,
 			SameSite: "Strict",
-			Path:     "/auth/refresh",
+			Path:     "/api/auth/refresh",
 		})
 
 		if errors.Is(err, errs.ErrTokenExpired) {
@@ -213,7 +213,7 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		Value:    "",
 		HTTPOnly: true,
 		SameSite: "Strict",
-		Path:     "/auth/refresh",
+		Path:     "/api/auth/refresh",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
