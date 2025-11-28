@@ -35,7 +35,8 @@ services:
     networks:
     - app
     depends_on:
-    - postgres
+      postgres:
+        condition: service_healthy
 
   postgres:
     image: postgres:16
@@ -47,6 +48,10 @@ services:
       - pgdata:/var/lib/postgresql/data
     networks:
       - app
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER}"]
+      interval: 5s
+      retries: 5
 
     
   migrate:
