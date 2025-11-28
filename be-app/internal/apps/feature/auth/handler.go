@@ -74,7 +74,7 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
-		Domain:   "discord.muhsandisv.com",
+		Domain:   "dc.muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -118,7 +118,7 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
-		Domain:   "discord.muhsandisv.com",
+		Domain:   "dc.muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -183,7 +183,7 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 			Secure:   true,
 			SameSite: "Strict",
 			Path:     "/api/auth/refresh",
-			Domain:   "discord.muhsandisv.com",
+			Domain:   "dc.muhsandisv.com",
 		})
 
 		if errors.Is(err, errs.ErrTokenExpired) {
@@ -221,7 +221,7 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		Secure:   true,
 		SameSite: "Strict",
 		Path:     "/api/auth/refresh",
-		Domain:   "discord.muhsandisv.com",
+		Domain:   "dc.muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
