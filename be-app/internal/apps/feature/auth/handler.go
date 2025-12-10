@@ -71,10 +71,12 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
-		Secure:   true,
+		// Secure:   true,
 		SameSite: "Strict",
-		Path:     "/api/auth/refresh",
-		Domain:   "muhsandisv.com",
+		// Path:     "/auth/refresh",
+		Path: "/",
+		// Path:     "/api/auth/refresh",
+		// Domain:   "muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -115,10 +117,12 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    response.RefreshToken.Token,
 		HTTPOnly: true,
-		Secure:   true,
+		// Secure:   true,
 		SameSite: "Strict",
-		Path:     "/api/auth/refresh",
-		Domain:   "muhsandisv.com",
+		Path:     "/",
+		// Path:     "/auth/refresh",
+		// Path:     "/api/auth/refresh",
+		// Domain:   "muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
@@ -180,10 +184,12 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 			Name:     "refresh_token",
 			Value:    "",
 			HTTPOnly: true,
-			Secure:   true,
+			// Secure:   true,
 			SameSite: "Strict",
-			Path:     "/api/auth/refresh",
-			Domain:   "muhsandisv.com",
+			Path:     "/",
+			// Path:     "/auth/refresh",
+			// Path:     "/api/auth/refresh",
+			// Domain:   "muhsandisv.com",
 		})
 
 		if errors.Is(err, errs.ErrTokenExpired) {
@@ -218,10 +224,12 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		Name:     "refresh_token",
 		Value:    "",
 		HTTPOnly: true,
-		Secure:   true,
+		// Secure:   true,
 		SameSite: "Strict",
-		Path:     "/api/auth/refresh",
-		Domain:   "muhsandisv.com",
+		Path:     "/",
+		// Path:     "/auth/refresh",
+		// Path:     "/api/auth/refresh",
+		// Domain:   "muhsandisv.com",
 	})
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
