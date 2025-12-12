@@ -4,7 +4,7 @@ import localFont from "next/font/local";
 
 export const metadata: Metadata = {
   title: "drocsid",
-  description: "this project clone for learn fundamental of some brand",
+  description: "this project clone for learn fundamental of some web",
 };
 
 const ggSans = localFont({
