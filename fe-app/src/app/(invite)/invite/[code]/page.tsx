@@ -43,14 +43,6 @@ export default function page() {
       style={{ backgroundImage: "url('/bg.svg')", backgroundSize: "cover" }}
       className="h-screen w-screen"
     >
-      <Image
-        className="absolute top-0 left-0 m-11"
-        src="/discord.svg"
-        width={124}
-        height={24}
-        alt="logo discord name"
-        priority
-      />
       <div className="fixed top-1/2 left-1/2 p-8 min-h-[300px] justify-center w-[450px] items-center text-white flex flex-col bg-[#393a41] rounded-lg -translate-x-1/2 -translate-y-1/2">
         {loading ? (
           <Loader2Icon className="animate-spin" />
@@ -161,7 +153,7 @@ function NotFound() {
         onClick={() => router.push("/")}
         className="bg-[#5865f2] cursor-pointer hover:bg-[#5865f2]/75 transition-all rounded-lg grow p-2 font-semibold mt-10 w-full"
       >
-        Continue to Discord
+        Continue to Apps
       </button>
     </>
   );
