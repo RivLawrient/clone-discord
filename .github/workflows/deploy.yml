@@ -35,10 +35,10 @@ jobs:
          -t lawrient/dc-fe-app:latest ./fe-app
 
       - name: Push backend image
-        run: docker push lawrient/be-app:latest
+        run: docker push lawrient/dc-be-app:latest
 
       - name: Push frontend image
-        run: docker push lawrient/fe-app:latest
+        run: docker push lawrient/dc-fe-app:latest
 
       - name: Checkout repo
         uses: actions/checkout@v4
