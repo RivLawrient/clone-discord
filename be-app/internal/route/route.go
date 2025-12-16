@@ -118,6 +118,13 @@ func (r Routes) SetupRoutes() {
 		return fiber.ErrUpgradeRequired
 	})
 	r.App.Get("/ws", websocket.New(r.HubHandler.Socket))
+	// r.App.Get("/ws", websocket.New(r.HubHandler.Socket, websocket.Config{
+
+	// 	CheckOrigin: func(c *fiber.Ctx) bool {
+	// 		// DEV
+	// 		return true
+	// 	},
+	// }))
 
 	r.App.Get("/img/:id", func(c *fiber.Ctx) error {
 		filename := c.Params("id")

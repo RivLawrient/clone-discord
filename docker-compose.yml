@@ -1,47 +1,12 @@
-version: "3.9"
+# version: "3.9"
 
 services:
-  frontend:
-    # build: ./fe-app
-    image: lawrient/fe-app:latest
-    container_name: frontend
-    restart: always
-    ports:
-    - "3000:3000"
-    networks:
-      - app
-
-  backend:
-    build: ./be-app
-    container_name: backend
-    restart: always
-    ports:
-    - "8080:8080"
-    env_file:
-    - ./.env
-    environment:
-    - APP_PORT=${APP_PORT}
-    - ALLOW_ORIGIN=${ALLOW_ORIGIN}
-    - DB_HOST=${DB_HOST}
-    - DB_PORT=${DB_PORT}
-    - DB_USER=${DB_USER}
-    - DB_PASSWORD=${DB_PASSWORD}
-    - DB_NAME=${DB_NAME}
-    - DB_SSLMODE=${DB_SSLMODE}
-    - JWT_SECRET=${JWT_SECRET}
-    - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES}
-    - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
-    - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
-    networks:
-    - app
-    depends_on:
-      postgres:
-        condition: service_healthy
 
   postgres:
     image: postgres:16
-    ports:
-      - "5432:5432"
+    container_name: dc_clone-psql
+    expose:
+      - 5432
     environment:
         POSTGRES_DB: ${DB_NAME}
         POSTGRES_USER: ${DB_USER}
@@ -55,20 +20,56 @@ services:
       interval: 5s
       retries: 5
 
-    
   migrate:
-    image: migrate/migrate
+    image: migrate/migrate:latest
+    container_name: dc_clone-migrate
     command: [
       "-path=/migrations",
-      "-database=postgres://${DB_USER}:${DB_PASSWORD}@postgres:5432/${DB_NAME}?sslmode=disable",
+      "-database=postgres://${DB_USER}:${DB_PASSWORD}@postgres:${DB_PORT}/${DB_NAME}?sslmode=disable",
       "up"
     ]
     volumes:
       - ./be-app/db/migrations:/migrations
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     networks:
       - app
+
+  frontend:
+    image: lawrient/dc-fe-app:latest
+    container_name: dc_clone-frontend
+    restart: always
+    expose:
+      - 3000
+    networks:
+      - app
+
+  backend:
+    image: lawrient/dc-be-app:latest
+    container_name: dc_clone-backend
+    restart: always
+    expose:
+      - ${APP_PORT}
+    environment:
+      - APP_PORT=${APP_PORT}
+      - DOMAIN=${DOMAIN}
+      - ALLOW_ORIGIN=${ALLOW_ORIGIN}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_SSLMODE=${DB_SSLMODE}
+      - JWT_SECRET=${JWT_SECRET}
+      - JWT_EXPIRE_MINUTES=${JWT_EXPIRE_MINUTES}
+      - LIVEKIT_API_KEY=${LIVEKIT_API_KEY}
+      - LIVEKIT_API_SECRET=${LIVEKIT_API_SECRET}
+    networks:
+    - app
+    depends_on:
+      postgres:
+        condition: service_healthy
 
 volumes:
   pgdata:

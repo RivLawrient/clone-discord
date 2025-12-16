@@ -24,6 +24,7 @@ func NewHandler(Hub *Hub, statusActivityService statusactivitiy.Service) *Handle
 var jwtSecretKey = []byte(os.Getenv("JWT_SECRET")) // Ganti dengan env
 
 func (h *Handler) Socket(c *websocket.Conn) {
+
 	// 1. Ambil userID (lo bisa ganti jadi ambil dari JWT yang di-attach sama Fiber ctx)
 	token := c.Query("token")
 	if token == "" {

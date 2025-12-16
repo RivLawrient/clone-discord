@@ -5,6 +5,8 @@ import (
 	"be-app/internal/errs"
 	"be-app/internal/helper"
 	"errors"
+	"os"
+	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/gofiber/fiber/v2"
@@ -67,17 +69,26 @@ func (h *Handler) RegisterUserHandler(c *fiber.Ctx) error {
 			Message: errs.ErrInternal.Error(),
 		})
 	}
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    response.RefreshToken.Token,
-		HTTPOnly: true,
-		// Secure:   true,
-		SameSite: "Strict",
-		// Path:     "/auth/refresh",
-		Path: "/",
-		// Path:     "/api/auth/refresh",
-		// Domain:   "muhsandisv.com",
-	})
+
+	if strings.HasPrefix(os.Getenv("ALLOW_ORIGIN"), "https://") {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    response.RefreshToken.Token,
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+			Domain:   os.Getenv("DOMAIN"),
+		})
+	} else {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    response.RefreshToken.Token,
+			HTTPOnly: true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
 		Message: "register success",
@@ -113,17 +124,25 @@ func (h *Handler) LoginUserHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    response.RefreshToken.Token,
-		HTTPOnly: true,
-		// Secure:   true,
-		SameSite: "Strict",
-		Path:     "/",
-		// Path:     "/auth/refresh",
-		// Path:     "/api/auth/refresh",
-		// Domain:   "muhsandisv.com",
-	})
+	if strings.HasPrefix(os.Getenv("ALLOW_ORIGIN"), "https://") {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    response.RefreshToken.Token,
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+			Domain:   os.Getenv("DOMAIN"),
+		})
+	} else {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    response.RefreshToken.Token,
+			HTTPOnly: true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[dto.TokenResponse]{
 		Message: "login success",
@@ -180,17 +199,26 @@ func (h *Handler) RefreshTokenHandler(c *fiber.Ctx) error {
 
 	token, err := h.Service.RefreshJWT(refreshToken)
 	if err != nil {
-		c.Cookie(&fiber.Cookie{
-			Name:     "refresh_token",
-			Value:    "",
-			HTTPOnly: true,
-			// Secure:   true,
-			SameSite: "Strict",
-			Path:     "/",
-			// Path:     "/auth/refresh",
-			// Path:     "/api/auth/refresh",
-			// Domain:   "muhsandisv.com",
-		})
+
+		if strings.HasPrefix(os.Getenv("ALLOW_ORIGIN"), "https://") {
+			c.Cookie(&fiber.Cookie{
+				Name:     "refresh_token",
+				Value:    "",
+				HTTPOnly: true,
+				Secure:   true,
+				SameSite: "Strict",
+				Path:     "/api/auth/refresh",
+				Domain:   os.Getenv("DOMAIN"),
+			})
+		} else {
+			c.Cookie(&fiber.Cookie{
+				Name:     "refresh_token",
+				Value:    "",
+				HTTPOnly: true,
+				SameSite: "Strict",
+				Path:     "/api/auth/refresh",
+			})
+		}
 
 		if errors.Is(err, errs.ErrTokenExpired) {
 			return c.Status(fiber.StatusBadRequest).JSON(dto.ResponseWeb[any]{
@@ -220,17 +248,25 @@ func (h *Handler) LogoutHandler(c *fiber.Ctx) error {
 		})
 	}
 
-	c.Cookie(&fiber.Cookie{
-		Name:     "refresh_token",
-		Value:    "",
-		HTTPOnly: true,
-		// Secure:   true,
-		SameSite: "Strict",
-		Path:     "/",
-		// Path:     "/auth/refresh",
-		// Path:     "/api/auth/refresh",
-		// Domain:   "muhsandisv.com",
-	})
+	if strings.HasPrefix(os.Getenv("ALLOW_ORIGIN"), "https://") {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			HTTPOnly: true,
+			Secure:   true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+			Domain:   os.Getenv("DOMAIN"),
+		})
+	} else {
+		c.Cookie(&fiber.Cookie{
+			Name:     "refresh_token",
+			Value:    "",
+			HTTPOnly: true,
+			SameSite: "Strict",
+			Path:     "/api/auth/refresh",
+		})
+	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ResponseWeb[any]{
 		Message: "logout success",

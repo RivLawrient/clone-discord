@@ -1,7 +1,7 @@
-FROM oven/bun:1.2.21 AS builder
-WORKDIR /app
+FROM oven/bun:1.3.3-alpine AS builder
+WORKDIR /app/
 
-COPY package.json bun.lock ./
+COPY package.json bun.lock* ./
 RUN bun install
 
 ARG NEXT_PUBLIC_HOST_API
@@ -20,10 +20,8 @@ COPY . .
 RUN bun run build
 
 # --- RUNNER ---
-FROM oven/bun:1.2.21
+FROM oven/bun:1.3.3-alpine
 WORKDIR /app
 
-COPY --from=builder /app/ ./
-
-EXPOSE 3000
+COPY --from=builder /app /app
 CMD ["bun", "run", "start"]

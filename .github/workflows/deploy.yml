@@ -11,15 +11,6 @@ jobs:
     environment: CLONE_DISCORD
 
     steps:
-      - name: Test secret
-        run: |
-          if [ -z "${{ secrets.DOCKER_HUB_USERNAME }}" ]; then
-          echo "Secret DOCKER_HUB_USERNAME is empty"
-          exit 1
-          else
-          echo "Secret DOCKER_HUB_USERNAME is set"
-          fi
-
       - name: Checkout code
         uses: actions/checkout@v3
 
@@ -49,18 +40,27 @@ jobs:
       - name: Push frontend image
         run: docker push lawrient/fe-app:latest
 
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Copy repo to VPS
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_KEY }}
+          source: "."
+          target: "/home/lawrient/apps/dc-clone/"
+
       - name: Deploy to VPS via SSH
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: 22
           script: |
-            cd /home/lawrient/project/
-            rm -rf clone-discord
-            git clone https://github.com/RivLawrient/clone-discord.git
-            cd clone-discord
+            cd /home/lawrient/apps/dc-clone
+
             # Buat file .env dari secrets
             echo "ALLOW_ORIGIN=${{ secrets.ALLOW_ORIGIN }}" >> .env
             echo "APP_PORT=${{ secrets.APP_PORT }}" >> .env
@@ -74,16 +74,12 @@ jobs:
 
             echo "LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}" >> .env
             echo "LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}" >> .env
-
-            echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
-            echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
-            echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
-
-            cd fe-app
-            echo "NEXT_PUBLIC_HOST_API=${{ secrets.NEXT_PUBLIC_HOST_API }}" >> .env
-            echo "NEXT_PUBLIC_HOST_WS=${{ secrets.NEXT_PUBLIC_HOST_WS }}" >> .env
-            echo "NEXT_PUBLIC_LIVEKIT_URL=${{ secrets.NEXT_PUBLIC_LIVEKIT_URL }}" >> .env
             
-            docker compose pull
+            echo "Pull latest image..."
+            sudo docker compose pull
 
-            docker compose up -d
+            echo "Restarting app..."
+            sudo docker compose down
+            sudo docker compose up -d
+
+            echo "Done."
