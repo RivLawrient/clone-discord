@@ -71,9 +71,10 @@ jobs:
             echo "DB_NAME=${{ secrets.DB_NAME }}" >> .env
             echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> .env
             echo "JWT_EXPIRE_MINUTES=${{ secrets.JWT_EXPIRE_MINUTES }}" >> .env
-
+            echo "DB_SSLMODE=${{ secrets.DB_SSLMODE }}" >> .env
             echo "LIVEKIT_API_KEY=${{ secrets.LIVEKIT_API_KEY }}" >> .env
             echo "LIVEKIT_API_SECRET=${{ secrets.LIVEKIT_API_SECRET }}" >> .env
+            echo "DOMAIN=${{ secrets.DOMAIN }}" >> .env
             
             echo "Pull latest image..."
             sudo docker compose pull
